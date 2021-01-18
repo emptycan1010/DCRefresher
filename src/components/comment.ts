@@ -9,7 +9,7 @@ export default {
     TimeStamp,
     User
   },
-  template: `<div class="refresher-comment" :class="{dccon: comment.memo.indexOf('<img class=') > -1}" :data-depth="comment.depth" :data-rereply="rereply" :data-deleted="comment.del_yn === 'Y'">
+  template: `<div class="refresher-comment" :data-depth="comment.depth" :data-rereply="rereply" :data-deleted="comment.del_yn === 'Y'">
     <div class="meta">
       <User :user="comment.user" :me="me"></User>
       <div class="float-right">
