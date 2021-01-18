@@ -9,7 +9,7 @@ export default {
     TimeStamp,
     User
   },
-  template: `<div class="refresher-comment" :data-depth="comment.depth" :data-rereply="rereply" :data-deleted="comment.del_yn === 'Y'">
+  template: `<div class="refresher-comment" :class="{dccon: comment.memo.indexOf('<img class=') > -1}" :data-depth="comment.depth" :data-rereply="rereply" :data-deleted="comment.del_yn === 'Y'">
     <div class="meta">
       <User :user="comment.user" :me="me"></User>
       <div class="float-right">
@@ -20,7 +20,7 @@ export default {
       <audio :src="getVoiceData.src" controls></audio>
       <p v-if="getVoiceData.memo">{{getVoiceData.memo}}</p>
     </div>
-    <p v-else class="refresher-comment-content" v-html="comment.memo"></p>
+    <p v-else class="refresher-comment-content" :class="{dccon: comment.memo.indexOf('<img class=') > -1}" v-html="comment.memo"></p>
   </div>`,
   data () {
     return {
