@@ -22,7 +22,7 @@ const updateWindowSize = (
 export default {
   name: '레이아웃 수정',
   description: '디시 레이아웃을 변경할 수 있도록 도와줍니다.',
-  author: { name: 'Sochiru', url: 'https://sochiru.pw' },
+  author: { name: 'Sochiru', url: '' },
   url: /board\/lists/g,
   status: {
     activePixel: 900,

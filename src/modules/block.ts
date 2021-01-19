@@ -3,7 +3,7 @@ import { queryString } from '../utils/http'
 export default {
   name: '컨텐츠 차단',
   description: '유저, 컨텐츠 등의 보고 싶지 않은 컨텐츠들을 삭제합니다.',
-  author: { name: 'Sochiru', url: 'https://sochiru.pw' },
+  author: { name: 'Sochiru', url: '' },
   url: /gall\.dcinside\.com\/(mgallery\/|mini\/)?board\/(view|lists)/g,
   status: false,
   memory: {

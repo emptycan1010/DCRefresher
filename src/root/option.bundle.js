@@ -170,9 +170,15 @@ Vue.component('refresher-module', {
       <div class="left">
         <p class="title">{{ name }}</p>
         <p class="desc">{{ desc }}</p>
-        <p class="mute">개발자 : <span class="link" v-if="typeof author === 'object'"
-                                    v-on:click="() => openLink(author && author.url)">{{ author.name }}</span><span
-            v-else>{{ author || '알 수 없음' }}</span>, 요구 유틸 : {{ require.join(', ') || '없음' }}</p>
+        <p class="mute">개발자 :
+            <span v-if="typeof author === 'object'"
+                :class="{link: author.url}"
+                v-on:click="() => openLink(author && author.url)">
+              {{ author.name }}
+            </span>
+            <span v-else>
+              {{ author || '알 수 없음' }}
+            </span>, 요구 유틸 : {{ require.join(', ') || '없음' }}</p>
       </div>
       <div class="right">
         <refresher-checkbox :checked="enabled" :change="update"></refresher-checkbox>
