@@ -1808,8 +1808,6 @@ export default {
       } else {
         newPostWithData(ev.state.preData, true)
       }
-
-      console.log(ev.state)
     }
     window.addEventListener('popstate', this.memory.popStateHandler)
   },

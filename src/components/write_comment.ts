@@ -91,7 +91,6 @@ export default {
   },
   methods: {
     validCheck (type: string, value: string) {
-      console.log(type, value)
       if (type === 'id' && (!value || value.length < 2)) {
         Toast.show('아이디는 최소 2자리 이상이어야 합니다.', true, 2000)
         this.unsignedUserID = 'ㅇㅇ'

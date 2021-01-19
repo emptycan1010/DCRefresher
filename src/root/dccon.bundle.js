@@ -70,7 +70,7 @@ function search () {
       let elS = doc.querySelector(
         '.dccon_listbox:not(.dccon_js) .dccon_shop_list'
       )
-      console.log(elS)
+
       elS.querySelectorAll('li').forEach(el => {
         let thumbnail = el.querySelector('img').src
         let name = el.querySelector('.dcon_name').innerText

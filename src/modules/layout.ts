@@ -9,7 +9,6 @@ const updateWindowSize = (
 
   if (forceActive || active >= width) {
     if (document.documentElement.className.indexOf('refresherCompact') === -1) {
-      console.log(document.documentElement.classList)
       document.documentElement.classList.add('refresherCompact')
     }
   } else {

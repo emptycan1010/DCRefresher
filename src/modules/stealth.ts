@@ -83,7 +83,6 @@ export default {
 
     if (buttons && buttons.length) {
       buttons.forEach((button: Element) => {
-        console.log(button)
         button.parentElement!.removeChild(button)
       })
     }
