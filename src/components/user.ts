@@ -1,11 +1,11 @@
 import { eventBus } from '../core/eventbus'
 
 export default {
-  template: `<div class="refresher-user" :data-me="me" v-on:click="clickHandle" :class="{cursor: !!this.user.id}" v-on:contextmenu="contextMenu" :title="(user.id ? '(' + user.id + ')' : user.ip ? '(' + user.ip + (user.ip_data ? ', ' + user.ip_data : '') + ')' : '').replaceAll('\\n', ' ').replaceAll(/  +/g, ' ')">
+  template: `<div class="refresher-user" :data-me="me" v-on:click="clickHandle" :class="{cursor: !!this.user.id}" v-on:contextmenu="contextMenu" :title="title">
     <div class="refresher-user-content">
       <span class="refresher-user-icon" :data-icon="user.icon" :data-type="user.type"></span>
       <span class="refresher-user-nick">{{user.nick}}</span>
-      <span class="refresher-user-info">{{user.id ? '(' + user.id + ')' : user.ip ? '(' + user.ip + (user.ip_data ? ', ' + (user.ip_data.length > 100 ? user.ip_data.substring(0, 97) + '...' : user.ip_data) : '') + ')' : ''}}</span>
+      <span class="refresher-user-info">{{userInfo}}</span>
     </div>
   </div>`,
   props: {
@@ -21,6 +21,37 @@ export default {
 
     click: {
       type: Function
+    }
+  },
+  computed: {
+    title (): string {
+      return (this.user.id
+        ? '(' + this.user.id + ')'
+        : this.user.ip
+        ? '(' +
+          this.user.ip +
+          (this.user.ip_data ? ', ' + this.user.ip_data : '') +
+          ')'
+        : ''
+      )
+        .replace('\\n', ' ')
+        .replace(/  +/g, ' ')
+    },
+
+    userInfo (): string {
+      return this.user.id
+        ? '(' + this.user.id + ')'
+        : this.user.ip
+        ? '(' +
+          this.user.ip +
+          (this.user.ip_data
+            ? ', ' +
+              (this.user.ip_data.length > 100
+                ? this.user.ip_data.substring(0, 97) + '...'
+                : this.user.ip_data)
+            : '') +
+          ')'
+        : ''
     }
   },
   methods: {
