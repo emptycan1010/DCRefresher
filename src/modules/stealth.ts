@@ -50,8 +50,8 @@ export default {
   memory: {
     contentViewUUID: null
   },
-  enable: true,
-  default_enable: true,
+  enable: false,
+  default_enable: false,
   require: ['eventBus'],
   func (eventBus: RefresherEventBus) {
     if (
