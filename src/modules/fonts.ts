@@ -25,56 +25,44 @@ export default {
       default: true
     }
   },
-  enable: true,
-  default_enable: true,
-  require: ['filter'],
-  func (filter: RefresherFilter) {
-    if (document && document.body) {
-      document.body.classList.add('refresherFont')
 
-      if (this.status.changeDCFont) {
-        document.body.classList.add('refresherChangeDCFont')
-      }
-    }
+  update: {
+    customFonts: (value: string | boolean) => {
+      let fontElement = document.querySelector('#refresherFontStyle')
+      if (fontElement && !value) {
+        fontElement.parentElement?.removeChild(fontElement)
 
-    this.memory.uuid = filter.add('body', (elem: HTMLElement) => {
-      if (elem.className.indexOf('refresherFont') == -1) {
-        elem.className += ' refresherFont'
+        return
       }
 
-      if (this.status.changeDCFont) {
-        if (elem.className.indexOf('refresherChangeDCFont') == -1) {
-          elem.className += ' refresherChangeDCFont'
+      if (value && document && document.head) {
+        if (!fontElement) {
+          fontElement = document.createElement('style')
+          fontElement.id = 'refresherFontStyle'
+          document.head.appendChild(fontElement)
         }
-      }
-    })
 
-    if (this.status.customFonts) {
-      if (document && document.head) {
-        let d = document.createElement('style')
-        d.id = 'refresherFontStyle'
-        d.innerHTML = `.refresherChangeDCFont,.refresherFont .refresher-block-popup,.refresherFont .refresher-frame,.refresherFont .refresher-popup,.refresherChangeDCFont .gall_list,.refresherChangeDCFont button,.refresherChangeDCFont input,.refresherChangeDCFont .view_comment div,.refresherChangeDCFont .view_content_wrap,.refresherChangeDCFont .view_content_wrap a,.refresherChangeDCFont .btn_cmt_close,.refresherChangeDCFont .btn_cmt_close span,.refresherChangeDCFont .btn_cmt_refresh,.refresherChangeDCFont .btn_cmt_open{font-family:${this.status.customFonts},-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans','Helvetica Neue',sans-serif!important}`
-        document.head.appendChild(d)
+        fontElement.innerHTML = `.refresherChangeDCFont,.refresherFont .refresher-block-popup,.refresherFont .refresher-frame,.refresherFont .refresher-popup,.refresherChangeDCFont .gall_list,.refresherChangeDCFont button,.refresherChangeDCFont input,.refresherChangeDCFont .view_comment div,.refresherChangeDCFont .view_content_wrap,.refresherChangeDCFont .view_content_wrap a,.refresherChangeDCFont .btn_cmt_close,.refresherChangeDCFont .btn_cmt_close span,.refresherChangeDCFont .btn_cmt_refresh,.refresherChangeDCFont .btn_cmt_open{font-family:${this.status.customFonts},-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans','Helvetica Neue',sans-serif!important}`
       }
+    },
+    changeDCFont: (vaule: boolean) => {
+      document.documentElement.classList[vaule ? 'add' : 'remove'](
+        'refresherChangeDCFont'
+      )
     }
   },
+  enable: true,
+  default_enable: true,
+  require: [],
+  func () {
+    document.documentElement.classList.add('refresherFont')
+    this.update.changeDCFont(this.status.changeDCFont)
+    this.update.customFonts(this.status.customFonts)
+  },
 
-  revoke (filter: RefresherFilter) {
-    if (document.body.className.indexOf('refresherFont') > -1) {
-      document.body.classList.remove('refresherFont')
-    }
-
-    if (document.body.className.indexOf('refresherChangeDCFont') > -1) {
-      document.body.classList.remove('refresherChangeDCFont')
-    }
-
-    let fontElement = document.querySelector('#refresherFontStyle')
-    if (fontElement) {
-      fontElement.parentElement?.removeChild(fontElement)
-    }
-
-    if (this.memory.uuid) {
-      filter.remove(this.memory.uuid, true)
-    }
+  revoke () {
+    document.documentElement.classList.remove('refresherFont')
+    this.update.changeDCFont(false)
+    this.update.customFonts(false)
   }
 }
