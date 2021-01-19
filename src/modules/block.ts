@@ -1,5 +1,7 @@
 import { queryString } from '../utils/http'
 
+import * as Toast from '../components/toast'
+
 export default {
   name: '컨텐츠 차단',
   description: '유저, 컨텐츠 등의 보고 싶지 않은 컨텐츠들을 삭제합니다.',
@@ -108,7 +110,11 @@ export default {
       }
 
       block.add(type, value, false, undefined, extra)
-      alert(`${block.TYPE_NAMES[type]} ${value}을(를) 차단했습니다.`)
+      Toast.show(
+        `${block.TYPE_NAMES[type]} ${value}을(를) 차단했습니다.`,
+        false,
+        3000
+      )
     })
   },
 

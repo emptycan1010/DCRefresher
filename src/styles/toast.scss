@@ -47,7 +47,7 @@ $desktop: 1024px;
 
   .contents {
     position: relative;
-    padding: 5px 20px;
+    padding: 5px 10px;
     border-radius: 13.3px;
     width: 100%;
     overflow: hidden;
@@ -63,10 +63,11 @@ $desktop: 1024px;
     }
 
     p {
-      margin: auto 5px;
+      margin: auto 20px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      font-size: 16px;
     }
 
     .text .material-icons {
@@ -180,13 +181,11 @@ $desktop: 1024px;
 }
 
 .refresher-toast-leave-active {
-  position: absolute;
   transition: all 200ms cubic-bezier(0.4, 0, 1, 1);
 }
 
 .refresher-toast-enter,
 .refresher-toast-leave-to {
-  position: absolute;
   transform: translateY(10px);
   opacity: 0;
 }

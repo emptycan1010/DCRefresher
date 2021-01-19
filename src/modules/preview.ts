@@ -251,7 +251,7 @@ const panel = {
             .then(response => {
               if (typeof response === 'object') {
                 if (response.result === 'success') {
-                  alert(response.msg || response.message)
+                  Toast.show(response.message || response.msg, false, 3000)
 
                   if (del_chk) {
                     frame.app.close()
@@ -280,7 +280,7 @@ const panel = {
 
         if (typeof response === 'object') {
           if (response.result === 'success') {
-            alert(response.message || response.msg)
+            Toast.show(response.message || response.msg, false, 3000)
 
             setAsNotice = !setAsNotice
             pin!.querySelector('p')!.innerHTML = setAsNotice
@@ -304,7 +304,7 @@ const panel = {
 
         if (typeof response === 'object') {
           if (response.result === 'success') {
-            alert(response.message || response.msg)
+            Toast.show(response.message || response.msg, false, 3000)
 
             setAsRecommend = !setAsRecommend
             recommend!.querySelector('img')!.src = setAsRecommend
@@ -956,7 +956,7 @@ let parse = (id: string, body: string) => {
   let requireCaptcha = dom.querySelector('.recommend_kapcode') !== null
   let requireCommentCaptcha =
     dom.querySelector('.cmt_write_box input[name="comment_code"]') !== null
-  
+
   let disabledDownvote = dom.querySelector('.icon_recom_down') === null
 
   return new PostInfo(id, {
@@ -1116,7 +1116,8 @@ export default {
     },
     experimentalComment: {
       name: '댓글 기능 활성화',
-      desc: '!!!차단 가능성 있음!!! 실험 중인 댓글 기능을 활성화합니다. 현재 댓글 기능을 사용할 시 디시에서 일시로 차단당할 가능성이 있습니다.',
+      desc:
+        '!!!차단 가능성 있음!!! 실험 중인 댓글 기능을 활성화합니다. 현재 댓글 기능을 사용할 시 디시에서 일시로 차단당할 가능성이 있습니다.',
       type: 'check',
       default: false,
       advanced: true
@@ -1159,7 +1160,8 @@ export default {
 
       frame.functions.vote = async (type: string) => {
         if (!postFetchedData) {
-          return alert('게시글이 로딩될 때까지 잠시 기다려주세요.')
+          Toast.show('게시글이 로딩될 때까지 잠시 기다려주세요.', true, 3000)
+          return
         }
 
         let requireCapCode = postFetchedData.requireCaptcha
@@ -1179,7 +1181,7 @@ export default {
           )
 
           if (res.result != 'true') {
-            alert(res.counts)
+            Toast.show(res.counts, true, 2000)
 
             return false
           }
@@ -1200,7 +1202,11 @@ export default {
 
       frame.functions.share = () => {
         if (!window.navigator.clipboard) {
-          alert('이 브라우저는 클립보드 복사 기능을 지원하지 않습니다.')
+          Toast.show(
+            '이 브라우저는 클립보드 복사 기능을 지원하지 않습니다.',
+            true,
+            3000
+          )
           return false
         }
 
@@ -1211,6 +1217,8 @@ export default {
             preData.id
           }`
         )
+
+        Toast.show('클립보드에 복사되었습니다.', false, 3000)
 
         return true
       }
@@ -1291,7 +1299,7 @@ export default {
       frame.functions.retry = frame.functions.load
 
       frame.functions.openOriginal = () => {
-        if(this.status.colorPreviewLink) location.reload()
+        if (this.status.colorPreviewLink) location.reload()
         else location.href = preData.link
       }
     }
@@ -1444,7 +1452,8 @@ export default {
         ) => {
           // TODO : 디시콘 추가시 type 핸들링 (현재 text만)
           if (!postFetchedData) {
-            return alert('게시글이 로딩될 때까지 잠시 기다려주세요.')
+            Toast.show('게시글이 로딩될 때까지 잠시 기다려주세요.', true, 3000)
+            return
           }
 
           let requireCapCode = postFetchedData.requireCommentCaptcha

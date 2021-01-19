@@ -2,6 +2,8 @@ import PreviewButton from './button'
 
 import { User } from '../structs/user'
 
+import * as Toast from './toast'
+
 import UserComponent from './user'
 
 export default {
@@ -91,7 +93,7 @@ export default {
     validCheck (type: string, value: string) {
       console.log(type, value)
       if (type === 'id' && (!value || value.length < 2)) {
-        alert('아이디는 최소 2자리 이상이어야 합니다.')
+        Toast.show('아이디는 최소 2자리 이상이어야 합니다.', true, 2000)
         this.unsignedUserID = 'ㅇㅇ'
       }
 
@@ -100,10 +102,12 @@ export default {
           .toString(36)
           .substring(5)
 
-        alert(
+        Toast.show(
           '비밀번호는 최소 2자리 이상이어야 합니다. 자동으로 "' +
             random +
-            '" 으로 설정합니다.'
+            '" 으로 설정합니다.',
+          false,
+          8000
         )
         this.unsignedUserPW = random
       }
@@ -119,7 +123,7 @@ export default {
       this.disabled = true
 
       if (!this.unsignedUserID || !this.unsignedUserPW) {
-        alert('아이디 혹은 비밀번호를 입력하지 않았습니다.')
+        Toast.show('아이디 혹은 비밀번호를 입력하지 않았습니다.', true, 2000)
         return false
       }
 

@@ -98,11 +98,20 @@ $dark-red: #e21919;
     &:hover {
       background-color: rgba(255, 255, 255, 0.08);
       box-shadow: none;
+      color: white;
+
+      p {
+        filter: invert(0);
+      }
     }
 
     &:active {
       background-color: rgba(255, 255, 255, 0.12);
       box-shadow: none;
+
+      p {
+        filter: invert(0);
+      }
     }
 
     p {
