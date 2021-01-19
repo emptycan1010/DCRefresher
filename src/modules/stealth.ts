@@ -79,6 +79,14 @@ export default {
   revoke (eventBus: RefresherEventBus) {
     document.documentElement.classList.remove('refresherStealth')
 
+    let buttons = elem.querySelectorAll(CONTROL_BUTTON)
+
+    if (buttons && buttons.length) {
+      buttons.forEach(button => {
+        buttons.parentElement.removeChild(button)
+      })
+    }
+
     if (this.memory.contentViewUUID) {
       eventBus.remove('refresherStealth', this.memory.contentViewUUID, true)
     }
