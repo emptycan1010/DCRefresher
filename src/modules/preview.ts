@@ -1186,7 +1186,7 @@ export default {
             return false
           }
 
-          frame[type ? 'upvotes' : 'downvotes'] = res.counts
+          frame[type ? 'upvotes' : 'downvotes'] = res.counts.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 
           return true
         }
