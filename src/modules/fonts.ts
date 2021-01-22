@@ -53,7 +53,7 @@ export default {
           document.head.appendChild(fontElement)
         }
 
-        fontElement.innerHTML = `.refresherChangeDCFont,.refresherChangeDCFont body,.refresherFont .refresher-block-popup,.refresherFont .refresher-frame,.refresherFont .refresher-popup,.refresherChangeDCFont .gall_list,.refresherChangeDCFont button,.refresherChangeDCFont input,.refresherChangeDCFont .view_comment div,.refresherChangeDCFont .view_content_wrap,.refresherChangeDCFont .view_content_wrap a,.refresherChangeDCFont .btn_cmt_close,.refresherChangeDCFont .btn_cmt_close span,.refresherChangeDCFont .btn_cmt_refresh,.refresherChangeDCFont .btn_cmt_open{font-family:${fontName},-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans','Helvetica Neue',sans-serif!important}`
+        fontElement.innerHTML = `.refresherFont .refresher-block-popup, .refresherFont .refresher-captcha-popup, .refresherFont .refresher-frame, .refresherFont .refresher-popup, .refresherChangeDCFont, .refresherChangeDCFont body, .refresherChangeDCFont .gall_list, .refresherChangeDCFont button, .refresherChangeDCFont input, .refresherChangeDCFont .view_comment div, .refresherChangeDCFont .view_content_wrap, .refresherChangeDCFont .view_content_wrap a, .refresherChangeDCFont .btn_cmt_close, .refresherChangeDCFont .btn_cmt_close span, .refresherChangeDCFont .btn_cmt_refresh, .refresherChangeDCFont .btn_cmt_open{font-family:${fontName},-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans','Helvetica Neue',sans-serif!important}`
       }
     },
     changeDCFont: (vaule: boolean) => {
