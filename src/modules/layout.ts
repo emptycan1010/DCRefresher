@@ -28,9 +28,11 @@ export default {
     forceCompact: false,
     hideGalleryView: false,
     hideUselessView: false,
-    pushToRight: false
+    pushToRight: false,
+    removeNotice: false
   },
   memory: {
+    uuid: null,
     resize: () => {}
   },
   settings: {
@@ -74,17 +76,24 @@ export default {
       desc: '"잡다 링크 숨기기" 옵션이 켜진 경우 본문 영역을 확장합니다.',
       type: 'check',
       default: false
+    },
+
+    removeNotice: {
+      name: '갤러리 공지 숨기기',
+      desc: '글 목록에서 공지사항을 숨깁니다.',
+      type: 'check',
+      default: false
     }
   },
   enable: true,
   default_enable: true,
-  require: [],
+  require: ['filter'],
   update: {
-    activePixel (value: Number) {
+    activePixel (this: RefresherModule, value: Number) {
       updateWindowSize(this.status.forceCompact, value, window.innerWidth)
     },
 
-    forceCompact (value: boolean) {
+    forceCompact (this: RefresherModule, value: boolean) {
       updateWindowSize(value, this.status.activePixel, window.innerWidth)
     },
 
@@ -104,9 +113,36 @@ export default {
       document.documentElement.classList[value ? 'add' : 'remove'](
         'refresherPushToRight'
       )
+    },
+
+    removeNotice (
+      this: RefresherModule,
+      value: boolean,
+      filter: RefresherFilter
+    ) {
+      if (!this.memory!.uuid && value) {
+        this.memory!.uuid = filter.add(
+          `.gall_list .us-post b`,
+          (elem: HTMLElement) => {
+            if (
+              elem.parentElement!.parentElement!.parentElement! &&
+              elem.parentElement!.parentElement!
+            ) {
+              elem.parentElement!.parentElement!.parentElement!.removeChild(
+                elem.parentElement!.parentElement!
+              )
+            }
+          },
+          {
+            neverExpire: true
+          }
+        )
+      } else if (this.memory!.uuid && !value) {
+        filter.remove(this.memory!.uuid)
+      }
     }
   },
-  func () {
+  func (filter: RefresherFilter) {
     this.memory.resize = () =>
       updateWindowSize(
         this.status.forceCompact,
@@ -119,13 +155,17 @@ export default {
     this.update.hideGalleryView(this.status.hideGalleryView)
     this.update.hideUselessView(this.status.hideUselessView)
     this.update.pushToRight(this.status.pushToRight)
+
+    this.update.removeNotice.bind(this)(this.status.removeNotice, filter)
   },
 
-  revoke () {
+  revoke (filter: RefresherFilter) {
     window.removeEventListener('resize', this.memory.resize)
 
     this.update.hideGalleryView(false)
     this.update.hideUselessView(false)
     this.update.pushToRight(false)
+
+    this.update.removeNotice.bind(this)(false, filter)
   }
 }
