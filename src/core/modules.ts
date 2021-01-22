@@ -167,10 +167,22 @@ eventBus.on(
       module_store[module].update &&
       typeof module_store[module].update[key] === 'function'
     ) {
-      module_store[module].update[key] = module_store[module].update[key].bind(
-        module_store[module]
+      let utils: any[] = []
+
+      if (module_store[module].require.length) {
+        for (var i = 0; i < module_store[module].require.length; i++) {
+          let name = module_store[module].require[i]
+
+          if (UTILS[name]) {
+            utils.push(UTILS[name])
+          }
+        }
+      }
+
+      module_store[module].update[key].bind(module_store[module])(
+        value,
+        ...utils
       )
-      module_store[module].update[key](value)
     }
   }
 )
