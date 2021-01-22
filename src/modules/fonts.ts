@@ -21,20 +21,19 @@ export default {
     changeDCFont: {
       name: '디시인사이드 폰트 교체',
       desc:
-          '미리보기 창 같은 DCRefresher의 폰트 뿐만 아니라 디시인사이드의 폰트까지 교체합니다.',
+        '미리보기 창 같은 DCRefresher의 폰트 뿐만 아니라 디시인사이드의 폰트까지 교체합니다.',
       type: 'check',
       default: true
     },
     bodyFontSize: {
       name: '본문 폰트 크기 지정',
-      desc:
-          '본문의 기본 폰트 크기를 조정합니다.',
+      desc: '본문의 기본 폰트 크기를 조정합니다. (미리보기 창은 + 2pt)',
       type: 'range',
       default: 13,
       min: 5,
       step: 1,
       max: 30,
-      unit: 'pt',
+      unit: 'pt'
     }
   },
 
@@ -62,7 +61,7 @@ export default {
         'refresherChangeDCFont'
       )
     },
-    bodyFontSize: (fontSize: number | boolean) => {
+    bodyFontSize: (fontSize: number) => {
       let fontElement = document.querySelector('#refresherFontStyleSize')
       if (fontElement && !fontSize) {
         fontElement.parentElement?.removeChild(fontElement)
@@ -77,7 +76,10 @@ export default {
           document.head.appendChild(fontElement)
         }
 
-        fontElement.innerHTML = `.refresherChangeDCFont .write_div, .refresherChangeDCFont .refresher-preview-contents-actual {font-size: ${fontSize}px;}`
+        fontElement.innerHTML = `.refresherChangeDCFont .write_div {font-size: ${fontSize}px;}
+        .refresherFont .refresher-preview-contents-actual, .refresherFont .refresher-preview-contents-actual .write_div{font-size: ${Number(
+          fontSize
+        ) + 2}px;}`
       }
     }
   },
