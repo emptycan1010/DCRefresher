@@ -17,7 +17,7 @@ export default {
       </div>
     </div>
     <div v-if="comment.vr_player">
-      <audio :src="getVoiceData.src" controls></audio>
+      <iframe :src="getVoiceData.src" width="280px" height="54px" ></iframe>
       <p v-if="getVoiceData.memo">{{getVoiceData.memo}}</p>
     </div>
     <p v-else class="refresher-comment-content" :class="{dccon: comment.memo.indexOf('<img class=') > -1 || comment.memo.indexOf('<video class=') > -1}" v-html="comment.memo"></p>
@@ -85,9 +85,9 @@ export default {
       if (!this.comment.vr_player) {
         return null
       }
-
-      let memo = this.comment.memo.split('@^dc^@')
-      return { src: 'https://vr.dcinside.com/' + memo[0], memo: memo[1] }
+      let memo =this.comment.memo.split('@^dc^@')
+      let voideSrc = memo[0].split('src="')[1].split('"')[0]
+      return { src: voideSrc, memo: memo[1] }
     }
   },
   methods: {
