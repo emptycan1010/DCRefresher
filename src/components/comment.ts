@@ -86,8 +86,8 @@ export default {
         return null
       }
       let memo =this.comment.memo.split('@^dc^@')
-      let voideSrc = memo[0].split('src="')[1].split('"')[0]
-      return { src: voideSrc, memo: memo[1] }
+      let voiceSrc = memo[0].split('src="')[1].split('"')[0]
+      return { src: voiceSrc, memo: memo[1] }
     }
   },
   methods: {
