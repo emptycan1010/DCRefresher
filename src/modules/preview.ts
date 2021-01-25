@@ -1691,8 +1691,6 @@ export default {
 
       frame.app.frames[0].collapse = collapseView
 
-      console.log(frame.app.frames[0].data.collapse)
-
       makeFirstFrame(
         frame.app.first(),
         preData,
