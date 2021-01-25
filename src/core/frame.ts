@@ -29,6 +29,7 @@ class InternalFrame implements RefresherFrame {
   data: { [index: string]: any }
 
   contents: string
+  collapse?: boolean
   error: object | boolean
   upvotes: any
   downvotes: any
@@ -42,6 +43,7 @@ class InternalFrame implements RefresherFrame {
     this.subtitle = ''
     this.comments = {}
     this.functions = {}
+    this.collapse = false
 
     this.app = app
     this.data = {}

@@ -130,6 +130,10 @@ $shadow-3dp: 0px 0px 16px rgba(0, 0, 0, 0.24);
   }
 }
 
+.refresher-collapse-text {
+  margin-top: 10px;
+}
+
 .refresher-frame,
 .refresher-mini-preview {
   position: absolute;
@@ -767,6 +771,10 @@ tr .gall_writer {
   padding-bottom: 2.5vh;
   margin-top: 2vh;
 
+  &.collapse {
+    display: none;
+  }
+
   &.refresher-error {
     h3 {
       font-weight: bold;
@@ -1153,6 +1161,7 @@ tr .gall_writer {
   top: 0;
   z-index: 1000;
   overflow: hidden;
+  pointer-events: none;
 
   min-width: 300px;
   min-height: 200px;

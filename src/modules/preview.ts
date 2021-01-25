@@ -579,9 +579,25 @@ const miniPreview: { [index: string]: any } = {
 
   move (ev: MouseEvent, use: boolean) {
     if (use) {
-      miniPreview.element.style.transform = `translate(${ev.clientX + 20}px, ${
-        ev.clientY
-      }px)`
+      let rect = miniPreview.element.getBoundingClientRect()
+      let width = rect.width
+      let height = rect.height
+
+      let y =
+        ev.clientY + height > window.innerHeight
+          ? ev.clientY - height < 0
+            ? 20
+            : ev.clientY - height
+          : ev.clientY
+
+      let x =
+        ev.clientX + width > window.innerWidth
+          ? ev.clientX - width < 0
+            ? 20
+            : ev.clientX - width
+          : ev.clientX
+
+      miniPreview.element.style.transform = `translate(${x}px, ${y}px)`
     }
   },
 
@@ -1186,7 +1202,10 @@ export default {
             return false
           }
 
-          frame[type ? 'upvotes' : 'downvotes'] = res.counts.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          frame[type ? 'upvotes' : 'downvotes'] = res.counts.replace(
+            /\B(?=(\d{3})+(?!\d))/g,
+            ','
+          )
 
           return true
         }
@@ -1521,6 +1540,13 @@ export default {
         return
       }
 
+      let collapseView = false
+
+      if (ev && ev.target) {
+        collapseView =
+          (ev.target as HTMLElement).className.indexOf('reply_num') > -1
+      }
+
       if (!historySkip) {
         this.memory.titleStore = document.title
         this.memory.urlStore = location.href
@@ -1662,6 +1688,10 @@ export default {
 
         clearInterval(this.memory.refreshIntervalId)
       })
+
+      frame.app.frames[0].collapse = collapseView
+
+      console.log(frame.app.frames[0].data.collapse)
 
       makeFirstFrame(
         frame.app.first(),

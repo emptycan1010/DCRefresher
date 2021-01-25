@@ -68,7 +68,7 @@ export const Frame = Vue.component('refresher-frame', {
           </div>
         </div>
       </div>
-      <div class="refresher-preview-contents" v-if="!frame.error">
+      <div class="refresher-preview-contents" v-if="!frame.error" :class="{collapse: frame.collapse}">
         <refresher-loader v-show="frame.data.load"></refresher-loader>
         <transition name="refresher-opacity">
           <div class="refresher-preview-contents-actual" v-html="frame.contents" :key="frame.contents"></div>
@@ -89,6 +89,9 @@ export const Frame = Vue.component('refresher-frame', {
         <div v-if="frame.data.comments && frame.data.useWriteComment">
           <WriteComment :func="writeComment"></WriteComment>
         </div>
+      </div>
+      <div v-if="frame.collapse" class="refresher-collapse-text">
+        <h3>댓글 보기를 클릭하여 댓글만 표시합니다.</h3>
       </div>
       <div class="refresher-preview-contents refresher-error" v-if="frame.error">
         <h3>{{frame.error.title}}을 불러올 수 없습니다.</h3>
@@ -117,7 +120,7 @@ export const Frame = Vue.component('refresher-frame', {
         <br>
         <span class="refresher-mute">{{frame.error.detail}}</span>
       </div>
-      <div class="refresher-preview-votes" v-if="frame.data.buttons">
+      <div class="refresher-preview-votes" v-if="frame.data.buttons && !frame.collapse">
         <div>
           <PreviewButton class="refresher-upvote" :id="'upvote'" :text="frame.upvotes || '0'" :click="upvote">
           </PreviewButton>
