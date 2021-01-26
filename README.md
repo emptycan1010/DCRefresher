@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://github.com/So-chiru/DCRefresher/raw/2.0/src/assets/icons/logo/Icon.png" width="250px"></img>
+<img src="https://github.com/So-chiru/DCRefresher/raw/master/src/assets/icons/logo/Icon.png" width="200px"></img>
 </p>
 
 # [DCRefresher](https://chrome.google.com/webstore/detail/dc-refresher/gpipaoeekcphlmilndfdbfdgijjjiklh)
