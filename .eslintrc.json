@@ -18,11 +18,11 @@
     "@typescript-eslint/no-explicit-any": "error",
     "linebreak-style": "off",
     "no-use-before-define": "off",
-    "camelcase": 2,
+    "camelcase": "off",
     "comma-dangle": "off",
     "quote-props": "off",
     "semi": ["error", "never"],
-    "indent": "off",
+    "indent": [2, 2],
     "no-unused-expressions": "off",
     "space-before-function-paren": "error"
   }

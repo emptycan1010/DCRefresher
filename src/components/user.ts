@@ -28,11 +28,11 @@ export default {
       return (this.user.id
         ? '(' + this.user.id + ')'
         : this.user.ip
-        ? '(' +
+          ? '(' +
           this.user.ip +
           (this.user.ip_data ? ', ' + this.user.ip_data : '') +
           ')'
-        : ''
+          : ''
       )
         .replace('\\n', ' ')
         .replace(/  +/g, ' ')
@@ -42,7 +42,7 @@ export default {
       return this.user.id
         ? '(' + this.user.id + ')'
         : this.user.ip
-        ? '(' +
+          ? '(' +
           this.user.ip +
           (this.user.ip_data
             ? ', ' +
@@ -51,7 +51,7 @@ export default {
                 : this.user.ip_data)
             : '') +
           ')'
-        : ''
+          : ''
     }
   },
   methods: {

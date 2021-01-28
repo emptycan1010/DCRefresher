@@ -25,6 +25,15 @@ const convertTime = (date: Date) => {
   return '아주 오래 전'
 }
 
+interface TimestampVueData {
+  mode: number
+  stamp: string
+}
+interface TimestampVue extends TimestampVueData {
+  date: Date
+  updates: number
+}
+
 export default {
   template: `<div class="refresher-timestamp" v-on:click="this.$root.changeStamp" :title="locale">
     <transition name="refresher-opacity">
@@ -37,26 +46,26 @@ export default {
       required: true
     }
   },
-  data: () => {
+  data: (): TimestampVueData => {
     return {
       mode: 0,
       stamp: ''
     }
   },
   computed: {
-    locale (): string {
+    locale (this: TimestampVue): string {
       return this.date.toLocaleString()
     }
   },
-  mounted () {
+  mounted (this: TimestampVue): void {
     this.stamp = convertTime(this.date)
 
-    this.updates = setInterval(() => {
+    this.updates = window.setInterval(() => {
       this.stamp = convertTime(this.date)
     }, 3000)
   },
 
-  beforeUnload () {
+  beforeUnload (this: TimestampVue): void {
     clearInterval(this.updates)
   }
 }

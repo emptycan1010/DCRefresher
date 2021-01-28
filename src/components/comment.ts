@@ -1,8 +1,46 @@
 import User from './user'
 import TimeStamp from './timestamp'
 import { eventBus } from '../core/eventbus'
+import { User as UserClass } from '../structs/user'
+import { PostInfo } from '../structs/post'
 
 const NRegex = /(ㄴ)(\s)?([^ ]+)/g
+
+interface CommentVueData {
+  currentId: string
+  me: boolean
+  rereply: boolean
+}
+interface CommentVueMethods {
+  checkReReply: () => boolean
+}
+
+interface CommentClass extends CommentVueData, CommentVueMethods {
+  comment: dcinsideCommentObject
+  index: number
+  postUser: string
+}
+
+interface dcinsideCommentObject {
+  no: string
+  parent: string
+  name: string
+  ip: string | null
+  user_id: string | null
+  user: UserClass
+  nicktype: string
+  memo: string
+  depth: number
+  vr_player: boolean | string
+  gallog_icon: string
+  vr_player_tag: string
+}
+
+interface VoiceDataComputed {
+  iframe: boolean
+  src: string
+  memo: string
+}
 
 export default {
   components: {
@@ -23,7 +61,7 @@ export default {
     </div>
     <p v-else class="refresher-comment-content" :class="{dccon: comment.memo.indexOf('<img class=') > -1 || comment.memo.indexOf('<video class=') > -1}" v-html="comment.memo"></p>
   </div>`,
-  data () {
+  data (): CommentVueData {
     return {
       currentId: '',
       me: false,
@@ -44,7 +82,7 @@ export default {
       type: String
     }
   },
-  mounted () {
+  mounted (this: CommentClass): void {
     this.rereply = this.checkReReply()
 
     if (!this.comment.user.id) {
@@ -55,12 +93,13 @@ export default {
       '#login_box .user_info .writer_nikcon > img'
     ) as HTMLImageElement
 
-    const click = gallogImageElement && gallogImageElement.getAttribute('onclick')
+    const click =
+      gallogImageElement && gallogImageElement.getAttribute('onclick')
 
     if (click) {
       this.currentId = click
-        .replace(/window\.open\(\'\/\/gallog\.dcinside\.com\//g, '')
-        .replace(/\'\)\;/g, '')
+        .replace(/window\.open\('\/\/gallog\.dcinside\.com\//g, '')
+        .replace(/'\);/g, '')
 
       this.me = this.currentId === this.comment.user.id
     }
@@ -82,7 +121,7 @@ export default {
     }
   },
   computed: {
-    getVoiceData (): { [index: string]: any } | null {
+    getVoiceData (this: CommentClass): VoiceDataComputed | null {
       if (!this.comment.vr_player) {
         return null
       }
@@ -99,18 +138,18 @@ export default {
     }
   },
   methods: {
-    date (str: string) {
+    date (str: string): string {
       return str.substring(0, 4).match(/\./)
         ? `${new Date().getFullYear()}-${str.replace(/\./g, '-')}`
         : str.replace(/\./g, '-')
     },
 
-    extractID (str: string) {
+    extractID (str: string): string | null {
       const match = str.match(/gallog\.dcinside.com\/.+\'/g)
-      return match ? match[0].replace(/gallog\.dcinside.com\/|\'/g, '') : null
+      return match ? match[0].replace(/gallog\.dcinside.com\/|'/g, '') : null
     },
 
-    checkReReply (): boolean {
+    checkReReply (this: CommentClass): boolean {
       const content = this.comment.memo
       const depth = this.comment.depth
 

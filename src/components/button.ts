@@ -1,5 +1,5 @@
 interface ButtonProps {
-  click: Function
+  click: () => boolean
   error: number
 }
 

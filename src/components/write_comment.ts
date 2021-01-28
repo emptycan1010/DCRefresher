@@ -57,16 +57,16 @@ export default {
     }
   },
   watch: {
-    unsignedUserID (value: string) {
+    unsignedUserID (value: string): void {
       localStorage.setItem('nonmember_nick', value)
       this.user.nick = value
     },
 
-    unsignedUserPW (value: string) {
+    unsignedUserPW (value: string): void {
       localStorage.setItem('nonmember_pw', value)
     }
   },
-  mounted () {
+  mounted (): void {
     const gallogName = document.querySelector(
       '#login_box .user_info .nickname em'
     ) as HTMLElement
@@ -81,8 +81,8 @@ export default {
 
       const id = gallogIcon
         .getAttribute('onclick')!
-        .replace(/window\.open\(\'\/\/gallog\.dcinside\.com\//g, '')
-        .replace(/\'\)\;/g, '')
+        .replace(/window\.open\('\/\/gallog\.dcinside\.com\//g, '')
+        .replace(/'\\;/g, '')
 
       this.user = new User(fixedName, id, null, gallogIcon.src)
     } else {
@@ -90,7 +90,7 @@ export default {
     }
   },
   methods: {
-    validCheck (type: string, value: string) {
+    validCheck (type: string, value: string): void {
       if (type === 'id' && (!value || value.length < 2)) {
         Toast.show('아이디는 최소 2자리 이상이어야 합니다.', true, 2000)
         this.unsignedUserID = 'ㅇㅇ'
@@ -118,7 +118,7 @@ export default {
       }
     },
 
-    async write () {
+    async write (): Promise<boolean> {
       this.disabled = true
 
       if (!this.unsignedUserID || !this.unsignedUserPW) {
@@ -142,17 +142,17 @@ export default {
       return true
     },
 
-    focus () {
+    focus (): void {
       this.focused = true
       this.$root.inputFocus = true
     },
 
-    blur () {
+    blur (): void {
       this.focused = false
       this.$root.inputFocus = false
     },
 
-    type (ev: KeyboardEvent) {
+    type (ev: KeyboardEvent): void {
       if (ev.key !== 'Enter') {
         return ev
       }

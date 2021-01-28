@@ -1,11 +1,14 @@
-export const find = (elem: string, parent: HTMLElement) =>
+export const find = (
+  elem: string,
+  parent: HTMLElement
+): Promise<NodeListOf<Element>> =>
   new Promise<NodeListOf<Element>>((resolve, reject) => {
     const parentFind = parent.querySelectorAll(elem)
     if (parentFind.length) {
       resolve(parentFind)
     }
 
-    let tout = 0
+    let timeout = 0
 
     const observer = new MutationObserver(muts => {
       let executed = false
@@ -23,8 +26,8 @@ export const find = (elem: string, parent: HTMLElement) =>
       resolve(lists)
       observer.disconnect()
 
-      if (tout) {
-        clearTimeout(tout)
+      if (timeout) {
+        clearTimeout(timeout)
       }
     })
 
@@ -33,14 +36,18 @@ export const find = (elem: string, parent: HTMLElement) =>
       subtree: true
     })
 
-    tout = setTimeout(() => {
+    timeout = window.setTimeout(() => {
       if (!observer) return
       observer.disconnect()
       reject('Too long execution.')
     }, 3000)
   })
 
-export const listen = (elem: string, parent: HTMLElement, cb: Function) => {
+export const listen = (
+  elem: string,
+  parent: HTMLElement,
+  cb: (elem: NodeListOf<Element>) => void
+): MutationObserver => {
   const parentFind = parent.querySelectorAll(elem)
   if (parentFind.length) {
     cb(parentFind)

@@ -74,9 +74,9 @@ export class User {
     const icon =
       uid !== null
         ? (
-            (dom.querySelector('a.writer_nikcon img')! as HTMLImageElement) ||
+          (dom.querySelector('a.writer_nikcon img')! as HTMLImageElement) ||
             {}
-          ).src
+        ).src
         : ''
 
     this.nick = nick

@@ -6,8 +6,8 @@ setTimeout(async () => {
     typeof chrome !== 'undefined'
       ? chrome
       : typeof browser !== 'undefined'
-      ? browser
-      : undefined
+        ? browser
+        : undefined
 
   if (typeof nav === 'undefined') {
     return

@@ -5,7 +5,7 @@
 export function setCookieTmp (e: string, t: string, o: number, i: string): void {
   const n = new Date()
   n.setTime(n.getTime() + 36e5 * o),
-    (document.cookie =
+  (document.cookie =
       e +
       '=' +
       escape(t) +

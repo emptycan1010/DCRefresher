@@ -25,6 +25,15 @@ const convertTime = (date: Date) => {
   return '이미 삭제 됨'
 }
 
+interface CountdownVueData {
+  mode: number
+  stamp: string
+}
+interface CountdownVue extends CountdownVueData {
+  date: Date
+  updates: number
+}
+
 export default {
   template: `<div class="refresher-countdown" v-on:click="this.$root.changeStamp" :title="locale">
     <transition name="refresher-opacity">
@@ -37,26 +46,26 @@ export default {
       required: true
     }
   },
-  data: () => {
+  data: (): CountdownVueData => {
     return {
       mode: 0,
       stamp: ''
     }
   },
   computed: {
-    locale (): string {
+    locale (this: CountdownVue): string {
       return this.date.toLocaleString()
     }
   },
-  mounted () {
+  mounted (this: CountdownVue): void {
     this.stamp = convertTime(this.date)
 
-    this.updates = setInterval(() => {
+    this.updates = window.setInterval(() => {
       this.stamp = convertTime(this.date)
     }, 5000)
   },
 
-  beforeUnload () {
+  beforeUnload (this: CountdownVue): void {
     clearInterval(this.updates)
   }
 }

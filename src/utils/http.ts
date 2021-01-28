@@ -55,7 +55,29 @@ export const heads = {
 export const viewRegex = /\/board\/view\//g
 export const mgall = /dcinside\.com\/mgallery/g
 
-export const view = (url: string) => {
+export const checkMinor = (url: string): boolean =>
+  /\.com\/mgallery/g.test(url || location.href)
+
+export const checkMini = (url: string): boolean =>
+  /\.com\/mini/g.test(url || location.href)
+
+/**
+ * URL에서 갤러리 종류를 확인하여 반환합니다.
+ *
+ * @param url 갤러리 종류를 확인할 URL.
+ * @param extra 마이너 갤러리와 미니 갤러리에 붙일 URL suffix.
+ */
+export const galleryType = (url: string, extra?: string): string => {
+  if (checkMinor(url)) {
+    return types.MINOR + (extra && extra.length ? extra : '')
+  } else if (checkMini(url)) {
+    return types.MINI + (extra && extra.length ? extra : '')
+  }
+
+  return types.MAJOR
+}
+
+export const view = (url: string): string => {
   let type = galleryType(url)
 
   if (type === types.MINI) {
@@ -78,7 +100,7 @@ export const view = (url: string) => {
   return type + 'board/lists?' + queries.toString()
 }
 
-export const make = (url: string, options: object) =>
+export const make = (url: string, options?: RequestInit): Promise<string> =>
   new Promise<string>((resolve, reject) =>
     fetch(url, options)
       .then(async response => {
@@ -93,30 +115,8 @@ export const make = (url: string, options: object) =>
       })
   )
 
-export const checkMinor = (url: string) =>
-  /\.com\/mgallery/g.test(url || location.href)
-
-export const checkMini = (url: string) =>
-  /\.com\/mini/g.test(url || location.href)
-
-/**
- * URL에서 갤러리 종류를 확인하여 반환합니다.
- *
- * @param url 갤러리 종류를 확인할 URL.
- * @param extra 마이너 갤러리와 미니 갤러리에 붙일 URL suffix.
- */
-export const galleryType = (url: string, extra?: string) => {
-  if (checkMinor(url)) {
-    return types.MINOR + (extra && extra.length ? extra : '')
-  } else if (checkMini(url)) {
-    return types.MINI + (extra && extra.length ? extra : '')
-  }
-
-  return types.MAJOR
-}
-
-export const mergeParamURL = (origin: string, getFrom: string) => {
-  const add: { [index: string]: any } = {}
+export const mergeParamURL = (origin: string, getFrom: string): string => {
+  const add: { [index: string]: string } = {}
 
   const originURL = new URL(origin)
   for (const [key, value] of originURL.searchParams) {
@@ -137,7 +137,7 @@ export const mergeParamURL = (origin: string, getFrom: string) => {
  *
  * @param url
  */
-export const galleryTypeName = (url: string) => {
+export const galleryTypeName = (url: string): string => {
   return commentGallTypes[galleryType(url)]
 }
 
@@ -146,5 +146,5 @@ export const galleryTypeName = (url: string) => {
  *
  * @param name Query 이름
  */
-export const queryString = (name: string) =>
+export const queryString = (name: string): string | null =>
   new URLSearchParams(window.location.search).get(name)
