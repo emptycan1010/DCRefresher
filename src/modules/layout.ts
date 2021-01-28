@@ -29,10 +29,12 @@ export default {
     hideGalleryView: false,
     hideUselessView: false,
     pushToRight: false,
-    removeNotice: false
+    removeNotice: false,
+    removeDCNotice: false
   },
   memory: {
     uuid: null,
+    uuiddc: null,
     resize: () => {}
   },
   settings: {
@@ -81,6 +83,13 @@ export default {
     removeNotice: {
       name: '갤러리 공지 숨기기',
       desc: '글 목록에서 공지사항을 숨깁니다.',
+      type: 'check',
+      default: false
+    },
+
+    removeDCNotice: {
+      name: '디시 공지 숨기기',
+      desc: '글 목록에서 운영자의 게시글을 숨깁니다.',
       type: 'check',
       default: false
     }
@@ -140,6 +149,39 @@ export default {
       } else if (this.memory!.uuid && !value) {
         filter.remove(this.memory!.uuid)
       }
+    },
+
+    removeDCNotice (
+      this: RefresherModule,
+      value: boolean,
+      filter: RefresherFilter
+    ) {
+      if (!this.memory!.uuiddc && value) {
+        this.memory!.uuiddc = filter.add(
+          `.gall_list .ub-content .ub-writer`,
+          (elem: HTMLElement) => {
+            let adminAttribute = elem.getAttribute('user_name')
+
+            if (!adminAttribute || adminAttribute !== '운영자') {
+              return
+            }
+
+            if (
+              elem.parentElement!.parentElement! &&
+              elem.parentElement!
+            ) {
+              elem.parentElement!.parentElement!.removeChild(
+                elem.parentElement!
+              )
+            }
+          },
+          {
+            neverExpire: true
+          }
+        )
+      } else if (this.memory!.uuiddc && !value) {
+        filter.remove(this.memory!.uuiddc)
+      }
     }
   },
   func (filter: RefresherFilter) {
@@ -157,6 +199,7 @@ export default {
     this.update.pushToRight(this.status.pushToRight)
 
     this.update.removeNotice.bind(this)(this.status.removeNotice, filter)
+    this.update.removeDCNotice.bind(this)(this.status.removeDCNotice, filter)
   },
 
   revoke (filter: RefresherFilter) {
@@ -167,5 +210,6 @@ export default {
     this.update.pushToRight(false)
 
     this.update.removeNotice.bind(this)(false, filter)
+    this.update.removeDCNotice.bind(this)(false, filter)
   }
 }
