@@ -583,33 +583,27 @@ const miniPreview: { [index: string]: any } = {
       let width = rect.width
       let height = rect.height
 
-      let y =
-        ev.clientY + height > window.innerHeight
-          ? ev.clientY - height < 0
-            ? 20
-            : ev.clientY - height
-          : ev.clientY
-
-      let x =
-        ev.clientX + width > window.innerWidth
-          ? ev.clientX - width < 0
-            ? 20
-            : ev.clientX - width
-          : ev.clientX
+      let x = Math.min(ev.clientX, window.innerWidth - width - 10)
+      let y = Math.min(ev.clientY, window.innerHeight - height - 10)
 
       miniPreview.element.style.transform = `translate(${x}px, ${y}px)`
+      miniPreview.cursorOut = false
     }
   },
 
   close (use: boolean) {
-    miniPreview.cursorOut = true
-
     if (use) {
       miniPreview.controller.abort()
       miniPreview.controller = new AbortController()
     }
 
-    miniPreview.element.classList.add('hide')
+    setTimeout(()=>{
+      miniPreview.cursorOut = true
+    }, 100)
+
+    setTimeout(()=>{
+      if(miniPreview.cursorOut) miniPreview.element.classList.add('hide')
+    }, 500)
   }
 }
 
