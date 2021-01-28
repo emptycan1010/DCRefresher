@@ -12,7 +12,7 @@ const tempButtonCreate = (elem: HTMLElement): void => {
   ).length
 
   if (buttonNum == 0 && contentNum != 0) {
-    let buttonFrame: HTMLElement = document.createElement('div')
+    const buttonFrame: HTMLElement = document.createElement('div')
     buttonFrame.classList.add(CONTROL_BUTTON.replace('.', ''))
     buttonFrame.classList.add('blur')
 
@@ -23,8 +23,8 @@ const tempButtonCreate = (elem: HTMLElement): void => {
       </div>
     `
 
-    let button = buttonFrame.querySelector('#tempview') as HTMLElement
-    let buttonText = buttonFrame.querySelector(
+    const button = buttonFrame.querySelector('#tempview') as HTMLElement
+    const buttonText = buttonFrame.querySelector(
       '#temp_button_text'
     ) as HTMLElement
 
@@ -79,7 +79,7 @@ export default {
   revoke (eventBus: RefresherEventBus) {
     document.documentElement.classList.remove('refresherStealth')
 
-    let buttons = document.querySelectorAll(CONTROL_BUTTON)
+    const buttons = document.querySelectorAll(CONTROL_BUTTON)
 
     if (buttons && buttons.length) {
       buttons.forEach((button: Element) => {

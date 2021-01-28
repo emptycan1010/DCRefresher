@@ -44,8 +44,8 @@ let BLOCK_CACHE: { [index: string]: RefresherBlockValue[] } = {}
 let BLOCK_MODE_CACHE: { [index: string]: string } = {}
 
 BLOCK_TYPES_KEYS.forEach(async key => {
-  let keyCache = await store.get(`${BLOCK_NAMESPACE}:${key}`)
-  let modeCache = await store.get(`${BLOCK_NAMESPACE}:${key}:MODE`)
+  const keyCache = await store.get(`${BLOCK_NAMESPACE}:${key}`)
+  const modeCache = await store.get(`${BLOCK_NAMESPACE}:${key}:MODE`)
 
   BLOCK_CACHE[key] = keyCache || []
   BLOCK_MODE_CACHE[key] = modeCache || BLOCK_DETECT_MODE.SAME
@@ -75,7 +75,7 @@ const checkValidMode = (mode: string) => {
 }
 
 const removeExists = (type: string, content: string) => {
-  let cache = BLOCK_CACHE[type]
+  const cache = BLOCK_CACHE[type]
 
   for (let i = 0; i < cache.length; i++) {
     if (cache[i].content === content) {
@@ -192,20 +192,20 @@ export const check = (
     return false
   }
 
-  let mode = BLOCK_MODE_CACHE[type]
+  const mode = BLOCK_MODE_CACHE[type]
 
   if (!BLOCK_CACHE[type] || BLOCK_CACHE[type].length < 1) {
     return false
   }
 
-  let result = BLOCK_CACHE[type].filter(v => {
+  const result = BLOCK_CACHE[type].filter(v => {
     if (v.gallery && v.gallery !== gallery) {
       return false
     }
 
     if (v.isRegex) {
-      let regexd = new RegExp(v.content)
-      let match = content.match(regexd)
+      const regexd = new RegExp(v.content)
+      const match = content.match(regexd)
 
       if (mode === BLOCK_DETECT_MODE.SAME) {
         return match && match[0] === content

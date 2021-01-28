@@ -1,5 +1,5 @@
 export const luminanace = (r, g, b) => {
-  var a = [r, g, b].map(v => {
+  const a = [r, g, b].map(v => {
     v /= 255
     return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
   })
@@ -7,10 +7,10 @@ export const luminanace = (r, g, b) => {
 }
 
 export const contrast = (rgb1, rgb2) => {
-  var lum1 = luminanace(rgb1[0], rgb1[1], rgb1[2])
-  var lum2 = luminanace(rgb2[0], rgb2[1], rgb2[2])
-  var brightest = Math.max(lum1, lum2)
-  var darkest = Math.min(lum1, lum2)
+  const lum1 = luminanace(rgb1[0], rgb1[1], rgb1[2])
+  const lum2 = luminanace(rgb2[0], rgb2[1], rgb2[2])
+  const brightest = Math.max(lum1, lum2)
+  const darkest = Math.min(lum1, lum2)
   return (brightest + 0.05) / (darkest + 0.05)
 }
 
@@ -31,18 +31,18 @@ export const parse = str => {
 
 // https://gist.github.com/mjackson/5311256
 export const RGBtoHSL = (r, g, b) => {
-  ;(r /= 255), (g /= 255), (b /= 255)
+  (r /= 255), (g /= 255), (b /= 255)
 
-  var max = Math.max(r, g, b),
-    min = Math.min(r, g, b)
-  var h,
-    s,
-    l = (max + min) / 2
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  let h
+  let s
+  const l = (max + min) / 2
 
-  if (max == min) {
+  if (max === min) {
     h = s = 0
   } else {
-    var d = max - min
+    const d = max - min
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
 
     switch (max) {
@@ -64,7 +64,7 @@ export const RGBtoHSL = (r, g, b) => {
 }
 
 export const HSLtoRGB = (h, s, l) => {
-  var r, g, b
+  let r, g, b
 
   if (s == 0) {
     r = g = b = l // achromatic
@@ -78,8 +78,8 @@ export const HSLtoRGB = (h, s, l) => {
       return p
     }
 
-    var q = l < 0.5 ? l * (1 + s) : l + s - l * s
-    var p = 2 * l - q
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s
+    const p = 2 * l - q
 
     r = hue2rgb(p, q, h + 1 / 3)
     g = hue2rgb(p, q, h)

@@ -1,7 +1,7 @@
 const updateWindowSize = (
   forceActive: boolean,
-  active: Number,
-  width: Number
+  active: number,
+  width: number
 ) => {
   if (typeof active === 'string') {
     active = Number(active)
@@ -89,7 +89,7 @@ export default {
   default_enable: true,
   require: ['filter'],
   update: {
-    activePixel (this: RefresherModule, value: Number) {
+    activePixel (this: RefresherModule, value: number) {
       updateWindowSize(this.status.forceCompact, value, window.innerWidth)
     },
 

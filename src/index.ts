@@ -1,4 +1,4 @@
-declare var require: any
+declare let require: any
 
 import './styles/index.scss'
 
@@ -6,7 +6,7 @@ import log from './utils/logger'
 
 log('🍊⚓ Initializing DCRefresher.')
 
-let loadStart = performance.now()
+const loadStart = performance.now()
 
 import './core/block'
 import { modules } from './core/modules'
@@ -14,7 +14,7 @@ import { filter } from './core/filtering'
 
 import './core/updateCheck'
 
-let context = require.context('./modules/', true, /\.ts$/)
+const context = require.context('./modules/', true, /\.ts$/)
 Promise.all(context.keys().map((v: string) => context(v).default))
   .then((v: any) => modules.load(...v))
   .then(async () => {

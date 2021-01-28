@@ -27,7 +27,7 @@ Vue.component('refresher-toast', {
 
 window.addEventListener('DOMContentLoaded', () => {
   if (!document.querySelector('.refresher-toast')) {
-    let element = document.createElement('refresher-toast')
+    const element = document.createElement('refresher-toast')
     document.querySelector('body')?.appendChild(element)
   }
 
@@ -89,9 +89,9 @@ window.addEventListener('keydown', ev => {
  * @param click 클릭하면 실행할 함수
  */
 export const show = (
-  content: String,
-  type: Boolean,
-  autoClose: Number,
+  content: string,
+  type: boolean,
+  autoClose: number,
   click?: Function
 ) => {
   if (Toast.autoClose) {

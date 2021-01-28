@@ -8,7 +8,7 @@ export const set = (key: string, value: any) => {
     throw new Error("This browser doesn't support storage API.")
   }
 
-  let obj = {}
+  const obj = {}
   obj[key] = value
 
   return (str.sync || str.local).set(obj)

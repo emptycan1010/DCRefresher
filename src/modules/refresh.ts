@@ -89,7 +89,7 @@ export default {
         let body = await http.make(url)
 
         try {
-          let bodyParse = new DOMParser().parseFromString(body, 'text/html')
+          const bodyParse = new DOMParser().parseFromString(body, 'text/html')
           body = ''
 
           eventBus.emit('refresherGetPost', bodyParse)
@@ -101,7 +101,7 @@ export default {
       })
     }
 
-    let run = () => {
+    const run = () => {
       if (!this.status.autoRate) {
         this.memory.delay = Math.max(1000, this.status.refreshRate || 2500)
       }
@@ -113,10 +113,10 @@ export default {
       this.memory.refresh = window.setTimeout(load, this.memory.delay)
     }
 
-    let isPostView = location.href.indexOf('/board/view') > -1
-    let currentPostNo = new URLSearchParams(location.href).get('no')
+    const isPostView = location.href.indexOf('/board/view') > -1
+    const currentPostNo = new URLSearchParams(location.href).get('no')
 
-    let load = async (skipRun?: boolean) => {
+    const load = async (skipRun?: boolean) => {
       // 도배 방지용
       if (Date.now() - lastAccess < 500) {
         return false
@@ -127,7 +127,7 @@ export default {
       }
       lastAccess = Date.now()
 
-      let isAdmin = document.querySelector('.useradmin_btnbox button') !== null
+      const isAdmin = document.querySelector('.useradmin_btnbox button') !== null
 
       // 글 선택 체크박스에 체크된 경우 새로 고침 건너 뜀
       if (
@@ -141,13 +141,13 @@ export default {
 
       this.memory.new_counts = 0
 
-      let url = http.view(location.href)
-      let newList = await body(url)
+      const url = http.view(location.href)
+      const newList = await body(url)
 
       let oldList = document.querySelector('.gall_list tbody')
       if (!oldList || !newList) return
 
-      let cached = Array.from(oldList.querySelectorAll('td.gall_num'))
+      const cached = Array.from(oldList.querySelectorAll('td.gall_num'))
         .map(v => v.innerHTML)
         .join('|')
 
@@ -155,10 +155,10 @@ export default {
       oldList.parentElement!.removeChild(oldList)
       oldList = null
 
-      let posts = newList.querySelectorAll('tr.us-post')
+      const posts = newList.querySelectorAll('tr.us-post')
       if (posts) {
         posts.forEach(tr => {
-          let writter = (tr as HTMLElement).querySelector(
+          const writter = (tr as HTMLElement).querySelector(
             '.ub-writer'
           ) as HTMLElement
 
@@ -178,9 +178,9 @@ export default {
         })
       }
 
-      let postNoIter = newList.querySelectorAll('td.gall_num')
+      const postNoIter = newList.querySelectorAll('td.gall_num')
 
-      let containsEmpty = newList.parentElement!.classList.contains('empty')
+      const containsEmpty = newList.parentElement!.classList.contains('empty')
       if (postNoIter.length) {
         if (containsEmpty) {
           newList.parentElement!.classList.remove('empty')
@@ -190,7 +190,7 @@ export default {
       }
 
       postNoIter.forEach(v => {
-        let value = v.innerHTML
+        const value = v.innerHTML
 
         if (cached.indexOf(value) == -1 && value != currentPostNo) {
           if (this.status.fadeIn && !this.memory.calledByPageTurn) {
@@ -216,7 +216,7 @@ export default {
           this.memory.average_counts.shift()
         }
 
-        let average =
+        const average =
           this.memory.average_counts.reduce((a, b) => a + b) /
           this.memory.average_counts.length
 
@@ -234,7 +234,7 @@ export default {
       if (isAdmin) {
         let noTempl = false
         document.querySelectorAll('.us-post').forEach(elem => {
-          let tmpl = document.querySelector('#minor_td-tmpl')
+          const tmpl = document.querySelector('#minor_td-tmpl')
 
           if (!tmpl) {
             noTempl = true
@@ -252,12 +252,12 @@ export default {
           })
 
           if (document.querySelector('#comment_chk_all')) {
-            var tbody_colspan = document.querySelector(
+            const tbody_colspan = document.querySelector(
               'table.gall_list tbody td'
             )
 
             if (tbody_colspan) {
-              let colspan = tbody_colspan.getAttribute('colspan') || ''
+              const colspan = tbody_colspan.getAttribute('colspan') || ''
 
               if (parseInt(colspan) == 6) {
                 tbody_colspan?.setAttribute(
@@ -309,7 +309,7 @@ export default {
 
           a.onclick = () => false
           a.addEventListener('click', async (ev: MouseEvent) => {
-            let isPageView = location.href.indexOf('/board/view') > -1
+            const isPageView = location.href.indexOf('/board/view') > -1
 
             if (isPageView) {
               history.pushState(
@@ -339,7 +339,7 @@ export default {
       this.memory.uuid2 = eventBus.on(
         'refresherGetPost',
         (parsedBody: Document) => {
-          let pagingBox = parsedBody.querySelector(
+          const pagingBox = parsedBody.querySelector(
             '.left_content .bottom_paging_box'
           )
 
@@ -349,16 +349,16 @@ export default {
           document
             .querySelectorAll('.left_content .bottom_paging_box a')!
             .forEach(async a => {
-              let href = (a as HTMLAnchorElement).href
+              const href = (a as HTMLAnchorElement).href
               if (href.indexOf('javascript:') > -1) {
                 return
               }
 
-              ;(a as HTMLAnchorElement).onclick = () => false
+              (a as HTMLAnchorElement).onclick = () => false
               ;(a as HTMLAnchorElement).addEventListener(
                 'click',
                 async (ev: MouseEvent) => {
-                  let isPageView = location.href.indexOf('/board/view') > -1
+                  const isPageView = location.href.indexOf('/board/view') > -1
 
                   if (isPageView) {
                     history.pushState(

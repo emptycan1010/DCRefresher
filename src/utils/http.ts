@@ -66,8 +66,8 @@ export const view = (url: string) => {
     type = urls.gall.major
   }
 
-  let urlParse = new URL(url)
-  let queries = new URLSearchParams(
+  const urlParse = new URL(url)
+  const queries = new URLSearchParams(
     url.replace(urlParse.origin + urlParse.pathname, '')
   )
 
@@ -116,15 +116,15 @@ export const galleryType = (url: string, extra?: string) => {
 }
 
 export const mergeParamURL = (origin: string, getFrom: string) => {
-  let add: { [index: string]: any } = {}
+  const add: { [index: string]: any } = {}
 
-  let originURL = new URL(origin)
-  for (let [key, value] of originURL.searchParams) {
+  const originURL = new URL(origin)
+  for (const [key, value] of originURL.searchParams) {
     add[key] = value
   }
 
-  let fromURL = new URL(getFrom)
-  for (let [key, value] of fromURL.searchParams) {
+  const fromURL = new URL(getFrom)
+  for (const [key, value] of fromURL.searchParams) {
     add[key] = value
   }
 

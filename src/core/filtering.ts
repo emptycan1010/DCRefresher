@@ -15,7 +15,7 @@ interface RefresherFilteringOptions {
   expireFunc?: Function
 }
 
-let lists: { [index: string]: RefresherFilteringLists } = {}
+const lists: { [index: string]: RefresherFilteringLists } = {}
 
 export const filter = {
   __run: async (a: RefresherFilteringLists, e: NodeListOf<Element>) => {
@@ -32,11 +32,11 @@ export const filter = {
    * @param non_blocking 비차단 방식으로 렌더링 합니다. (페이지 로드 후)
    */
   run: async (non_blocking: boolean) => {
-    let listsKeys = Object.keys(lists)
+    const listsKeys = Object.keys(lists)
 
     let len = listsKeys.length
     while (len--) {
-      let filterObj = lists[listsKeys[len]]
+      const filterObj = lists[listsKeys[len]]
 
       let observer: any
 
@@ -55,7 +55,7 @@ export const filter = {
 
         lists[listsKeys[len]].expire = () => {
           if (observer) {
-            ;(observer as MutationObserver).disconnect()
+            (observer as MutationObserver).disconnect()
             observer = null
           }
         }
@@ -75,7 +75,7 @@ export const filter = {
   },
 
   runSpecific: (id: string) => {
-    let item = lists[id]
+    const item = lists[id]
 
     return observe
       .find(item.scope, document.documentElement)
@@ -86,10 +86,10 @@ export const filter = {
    * 필터 lists 에 필터 함수를 등록합니다.
    */
   add: (scope: string, cb: Function, options?: RefresherFilteringOptions) => {
-    let uuid = strings.uuid()
+    const uuid = strings.uuid()
 
     if (typeof lists[uuid] === 'undefined') {
-      let obj = {
+      const obj = {
         func: cb,
         scope,
         status: {},
@@ -170,7 +170,7 @@ export const filter = {
       return
     }
 
-    let eventObj = lists[uuid].events[event]
+    const eventObj = lists[uuid].events[event]
     let eventIter = eventObj.length
 
     while (eventIter--) {

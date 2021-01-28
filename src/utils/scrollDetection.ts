@@ -1,4 +1,4 @@
-const average = arr => arr.reduce((a, b) => a + b) / arr.length
+const average = (arr: number[]) => arr.reduce((a, b) => a + b) / arr.length
 
 const SCROLLMODE = {
   NOT_DEFINED: 0,
@@ -6,10 +6,18 @@ const SCROLLMODE = {
   VARIABLE: 2
 }
 
+interface ScrollSession {
+  time: number[]
+  delta: number[]
+  peak: number
+  direction: number
+  fired: number
+}
+
 export class ScrollDetection {
   lastEvent: number
   events: { [index: string]: Function[] }
-  session: { [index: string]: any }
+  session: ScrollSession
   mode: number
 
   constructor () {
@@ -17,11 +25,18 @@ export class ScrollDetection {
     this.events = {}
     this.mode = 0
 
-    this.session = {}
+    this.session = {
+      time: [],
+      delta: [],
+      peak: 0,
+      direction: 0,
+      fired: 0
+    }
+
     this.initSession()
   }
 
-  initSession () {
+  initSession (): void {
     this.session = {
       time: [],
       delta: [],
@@ -31,7 +46,7 @@ export class ScrollDetection {
     }
   }
 
-  emit (event: string, ...args: any[]) {
+  emit (event: string, ...args: Record<string, unknown>[]): void {
     if (this.events[event]) {
       this.events[event].forEach(func => {
         func(...args)
@@ -39,7 +54,7 @@ export class ScrollDetection {
     }
   }
 
-  listen (event: string, cb: Function) {
+  listen (event: string, cb: Function): void {
     if (!this.events[event]) {
       this.events[event] = []
     }
@@ -47,16 +62,16 @@ export class ScrollDetection {
     this.events[event].push(cb)
   }
 
-  scroll (ev: WheelEvent) {
+  scroll (ev: WheelEvent): void {
     this.emit('scroll', ev)
     this.session.fired = Date.now()
   }
 
-  addMouseEvent (ev: WheelEvent) {
-    let lastEvent = this.lastEvent
+  addMouseEvent (ev: WheelEvent): void {
+    const lastEvent = this.lastEvent
     this.lastEvent = Date.now()
 
-    let absoluteDelta = Math.abs(ev.deltaY)
+    const absoluteDelta = Math.abs(ev.deltaY)
     if (absoluteDelta < 2) {
       this.initSession()
 
@@ -70,7 +85,7 @@ export class ScrollDetection {
     }
 
     if (this.session.delta.length) {
-      let lastDelta = this.session.delta[this.session.delta.length - 1]
+      const lastDelta = this.session.delta[this.session.delta.length - 1]
 
       if (lastDelta === 100 && average(this.session.delta) === 100) {
         this.mode = SCROLLMODE.FIXED

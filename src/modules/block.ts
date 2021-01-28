@@ -31,15 +31,15 @@ export default {
     this.memory.uuid = filter.add(
       '.ub-writer',
       async (elem: HTMLElement) => {
-        let gallery = queryString('id')!
+        const gallery = queryString('id')!
 
-        let nick = elem.dataset.nick || ''
-        let uid = elem.dataset.uid || ''
-        let ip = elem.dataset.ip || ''
+        const nick = elem.dataset.nick || ''
+        const uid = elem.dataset.uid || ''
+        const ip = elem.dataset.ip || ''
 
-        let blockNickname = block.check('NICK', nick, gallery)
-        let blockId = block.check('ID', uid, gallery)
-        let blockIP = block.check('IP', ip, gallery)
+        const blockNickname = block.check('NICK', nick, gallery)
+        const blockId = block.check('ID', uid, gallery)
+        const blockIP = block.check('IP', ip, gallery)
 
         if (!elem.oncontextmenu) {
           elem.oncontextmenu = _ => {
@@ -57,11 +57,11 @@ export default {
           elem.parentElement &&
           (blockNickname || blockId || blockIP)
         ) {
-          let post = elem.parentElement
+          const post = elem.parentElement
           if (post && post.className.indexOf('ub-content') > -1) {
             post.style.display = 'none'
           } else {
-            let content = dom.findNeighbor(post, '.ub-content', 3)
+            const content = dom.findNeighbor(post, '.ub-content', 3)
 
             content!.style.display = 'none'
           }
@@ -91,7 +91,7 @@ export default {
 
       let type = 'NICK'
       let value = this.memory.selected.nick
-      let extra = this.memory.selected.nick
+      const extra = this.memory.selected.nick
 
       if (this.memory.selected.uid) {
         type = 'ID'

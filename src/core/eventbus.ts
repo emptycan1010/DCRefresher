@@ -1,6 +1,6 @@
 import * as strings from '../utils/string'
 
-let lists: { [index: string]: any[] } = {}
+const lists: { [index: string]: any[] } = {}
 
 export const eventBus = {
   /**
@@ -14,11 +14,11 @@ export const eventBus = {
       return
     }
 
-    let remove_queue = []
+    const remove_queue = []
 
     let iter = lists[event].length
     while (iter--) {
-      let callback = lists[event][iter]
+      const callback = lists[event][iter]
       callback.func(...params)
 
       if (callback.once) {
@@ -50,13 +50,13 @@ export const eventBus = {
     }
 
     return new Promise(async (resolve, reject) => {
-      let results = []
+      const results = []
 
-      let remove_queue: number[] = []
+      const remove_queue: number[] = []
 
       let iter = lists[event].length
       while (iter--) {
-        let callback = lists[event][iter]
+        const callback = lists[event][iter]
 
         try {
           results.push(await callback.func(...params))
@@ -82,13 +82,13 @@ export const eventBus = {
    */
   on: (event: string, cb: Function, options?: { [index: string]: any }) => {
     // TODO : { [index: string]: any } 타입을 RefresherEventBusOptions interface로
-    let uuid = strings.uuid()
+    const uuid = strings.uuid()
 
     if (typeof lists[event] === 'undefined') {
       lists[event] = []
     }
 
-    let obj: { [index: string]: any } = {
+    const obj: { [index: string]: any } = {
       func: cb,
       uuid
     }
@@ -114,7 +114,7 @@ export const eventBus = {
       throw new Error('Given Event is not exists in the list.')
     }
 
-    let callbacks = lists[event]
+    const callbacks = lists[event]
 
     let iter = callbacks.length
     while (iter--) {

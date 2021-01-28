@@ -1,8 +1,8 @@
 import * as http from './http'
 import { GalleryPreData } from '../structs/post'
 
-var _d = function (r) {
-  var a,
+const _d = function (r) {
+  let a,
     e,
     n,
     t,
@@ -29,9 +29,9 @@ var _d = function (r) {
 let lastDomText = ''
 let _r: string
 
-let requestBeforeServiceCode = (dom: HTMLElement) => {
+const requestBeforeServiceCode = (dom: HTMLElement) => {
   if (!_r || lastDomText !== dom.innerHTML) {
-    let _rpre = dom.querySelector(
+    const _rpre = dom.querySelector(
       '#container > section #reply-setting-tmpl + script[type="text/javascript"]'
     )
 
@@ -41,7 +41,7 @@ let requestBeforeServiceCode = (dom: HTMLElement) => {
 
     _r = _rpre.innerHTML
 
-    let _rmatch = _r.match(/_d\(\'(.+)\'/g)
+    const _rmatch = _r.match(/_d\(\'(.+)\'/g)
     if (!_rmatch || !_rmatch[0]) {
       throw new Error('_d 값을 찾을 수 없습니다.')
     }
@@ -53,7 +53,7 @@ let requestBeforeServiceCode = (dom: HTMLElement) => {
     }
 
     if (lastDomText !== dom.innerHTML) {
-      var tvl = _r,
+      let tvl = _r,
         fi = parseInt(tvl.substr(0, 1))
       ;(fi = fi > 5 ? fi - 5 : fi + 4),
         (tvl = tvl.replace(/^./, fi)),
@@ -64,12 +64,12 @@ let requestBeforeServiceCode = (dom: HTMLElement) => {
   lastDomText = dom.innerHTML
 
   if ('string' == typeof _r) {
-    var r = (dom.querySelector(
+    const r = (dom.querySelector(
       'input[name="service_code"]'
     )! as HTMLInputElement).value
-    var _rs = _r.split(',')
-    var t = ''
-    for (var e = 0; e < _rs.length; e++)
+    const _rs = _r.split(',')
+    let t = ''
+    for (let e = 0; e < _rs.length; e++)
       t += String.fromCharCode((2 * (_rs[e] - e - 1)) / (13 - e - 1))
     return r.replace(/(.{10})$/, t)
   } else {
@@ -81,7 +81,7 @@ const secretKey = (dom: HTMLElement) => {
   return (
     Array.from(dom.querySelectorAll('#focus_cmt > input'))
       .map(el => {
-        let id = el.name || el.id
+        const id = el.name || el.id
         if (
           id === 'service_code' ||
           id === 'gallery_no' ||
@@ -144,9 +144,9 @@ export async function submitComment (
   //     }
   //   }
 
-  let key = secretKey(dom) + `&service_code=${code}`
+  const key = secretKey(dom) + `&service_code=${code}`
 
-  let response = await http.make(http.urls.comments_submit, {
+  const response = await http.make(http.urls.comments_submit, {
     method: 'POST',
     dataType: 'json',
     headers: {
@@ -160,7 +160,7 @@ export async function submitComment (
       user.pw ? '&password=' + user.pw : ''
     }${captcha ? '&code=' + captcha : ''}&memo=${encodeURI(memo)}${key}`
   })
-  let res = response.split('||')
+  const res = response.split('||')
 
   return {
     result: res[0],

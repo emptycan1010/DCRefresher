@@ -1,13 +1,13 @@
 export const find = (elem: string, parent: HTMLElement) =>
   new Promise<NodeListOf<Element>>((resolve, reject) => {
-    let parentFind = parent.querySelectorAll(elem)
+    const parentFind = parent.querySelectorAll(elem)
     if (parentFind.length) {
       resolve(parentFind)
     }
 
-    let tout: number = 0
+    let tout = 0
 
-    var observer = new MutationObserver(muts => {
+    const observer = new MutationObserver(muts => {
       let executed = false
       let iter = muts.length
       while (iter--) {
@@ -17,7 +17,7 @@ export const find = (elem: string, parent: HTMLElement) =>
       }
 
       if (!executed) return
-      let lists = document.querySelectorAll(elem)
+      const lists = document.querySelectorAll(elem)
       if (!lists.length) return
 
       resolve(lists)
@@ -41,12 +41,12 @@ export const find = (elem: string, parent: HTMLElement) =>
   })
 
 export const listen = (elem: string, parent: HTMLElement, cb: Function) => {
-  let parentFind = parent.querySelectorAll(elem)
+  const parentFind = parent.querySelectorAll(elem)
   if (parentFind.length) {
     cb(parentFind)
   }
 
-  var observer = new MutationObserver(muts => {
+  const observer = new MutationObserver(muts => {
     let executed = false
     let iter = muts.length
     while (iter--) {
@@ -56,7 +56,7 @@ export const listen = (elem: string, parent: HTMLElement, cb: Function) => {
     }
 
     if (!executed) return
-    let lists = document.querySelectorAll(elem)
+    const lists = document.querySelectorAll(elem)
     if (!lists || !lists.length) return
 
     cb(lists)

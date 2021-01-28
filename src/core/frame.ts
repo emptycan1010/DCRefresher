@@ -1,5 +1,7 @@
 import Vue from 'vue'
 
+import { Outer, Scroll } from '../components/frame'
+
 interface FrameOption {
   relative?: boolean
   center?: boolean
@@ -14,8 +16,6 @@ interface FrameStackOption {
   onScroll?: Function
   blur?: boolean
 }
-
-import { Outer, Scroll } from '../components/frame'
 
 class InternalFrame implements RefresherFrame {
   title: string
@@ -159,7 +159,7 @@ export default class {
       this.app.frames.push(new InternalFrame(this.class, childs[i], this.app))
     }
 
-    let keyupFunction = (ev: KeyboardEvent) => {
+    const keyupFunction = (ev: KeyboardEvent) => {
       if (ev.code === 'Escape') {
         this.app.outerClick()
       }
@@ -171,7 +171,7 @@ export default class {
     document.querySelector('body')!.style.overflow = 'hidden'
 
     if (option && option.onScroll) {
-      let refresherGroup = this.app.$el.querySelector('.refresher-group')
+      const refresherGroup = this.app.$el.querySelector('.refresher-group')
 
       if (!refresherGroup) {
         return

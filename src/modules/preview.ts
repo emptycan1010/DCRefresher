@@ -6,7 +6,7 @@ import * as http from '../utils/http'
 import * as Toast from '../components/toast'
 
 import { ScrollDetection } from '../utils/scrollDetection'
-import { get_cookie, set_cookie_tmp } from '../utils/webStorage'
+import { get_cookie, setCookieTmp } from '../utils/webStorage'
 import { submitComment } from '../utils/comment'
 
 interface GalleryHTTPRequestArguments {
@@ -26,12 +26,12 @@ const getURL = (u: string) => {
   return !chrome || !chrome.extension ? u : chrome.extension.getURL(u)
 }
 
-let KEY_COUNTS: { [index: string]: any } = {}
+const KEY_COUNTS: { [index: string]: any } = {}
 let adminKeyPress: any = null
 
 const panel = {
   block: (callback: Function, closeCallback: Function) => {
-    let element = document.createElement('div')
+    const element = document.createElement('div')
     element.className = 'refresher-block-popup'
 
     element.innerHTML = `
@@ -81,16 +81,16 @@ const panel = {
 
     element.querySelectorAll('input[type="radio"]').forEach(v => {
       v.addEventListener('click', ev => {
-        let selected = ev.target as HTMLInputElement
+        const selected = ev.target as HTMLInputElement
 
         if (selected!.getAttribute('name') === 'duration') {
           avoid_hour = Number(selected!.value)
         }
 
         if (selected!.getAttribute('name') === 'reason') {
-          let value = Number(selected!.value)
+          const value = Number(selected!.value)
 
-          let blockReasonInput = document.querySelector(
+          const blockReasonInput = document.querySelector(
             'input[name="reason_text"]'
           ) as HTMLInputElement
 
@@ -106,10 +106,10 @@ const panel = {
     })
 
     element.querySelector('.go-block')?.addEventListener('click', () => {
-      let avoid_reason_txt = (element.querySelector(
+      const avoid_reason_txt = (element.querySelector(
         'input[name="reason_text"]'
       )! as HTMLInputElement).value
-      let del_chk = (element.querySelector(
+      const del_chk = (element.querySelector(
         'input[name="remove"]'
       )! as HTMLInputElement).checked
 
@@ -126,12 +126,16 @@ const panel = {
     eventBus: RefresherEventBus,
     useKeyPress: boolean
   ) => {
-    let preFoundBlockElement = document.querySelector('.refresher-block-popup')
+    const preFoundBlockElement = document.querySelector(
+      '.refresher-block-popup'
+    )
     if (preFoundBlockElement) {
       preFoundBlockElement.parentElement?.removeChild(preFoundBlockElement)
     }
 
-    let preFoundElement = document.querySelector('.refresher-management-panel')
+    const preFoundElement = document.querySelector(
+      '.refresher-management-panel'
+    )
     if (preFoundElement) {
       preFoundElement.parentElement?.removeChild(preFoundElement)
     }
@@ -139,7 +143,7 @@ const panel = {
     let setAsNotice = !preData.notice
     let setAsRecommend = !preData.recommend
 
-    let element = document.createElement('div')
+    const element = document.createElement('div')
     element.id = 'refresher-management-panel'
     element.className = 'refresher-management-panel'
 
@@ -147,8 +151,8 @@ const panel = {
       element.className += ' blur'
     }
 
-    let upvoteImage = getURL('/assets/icons/upvote.png')
-    let downvoteImage = getURL('/assets/icons/downvote.png')
+    const upvoteImage = getURL('/assets/icons/upvote.png')
+    const downvoteImage = getURL('/assets/icons/downvote.png')
 
     element.innerHTML = `
       <div class="button pin">
@@ -169,7 +173,7 @@ const panel = {
       </div>
     `
 
-    let deleteFunction = () => {
+    const deleteFunction = () => {
       frame.app.close()
 
       request.delete(preData).then(response => {
@@ -241,10 +245,10 @@ const panel = {
     element.querySelector('.block')?.addEventListener('click', _ => {
       panel.block(
         (
-          avoid_hour: Number,
-          avoid_reason: Number,
+          avoid_hour: number,
+          avoid_reason: number,
           avoid_reason_txt: string,
-          del_chk: Number
+          del_chk: number
         ) => {
           request
             .block(preData, avoid_hour, avoid_reason, avoid_reason_txt, del_chk)
@@ -267,13 +271,13 @@ const panel = {
             })
         },
         () => {
-          let blockPopup = document.querySelector('.refresher-block-popup')
+          const blockPopup = document.querySelector('.refresher-block-popup')
           blockPopup!.parentElement?.removeChild(blockPopup!)
         }
       )
     })
 
-    let pin = element.querySelector('.pin')
+    const pin = element.querySelector('.pin')
     pin!.addEventListener('click', _ => {
       request.setNotice(preData, setAsNotice).then(response => {
         eventBus.emit('refreshRequest')
@@ -297,7 +301,7 @@ const panel = {
       })
     })
 
-    let recommend = element.querySelector('.recommend')
+    const recommend = element.querySelector('.recommend')
     recommend!.addEventListener('click', _ => {
       request.setRecommend(preData, setAsRecommend).then(response => {
         eventBus.emit('refreshRequest')
@@ -330,7 +334,7 @@ const panel = {
   },
 
   captcha (src: string, callback: Function): boolean {
-    let element = document.createElement('div')
+    const element = document.createElement('div')
     element.className = 'refresher-captcha-popup'
 
     element.innerHTML = `
@@ -352,7 +356,7 @@ const panel = {
 
     element.querySelector('input')?.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
-        let input = element.querySelector('input')!.value
+        const input = element.querySelector('input')!.value
 
         callback(input)
 
@@ -365,7 +369,7 @@ const panel = {
     })
 
     element.querySelector('button')?.addEventListener('click', ev => {
-      let input = element.querySelector('input')!.value
+      const input = element.querySelector('input')!.value
 
       callback(input)
 
@@ -379,10 +383,10 @@ const panel = {
 }
 
 const getRelevantData = (ev: MouseEvent) => {
-  let target = ev.target as HTMLElement
-  let isTR = target!.tagName === 'TR'
+  const target = ev.target as HTMLElement
+  const isTR = target!.tagName === 'TR'
 
-  let listID = (isTR
+  const listID = (isTR
     ? target!.querySelector('.gall_num')
     : findNeighbor(target, '.gall_num', 5, null)) as HTMLElement
 
@@ -409,7 +413,7 @@ const getRelevantData = (ev: MouseEvent) => {
       id = listID.innerText
     }
 
-    let emElement = isTR
+    const emElement = isTR
       ? target.querySelector('em.icon_img')
       : findNeighbor(target, 'em.icon_img', 5, null)
     if (emElement) {
@@ -433,7 +437,7 @@ const getRelevantData = (ev: MouseEvent) => {
       ? target.querySelector('a')
       : findNeighbor(ev.target as HTMLElement, 'a', 2, null)) as HTMLLinkElement
 
-    let pt = isTR
+    const pt = isTR
       ? target.querySelector('.txt_box')
       : findNeighbor(ev.target as HTMLElement, '.txt_box', 2, null)
     if (pt) {
@@ -442,9 +446,9 @@ const getRelevantData = (ev: MouseEvent) => {
   }
 
   if (linkElement) {
-    let href = linkElement.href || ''
-    let linkNumberMatch = href.match(/\&no=.+/)
-    let linkIdMatch = href.match(/\id=.+/)
+    const href = linkElement.href || ''
+    const linkNumberMatch = href.match(/\&no=.+/)
+    const linkIdMatch = href.match(/\id=.+/)
 
     if (!linkNumberMatch || !linkIdMatch) {
       return
@@ -505,7 +509,7 @@ const miniPreview: { [index: string]: any } = {
 
     miniPreview.lastRequest = Date.now()
 
-    let preData = getRelevantData(ev)
+    const preData = getRelevantData(ev)
 
     if (!preData) {
       return
@@ -520,13 +524,14 @@ const miniPreview: { [index: string]: any } = {
     }
 
     if (!miniPreview.init) {
-      miniPreview.element.innerHTML = `<h3>제목</h3><br><div class="refresher-mini-preview-contents"></div>`
+      miniPreview.element.innerHTML =
+        '<h3>제목</h3><br><div class="refresher-mini-preview-contents"></div>'
 
       document.body.appendChild(miniPreview.element)
       miniPreview.init = true
     }
 
-    let selector = miniPreview.element.querySelector(
+    const selector = miniPreview.element.querySelector(
       '.refresher-mini-preview-contents'
     )
 
@@ -539,13 +544,13 @@ const miniPreview: { [index: string]: any } = {
         miniPreview.caches = {}
       }
 
-      let cache = miniPreview.caches[preData.gallery + preData.id]
+      const cache = miniPreview.caches[preData.gallery + preData.id]
       if (cache) {
         return resolve(cache)
       }
 
       try {
-        let result = await request.post(
+        const result = await request.post(
           preData.link,
           preData.gallery,
           preData.id,
@@ -562,7 +567,7 @@ const miniPreview: { [index: string]: any } = {
       .then(v => {
         selector!.innerHTML = v.contents
 
-        let writeDiv = selector.querySelector('.write_div')
+        const writeDiv = selector.querySelector('.write_div')
         if (writeDiv) {
           writeDiv.setAttribute('style', null)
         }
@@ -579,18 +584,18 @@ const miniPreview: { [index: string]: any } = {
 
   move (ev: MouseEvent, use: boolean) {
     if (use) {
-      let rect = miniPreview.element.getBoundingClientRect()
-      let width = rect.width
-      let height = rect.height
+      const rect = miniPreview.element.getBoundingClientRect()
+      const width = rect.width
+      const height = rect.height
 
-      let y =
+      const y =
         ev.clientY + height > window.innerHeight
           ? ev.clientY - height < 0
             ? 20
             : ev.clientY - height
           : ev.clientY
 
-      let x =
+      const x =
         ev.clientX + width > window.innerWidth
           ? ev.clientX - width < 0
             ? 20
@@ -621,7 +626,7 @@ const request = {
     code: string | null,
     link: string
   ) {
-    set_cookie_tmp(
+    setCookieTmp(
       gall_id + post_id + '_Firstcheck' + (!type ? '_down' : ''),
       'Y',
       3,
@@ -646,7 +651,7 @@ const request = {
         )}&link_id=${gall_id}`
       })
       .then((v: string) => {
-        let res = v.split('||')
+        const res = v.split('||')
 
         return {
           result: res[0],
@@ -665,10 +670,12 @@ const request = {
   ) {
     return http
       .make(
-        `${http.urls.base +
+        `${
+          http.urls.base +
           http.galleryType(link, '/') +
           http.urls.view +
-          gallery}&no=${id}`,
+          gallery
+        }&no=${id}`,
         { signal, cache: noCache ? 'no-cache' : 'default' }
       )
       .then(response => parse(id, response))
@@ -684,9 +691,9 @@ const request = {
       throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
     }
 
-    let galleryType = http.galleryType(args.link, '/')
+    const galleryType = http.galleryType(args.link, '/')
 
-    let response = await http.make(http.urls.comments, {
+    const response = await http.make(http.urls.comments, {
       method: 'POST',
       dataType: 'json',
       headers: {
@@ -697,8 +704,9 @@ const request = {
       cache: 'no-store',
       referrer: `https://gall.dcinside.com/${galleryType}board/view/?id=${args.gallery}&no=${args.id}`,
       body:
-        `id=${args.gallery}&no=${Number(args.id)}&cmt_id=${args.commentId ||
-          args.gallery}&cmt_no=${Number(args.commentNo || args.id)}&e_s_n_o=${
+        `id=${args.gallery}&no=${Number(args.id)}&cmt_id=${
+          args.commentId || args.gallery
+        }&cmt_no=${Number(args.commentNo || args.id)}&e_s_n_o=${
           (document.getElementById('e_s_n_o')! as HTMLInputElement).value
         }&comment_page=1&sort=&_GALLTYPE_=` + http.galleryTypeName(args.link),
       signal
@@ -711,10 +719,10 @@ const request = {
       throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
     }
 
-    let galleryType = http.galleryType(args.link, '/')
+    const galleryType = http.galleryType(args.link, '/')
 
-    let response = await http.make(
-      galleryType == 'mini/'
+    const response = await http.make(
+      galleryType === 'mini/'
         ? http.urls.manage.deleteMini
         : http.urls.manage.delete,
       {
@@ -747,18 +755,18 @@ const request = {
 
   async block (
     args: GalleryHTTPRequestArguments,
-    avoid_hour: Number,
-    avoid_reason: Number,
+    avoid_hour: number,
+    avoid_reason: number,
     avoid_reason_txt: string,
-    del_chk: Number
+    del_chk: number
   ) {
     if (!args.link) {
       throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
     }
 
-    let galleryType = http.galleryType(args.link, '/')
+    const galleryType = http.galleryType(args.link, '/')
 
-    let response = await http.make(
+    const response = await http.make(
       galleryType == 'mini/'
         ? http.urls.manage.blockMini
         : http.urls.manage.block,
@@ -796,9 +804,9 @@ const request = {
       throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
     }
 
-    let galleryType = http.galleryType(args.link, '/')
+    const galleryType = http.galleryType(args.link, '/')
 
-    let response = await http.make(
+    const response = await http.make(
       galleryType == 'mini/'
         ? http.urls.manage.setNoticeMini
         : http.urls.manage.setNotice,
@@ -835,9 +843,9 @@ const request = {
       throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
     }
 
-    let galleryType = http.galleryType(args.link, '/')
+    const galleryType = http.galleryType(args.link, '/')
 
-    let response = await http.make(
+    const response = await http.make(
       galleryType == 'mini/'
         ? http.urls.manage.setRecommendMini
         : http.urls.manage.setRecommend,
@@ -875,8 +883,8 @@ const request = {
       throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
     }
 
-    let galleryType = http.galleryType(args.link, '/')
-    let galleryTypeName = http.galleryTypeName(args.link)
+    const galleryType = http.galleryType(args.link, '/')
+    const galleryTypeName = http.galleryTypeName(args.link)
 
     await http.make(http.urls.captcha, {
       method: 'POST',
@@ -907,8 +915,8 @@ const request = {
   }
 }
 
-let parse = (id: string, body: string) => {
-  let dom = new DOMParser().parseFromString(body, 'text/html')
+const parse = (id: string, body: string) => {
+  const dom = new DOMParser().parseFromString(body, 'text/html')
 
   let header = dom.querySelector('.view_content_wrap span.title_headtext')
     ?.innerHTML
@@ -917,10 +925,10 @@ let parse = (id: string, body: string) => {
     header = header.replace(/(\[|\])/g, '')
   }
 
-  let title = dom.querySelector('.view_content_wrap span.title_subject')
+  const title = dom.querySelector('.view_content_wrap span.title_subject')
     ?.innerHTML
 
-  let date = dom.querySelector('.view_content_wrap div.fl > span.gall_date')
+  const date = dom.querySelector('.view_content_wrap div.fl > span.gall_date')
     ?.innerHTML
 
   let expire = dom.querySelector(
@@ -931,49 +939,49 @@ let parse = (id: string, body: string) => {
     expire = expire.replace(/\s자동\s삭제/, '')
   }
 
-  let views = dom
+  const views = dom
     .querySelector('.view_content_wrap div.fr > span.gall_count')
     ?.innerHTML.replace(/조회\s/, '')
-  let upvotes = dom
+  const upvotes = dom
     .querySelector('.view_content_wrap div.fr > span.gall_reply_num')
     ?.innerHTML.replace(/추천\s/, '')
 
-  let downvotes = dom.querySelector('div.btn_recommend_box.clear .down_num')
+  const downvotes = dom.querySelector('div.btn_recommend_box.clear .down_num')
     ?.innerHTML
 
-  let content_query = dom.querySelector(
+  const content_query = dom.querySelector(
     '.view_content_wrap > div > div.inner.clear > div.writing_view_box'
   )
 
-  let writeDiv = content_query?.querySelector('.write_div') as HTMLElement
+  const writeDiv = content_query?.querySelector('.write_div') as HTMLElement
   if (writeDiv && writeDiv.style.width) {
-    let width = writeDiv.style.width
+    const width = writeDiv.style.width
     writeDiv.style.width = 'unset'
     writeDiv.style.maxWidth = width
     writeDiv.style.overflow = ''
   }
-  let contents = content_query?.innerHTML
+  const contents = content_query?.innerHTML
 
-  let commentId = body
+  const commentId = body
     .match(ISSUE_ZOOM_ID)![0]
     .match(QUOTES)![1]
     .replace(/\'/g, '')
 
-  let commentNo = body
+  const commentNo = body
     .match(ISSUE_ZOOM_NO)![0]
     .match(QUOTES)![1]
     .replace(/\'/g, '')
 
-  let noticeElement = dom.querySelector(
+  const noticeElement = dom.querySelector(
     '.user_control .option_box li:first-child'
   )
-  let isNotice = noticeElement && noticeElement.innerHTML !== '공지 등록'
+  const isNotice = noticeElement && noticeElement.innerHTML !== '공지 등록'
 
-  let requireCaptcha = dom.querySelector('.recommend_kapcode') !== null
-  let requireCommentCaptcha =
+  const requireCaptcha = dom.querySelector('.recommend_kapcode') !== null
+  const requireCommentCaptcha =
     dom.querySelector('.cmt_write_box input[name="comment_code"]') !== null
 
-  let disabledDownvote = dom.querySelector('.icon_recom_down') === null
+  const disabledDownvote = dom.querySelector('.icon_recom_down') === null
 
   return new PostInfo(id, {
     header,
@@ -1148,7 +1156,7 @@ export default {
     block: RefresherBlock
   ) {
     let postFetchedData: PostInfo
-    let makeFirstFrame = (
+    const makeFirstFrame = (
       frame: RefresherFrame,
       preData: GalleryPreData,
       signal: AbortSignal,
@@ -1159,7 +1167,7 @@ export default {
       frame.data.buttons = true
 
       if (this.status.colorPreviewLink) {
-        let title = `${preData.title} - ${document.title
+        const title = `${preData.title} - ${document.title
           .split('-')
           .slice(-1)[0]
           .trim()}`
@@ -1180,15 +1188,15 @@ export default {
           return
         }
 
-        let requireCapCode = postFetchedData.requireCaptcha
+        const requireCapCode = postFetchedData.requireCaptcha
 
         let codeSrc = ''
         if (requireCapCode) {
           codeSrc = await request.captcha(preData, 'recommend')
         }
 
-        let req = async (captcha?: string) => {
-          let res = await request.vote(
+        const req = async (captcha?: string) => {
+          const res = await request.vote(
             preData.gallery,
             preData.id,
             type,
@@ -1261,7 +1269,7 @@ export default {
             }
 
             if (this.status.colorPreviewLink) {
-              let title = `${obj.title} - ${document.title
+              const title = `${obj.title} - ${document.title
                 .split('-')
                 .slice(-1)[0]
                 .trim()}`
@@ -1323,14 +1331,14 @@ export default {
       }
     }
 
-    let makeSecondFrame = (
+    const makeSecondFrame = (
       frame: RefresherFrame,
       preData: GalleryPreData,
       signal: AbortSignal
     ) => {
       frame.data.load = true
-      frame.title = `댓글`
-      frame.subtitle = `로딩 중`
+      frame.title = '댓글'
+      frame.subtitle = '로딩 중'
 
       frame.data.useWriteComment = this.status.experimentalComment
 
@@ -1444,15 +1452,17 @@ export default {
                   .reduce((a: number, b: number) => a + b)
               }
 
-              frame.subtitle = `${(comments.total_cnt !== threadCounts &&
-                `쓰레드 ${threadCounts}개, 총 댓글`) ||
-                ''} ${comments.total_cnt}개`
+              frame.subtitle = `${
+                (comments.total_cnt !== threadCounts &&
+                  `쓰레드 ${threadCounts}개, 총 댓글`) ||
+                ''
+              } ${comments.total_cnt}개`
 
               frame.data.comments = comments
               frame.data.load = false
             })
             .catch((e: Error) => {
-              frame.subtitle = ``
+              frame.subtitle = ''
 
               frame.error = {
                 title: '댓글',
@@ -1475,15 +1485,15 @@ export default {
             return
           }
 
-          let requireCapCode = postFetchedData.requireCommentCaptcha
+          const requireCapCode = postFetchedData.requireCommentCaptcha
 
           let codeSrc = ''
           if (requireCapCode) {
             codeSrc = await request.captcha(preData, 'comment')
           }
 
-          let req = async (captcha?: string) => {
-            let res = await submitComment(
+          const req = async (captcha?: string) => {
+            const res = await submitComment(
               postData,
               user,
               postDom,
@@ -1516,7 +1526,7 @@ export default {
       })
     }
 
-    let previewFrame = (
+    const previewFrame = (
       ev: MouseEvent | null,
       prd?: GalleryPreData,
       historySkip?: boolean
@@ -1552,18 +1562,18 @@ export default {
         this.memory.urlStore = location.href
       }
 
-      let controller = new AbortController()
+      const controller = new AbortController()
       this.memory.signal = controller.signal
 
       let appStore: any
       let groupStore: HTMLElement
 
-      let detector = new ScrollDetection()
+      const detector = new ScrollDetection()
       let scrolledCount = 0
 
       detector.listen('scroll', (ev: WheelEvent) => {
-        let scrolledTop = groupStore.scrollTop === 0
-        let scrolledToBottom =
+        const scrolledTop = groupStore.scrollTop === 0
+        const scrolledToBottom =
           groupStore.scrollHeight - groupStore.scrollTop ===
           groupStore.clientHeight
 
@@ -1657,17 +1667,17 @@ export default {
       frame.app.$on('close', () => {
         controller.abort()
 
-        let blockPopup = document.querySelector('.refresher-block-popup')
+        const blockPopup = document.querySelector('.refresher-block-popup')
         if (blockPopup) {
           blockPopup.parentElement?.removeChild(blockPopup)
         }
 
-        let captchaPopup = document.querySelector('.refresher-captcha-popup')
+        const captchaPopup = document.querySelector('.refresher-captcha-popup')
         if (captchaPopup) {
           captchaPopup.parentElement?.removeChild(captchaPopup)
         }
 
-        let adminPanel = document.getElementById('refresher-management-panel')
+        const adminPanel = document.getElementById('refresher-management-panel')
         if (adminPanel) {
           adminPanel.parentElement?.removeChild(adminPanel)
         }
@@ -1721,15 +1731,18 @@ export default {
       }
     }
 
-    let newPostWithData = (preData: GalleryPreData, historySkip?: boolean) => {
-      let firstApp = frame.app.first()
-      let secondApp = frame.app.second()
+    const newPostWithData = (
+      preData: GalleryPreData,
+      historySkip?: boolean
+    ) => {
+      const firstApp = frame.app.first()
+      const secondApp = frame.app.second()
 
       if (firstApp.data.load) {
         return
       }
 
-      let params = new URLSearchParams(preData.link)
+      const params = new URLSearchParams(preData.link)
       params.set('no', preData.id)
       preData.link = unescape(params.toString())
 
@@ -1753,7 +1766,7 @@ export default {
       }
     }
 
-    let handleMousePress = (ev: MouseEvent) => {
+    const handleMousePress = (ev: MouseEvent) => {
       if (ev.button != 2) {
         return ev
       }
@@ -1773,7 +1786,7 @@ export default {
       }
     }
 
-    let addHandler = (e: HTMLElement) => {
+    const addHandler = (e: HTMLElement) => {
       e.addEventListener('mouseup', handleMousePress)
       e.addEventListener('mousedown', handleMousePress)
       e.addEventListener(

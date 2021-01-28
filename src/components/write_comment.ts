@@ -67,19 +67,19 @@ export default {
     }
   },
   mounted () {
-    let gallogName = document.querySelector(
+    const gallogName = document.querySelector(
       '#login_box .user_info .nickname em'
     ) as HTMLElement
 
-    let fixedName = gallogName && gallogName.innerHTML
+    const fixedName = gallogName && gallogName.innerHTML
     if (fixedName) {
       this.fixedUser = true
 
-      let gallogIcon = document.querySelector(
+      const gallogIcon = document.querySelector(
         '#login_box .user_info .writer_nikcon img'
       ) as HTMLImageElement
 
-      let id = gallogIcon
+      const id = gallogIcon
         .getAttribute('onclick')!
         .replace(/window\.open\(\'\/\/gallog\.dcinside\.com\//g, '')
         .replace(/\'\)\;/g, '')
@@ -97,7 +97,7 @@ export default {
       }
 
       if (type === 'pw' && (!value || value.length < 2)) {
-        let random = Math.random()
+        const random = Math.random()
           .toString(36)
           .substring(5)
 
@@ -127,7 +127,7 @@ export default {
       }
 
       if (this.func) {
-        let result = await this.func(
+        const result = await this.func(
           'text',
           this.text,
           this.fixedUser

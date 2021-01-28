@@ -67,11 +67,11 @@ export class User {
       return
     }
 
-    let nick = dom.dataset.nick || ''
-    let uid = dom.dataset.uid || ''
-    let ip = dom.dataset.ip || ''
+    const nick = dom.dataset.nick || ''
+    const uid = dom.dataset.uid || ''
+    const ip = dom.dataset.ip || ''
 
-    let icon =
+    const icon =
       uid !== null
         ? (
             (dom.querySelector('a.writer_nikcon img')! as HTMLImageElement) ||

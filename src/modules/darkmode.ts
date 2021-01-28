@@ -4,7 +4,7 @@ import * as DOM from '../utils/dom'
 const contentColorFix = (el: HTMLElement) => {
   if (!el) return
 
-  let qSelector = el.querySelector(
+  const qSelector = el.querySelector(
     '.refresher-frame:first-child .refresher-preview-contents'
   )! as HTMLElement
 
@@ -22,18 +22,18 @@ const contentColorFix = (el: HTMLElement) => {
 }
 
 const colorCorrection = (elem: HTMLElement) => {
-  let fontAttr = elem.hasAttribute('color')
+  const fontAttr = elem.hasAttribute('color')
 
-  let textColor = Color.parse(
+  const textColor = Color.parse(
     fontAttr ? elem.getAttribute('color') : elem.style.color
   )
 
-  let contrast = Color.contrast(textColor, [41, 41, 41])
+  const contrast = Color.contrast(textColor, [41, 41, 41])
 
   if (contrast < 3) {
-    let trans = Color.RGBtoHSL(textColor[0], textColor[1], textColor[2])
+    const trans = Color.RGBtoHSL(textColor[0], textColor[1], textColor[2])
     trans[2] = Color.inverseColor(trans[2])
-    let rollback = Color.HSLtoRGB(trans[0], trans[1], trans[2])
+    const rollback = Color.HSLtoRGB(trans[0], trans[1], trans[2])
 
     if (fontAttr) {
       elem.setAttribute(

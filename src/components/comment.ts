@@ -51,11 +51,11 @@ export default {
       return
     }
 
-    let gallogImageElement = document.querySelector(
+    const gallogImageElement = document.querySelector(
       '#login_box .user_info .writer_nikcon > img'
     ) as HTMLImageElement
 
-    let click = gallogImageElement && gallogImageElement.getAttribute('onclick')
+    const click = gallogImageElement && gallogImageElement.getAttribute('onclick')
 
     if (click) {
       this.currentId = click
@@ -86,7 +86,7 @@ export default {
       if (!this.comment.vr_player) {
         return null
       }
-      let memo = this.comment.memo.split('@^dc^@')
+      const memo = this.comment.memo.split('@^dc^@')
 
       return {
         iframe: memo[0].indexOf('iframe') > -1,
@@ -106,13 +106,13 @@ export default {
     },
 
     extractID (str: string) {
-      let match = str.match(/gallog\.dcinside.com\/.+\'/g)
+      const match = str.match(/gallog\.dcinside.com\/.+\'/g)
       return match ? match[0].replace(/gallog\.dcinside.com\/|\'/g, '') : null
     },
 
     checkReReply (): boolean {
-      let content = this.comment.memo
-      let depth = this.comment.depth
+      const content = this.comment.memo
+      const depth = this.comment.depth
 
       if (depth < 1) {
         return false

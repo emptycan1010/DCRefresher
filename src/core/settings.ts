@@ -2,7 +2,7 @@ import * as store from '../utils/store'
 import { eventBus } from './eventbus'
 import { browser } from 'webextension-polyfill-ts'
 
-let settings_store: { [index: string]: any } = {}
+const settings_store: { [index: string]: any } = {}
 
 const runtime = (chrome && chrome.runtime) || (browser && browser.runtime)
 
@@ -11,7 +11,7 @@ export const set = async (module: string, key: string, value: any) => {
 
   settings_store[module][key].value = value
 
-  let s = await store.set(`${module}.${key}`, value)
+  const s = await store.set(`${module}.${key}`, value)
 
   if (runtime) {
     runtime.sendMessage(

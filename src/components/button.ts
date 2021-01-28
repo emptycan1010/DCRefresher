@@ -1,3 +1,12 @@
+interface ButtonProps {
+  click: Function
+  error: number
+}
+
+interface ButtonData {
+  error: number
+}
+
 export default {
   template: `
     <div class="refresher-preview-button" v-on:click="safeClick">
@@ -19,18 +28,18 @@ export default {
       required: false
     }
   },
-  data () {
+  data (): ButtonData {
     return {
-      error: null
+      error: 0
     }
   },
   methods: {
-    getURL (u) {
+    getURL (u: string): string {
       return !chrome || !chrome.extension ? u : chrome.extension.getURL(u)
     },
 
-    async safeClick () {
-      let result = this.click && (await this.click())
+    async safeClick (this: ButtonProps): Promise<unknown> {
+      const result = this.click && (await this.click())
 
       if (!result) {
         this.error = Math.random()

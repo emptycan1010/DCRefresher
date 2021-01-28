@@ -13,7 +13,7 @@ import { browser } from 'webextension-polyfill-ts'
 import * as settings from './settings'
 import * as block from './block'
 
-let UTILS: { [index: string]: object } = {
+const UTILS: { [index: string]: Record<string, unknown> } = {
   filter,
   Frame,
   eventBus,
@@ -23,15 +23,15 @@ let UTILS: { [index: string]: object } = {
   dom
 }
 
-let module_store: { [index: string]: any } = {}
+const module_store: { [index: string]: any } = {}
 
 const runtime = browser && browser.runtime
 
 const runModule = (mod: RefresherModule) => {
-  let plugins = []
+  const plugins = []
 
   if (mod.require && mod.require.length) {
-    let len = mod.require.length
+    const len = mod.require.length
     for (let mi = 0; mi < len; mi++) {
       plugins.push(UTILS[mod.require[mi]])
     }
@@ -44,10 +44,10 @@ const runModule = (mod: RefresherModule) => {
 
 const revokeModule = (mod: RefresherModule) => {
   if (mod.revoke) {
-    let plugins = []
+    const plugins = []
 
     if (mod.require && mod.require.length) {
-      let len = mod.require.length
+      const len = mod.require.length
       for (let mi = 0; mi < len; mi++) {
         plugins.push(UTILS[mod.require[mi]])
       }
@@ -77,13 +77,13 @@ export const modules = {
     }),
 
   register: async (mod: RefresherModule) => {
-    let start = performance.now()
+    const start = performance.now()
 
     if (typeof module_store[mod.name] !== 'undefined') {
       throw new Error(`${mod.name} is already registered.`)
     }
 
-    let enable = await store.get(`${mod.name}.enable`)
+    const enable = await store.get(`${mod.name}.enable`)
     mod.enable = enable
 
     if (typeof enable === 'undefined' || enable === null) {
@@ -103,7 +103,7 @@ export const modules = {
 
     module_store[mod.name] = mod
 
-    let stringify = JSON.stringify({
+    const stringify = JSON.stringify({
       module_store,
       settings_store: settings.dump()
     })
@@ -167,11 +167,11 @@ eventBus.on(
       module_store[module].update &&
       typeof module_store[module].update[key] === 'function'
     ) {
-      let utils: any[] = []
+      const utils: any[] = []
 
       if (module_store[module].require.length) {
-        for (var i = 0; i < module_store[module].require.length; i++) {
-          let name = module_store[module].require[i]
+        for (let i = 0; i < module_store[module].require.length; i++) {
+          const name = module_store[module].require[i]
 
           if (UTILS[name]) {
             utils.push(UTILS[name])
