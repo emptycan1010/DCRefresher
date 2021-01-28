@@ -59,15 +59,11 @@ export default {
         ) {
           let post = elem.parentElement
           if (post && post.className.indexOf('ub-content') > -1) {
-            if (post.parentElement) {
-              post.parentElement.removeChild(post)
-            }
+            post.style.display = 'none'
           } else {
             let content = dom.findNeighbor(post, '.ub-content', 3)
 
-            if (content?.parentElement) {
-              content.parentElement.removeChild(content)
-            }
+            content!.style.display = 'none'
           }
         }
       },

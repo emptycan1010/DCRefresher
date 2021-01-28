@@ -124,13 +124,8 @@ export default {
         this.memory!.uuid = filter.add(
           `.gall_list .us-post b`,
           (elem: HTMLElement) => {
-            if (
-              elem.parentElement!.parentElement!.parentElement! &&
-              elem.parentElement!.parentElement!
-            ) {
-              elem.parentElement!.parentElement!.parentElement!.removeChild(
-                elem.parentElement!.parentElement!
-              )
+            if (elem.parentElement!.parentElement!) {
+              elem.parentElement!.parentElement.style.display = 'none'
             }
           },
           {
