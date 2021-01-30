@@ -13,30 +13,34 @@ interface FrameStackOption {
   background?: boolean
   stack?: boolean
   groupOnce?: boolean
-  onScroll?: Function
+  onScroll?: (
+    ev: WheelEvent,
+    app: RefresherFrameAppVue,
+    group: HTMLElement
+  ) => void
   blur?: boolean
 }
 
 class InternalFrame implements RefresherFrame {
   title: string
   subtitle: string
-  comments: object
-  functions: { [index: string]: Function }
+  comments: dcinsideComments | Record<string, unknown>
+  functions: {
+    [index: string]: (...args: unknown[]) => boolean | Promise<boolean>
+  }
 
-  class: string
   options: FrameOption
-  app: Vue
-  data: { [index: string]: any }
+  app: RefresherFrameAppVue
+  data: { [index: string]: unknown }
 
   contents: string
   collapse?: boolean
-  error: object | boolean
-  upvotes: any
-  downvotes: any
-  buttonError: any
+  error: Error | boolean
+  upvotes: string | null
+  downvotes: string | null
+  buttonError: unknown
 
-  constructor (cls: string, options: FrameOption, app: Vue) {
-    this.class = cls
+  constructor (options: FrameOption, app: RefresherFrameAppVue) {
     this.options = options
 
     this.title = ''
@@ -70,8 +74,8 @@ class InternalFrame implements RefresherFrame {
 
 export default class {
   outer: HTMLElement
-  frame: any[]
-  app: Vue
+  frame: RefresherFrame[]
+  app: RefresherFrameAppVue
 
   constructor (childs: Array<FrameOption>, option: FrameStackOption) {
     if (!document || !document.createElement) {
@@ -89,7 +93,7 @@ export default class {
     }
 
     this.outer = document.createElement('refresher-frame-outer')
-    document.querySelector('body')!.appendChild(this.outer)
+    document.body.appendChild(this.outer)
 
     this.frame = []
     this.app = new Vue({
@@ -131,13 +135,13 @@ export default class {
         outerClick () {
           this.$emit('close')
           this.fadeOut()
-          document.querySelector('body')!.style.overflow = 'auto'
+          document.body.style.overflow = 'auto'
 
           setTimeout(() => {
-            document.querySelector('body')!.removeChild(this.$el)
+            document.body.removeChild(this.$el)
           }, 300)
 
-          this.closed = true
+          this.$data.closed = true
         },
 
         close () {
@@ -145,18 +149,18 @@ export default class {
         },
 
         fadeIn () {
-          this.fade = true
-          this.closed = false
+          this.$data.fade = true
+          this.$data.closed = false
         },
 
         fadeOut () {
-          this.fade = false
+          this.$data.fade = false
         }
       }
     })
 
     for (let i = 0; i < childs.length; i++) {
-      this.app.frames.push(new InternalFrame(this.class, childs[i], this.app))
+      this.app.frames.push(new InternalFrame(childs[i], this.app))
     }
 
     const keyupFunction = (ev: KeyboardEvent) => {
@@ -168,7 +172,7 @@ export default class {
     }
     document.addEventListener('keyup', keyupFunction)
 
-    document.querySelector('body')!.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
 
     if (option && option.onScroll) {
       const refresherGroup = this.app.$el.querySelector('.refresher-group')
@@ -179,7 +183,7 @@ export default class {
 
       refresherGroup.addEventListener('wheel', ev => {
         if (option.onScroll) {
-          option.onScroll(ev, this.app, refresherGroup)
+          option.onScroll(ev as WheelEvent, this.app, refresherGroup as HTMLElement)
         }
       })
     }

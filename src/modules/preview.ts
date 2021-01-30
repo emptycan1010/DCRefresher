@@ -1,5 +1,4 @@
-import { User } from '../structs/user'
-import { PostInfo, GalleryPreData } from '../structs/post'
+import { User } from '../utils/user'
 import { findNeighbor } from '../utils/dom'
 import * as http from '../utils/http'
 
@@ -8,7 +7,38 @@ import * as Toast from '../components/toast'
 import { ScrollDetection } from '../utils/scrollDetection'
 import { get_cookie, setCookieTmp } from '../utils/webStorage'
 import { submitComment } from '../utils/comment'
+import logger from '../utils/logger'
 
+class PostInfo implements PostInfo {
+  id: string
+  header?: string
+  title?: string
+  date?: string
+  expire?: string
+  user?: User
+  views?: string
+  upvotes?: string
+  downvotes?: string
+  contents?: string
+  commentId?: string
+  commentNo?: string
+  isNotice?: boolean
+  requireCaptcha?: boolean
+  requireCommentCaptcha?: boolean
+  disabledDownvote?: boolean
+  dom?: Document
+
+  constructor (id: string, data: { [index: string]: unknown }) {
+    this.id = id
+
+    const keys = Object.keys(data)
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]
+
+      this[key] = data[key]
+    }
+  }
+}
 interface GalleryHTTPRequestArguments {
   gallery: string
   id: string
@@ -17,8 +47,8 @@ interface GalleryHTTPRequestArguments {
   link?: string
 }
 
-const ISSUE_ZOOM_ID = /\$\(document\)\.data\('comment_id'\,\s\'.+'\);/g
-const ISSUE_ZOOM_NO = /\$\(document\)\.data\('comment_no'\,\s\'.+'\);/g
+const ISSUE_ZOOM_ID = /\$\(document\)\.data\('comment_id',\s'.+'\);/g
+const ISSUE_ZOOM_NO = /\$\(document\)\.data\('comment_no',\s'.+'\);/g
 
 const QUOTES = /(["'])(?:(?=(\\?))\2.)*?\1/g
 
@@ -26,11 +56,402 @@ const getURL = (u: string) => {
   return !chrome || !chrome.extension ? u : chrome.extension.getURL(u)
 }
 
-const KEY_COUNTS: { [index: string]: any } = {}
-let adminKeyPress: any = null
+const parse = (id: string, body: string) => {
+  const dom = new DOMParser().parseFromString(body, 'text/html')
+
+  let header = dom.querySelector('.view_content_wrap span.title_headtext')
+    ?.innerHTML
+
+  if (header) {
+    header = header.replace(/(\[|\])/g, '')
+  }
+
+  const title = dom.querySelector('.view_content_wrap span.title_subject')
+    ?.innerHTML
+
+  const date = dom.querySelector('.view_content_wrap div.fl > span.gall_date')
+    ?.innerHTML
+
+  let expire = dom.querySelector(
+    '.view_content_wrap div.fl > span.mini_autodeltime > div.pop_tipbox > div'
+  )?.innerHTML
+
+  if (expire) {
+    expire = expire.replace(/\s자동\s삭제/, '')
+  }
+
+  const views = dom
+    .querySelector('.view_content_wrap div.fr > span.gall_count')
+    ?.innerHTML.replace(/조회\s/, '')
+  const upvotes = dom
+    .querySelector('.view_content_wrap div.fr > span.gall_reply_num')
+    ?.innerHTML.replace(/추천\s/, '')
+
+  const downvotes = dom.querySelector('div.btn_recommend_box.clear .down_num')
+    ?.innerHTML
+
+  const content_query = dom.querySelector(
+    '.view_content_wrap > div > div.inner.clear > div.writing_view_box'
+  )
+
+  const writeDiv = content_query?.querySelector('.write_div') as HTMLElement
+  if (writeDiv && writeDiv.style.width) {
+    const width = writeDiv.style.width
+    writeDiv.style.width = 'unset'
+    writeDiv.style.maxWidth = width
+    writeDiv.style.overflow = ''
+  }
+  const contents = content_query?.innerHTML
+
+  const zoomID = body.match(ISSUE_ZOOM_ID)
+  const zoomNO = body.match(ISSUE_ZOOM_NO)
+
+  let commentId = ''
+  let commentNo = ''
+
+  if (zoomID && zoomID[0]) {
+    commentId = (zoomID[0].match(QUOTES) as string[])[1].replace(/'/g, '')
+  }
+
+  if (zoomNO && zoomNO[0]) {
+    commentNo = (zoomNO[0].match(QUOTES) as string[])[1].replace(/'/g, '')
+  }
+
+  const noticeElement = dom.querySelector(
+    '.user_control .option_box li:first-child'
+  )
+  const isNotice = noticeElement && noticeElement.innerHTML !== '공지 등록'
+
+  const requireCaptcha = dom.querySelector('.recommend_kapcode') !== null
+  const requireCommentCaptcha =
+    dom.querySelector('.cmt_write_box input[name="comment_code"]') !== null
+
+  const disabledDownvote = dom.querySelector('.icon_recom_down') === null
+
+  return new PostInfo(id, {
+    header,
+    title,
+    date,
+    expire,
+    user: new User('', '', '', '').import(
+      dom.querySelector(
+        'div.view_content_wrap > header > div > div.gall_writer'
+      ) || null
+    ),
+    views,
+    upvotes,
+    downvotes,
+    contents,
+    commentId,
+    commentNo,
+    isNotice,
+    disabledDownvote,
+    requireCaptcha,
+    requireCommentCaptcha,
+    dom
+  })
+}
+
+const request = {
+  async vote (
+    gall_id: string,
+    post_id: string,
+    type: string,
+    code: string | null,
+    link: string
+  ) {
+    setCookieTmp(
+      gall_id + post_id + '_Firstcheck' + (!type ? '_down' : ''),
+      'Y',
+      3,
+      'dcinside.com'
+    )
+
+    return http
+      .make(http.urls.vote, {
+        method: 'POST',
+        headers: {
+          Origin: 'https://gall.dcinside.com',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        cache: 'no-store',
+        referrer: link,
+        body: `ci_t=${get_cookie('ci_c')}&id=${gall_id}&no=${post_id}&mode=${
+          type ? 'U' : 'D'
+        }&code_recommend=${code}&_GALLTYPE_=${http.galleryTypeName(
+          link
+        )}&link_id=${gall_id}`
+      })
+      .then((v: string) => {
+        const res = v.split('||')
+
+        return {
+          result: res[0],
+          counts: res[1],
+          fixedCounts: res[2]
+        }
+      })
+  },
+
+  post (
+    link: string,
+    gallery: string,
+    id: string,
+    signal: AbortSignal,
+    noCache: boolean
+  ) {
+    return http
+      .make(
+        `${http.urls.base +
+          http.galleryType(link, '/') +
+          http.urls.view +
+          gallery}&no=${id}`,
+        { signal, cache: noCache ? 'no-cache' : 'default' }
+      )
+      .then(response => parse(id, response))
+  },
+
+  /**
+   * 디시인사이드 서버에 댓글을 요청합니다.
+   * @param args
+   * @param signal
+   */
+  async comments (args: GalleryHTTPRequestArguments, signal: AbortSignal) {
+    if (!args.link) {
+      throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
+    }
+
+    const galleryType = http.galleryType(args.link, '/')
+
+    const response = await http.make(http.urls.comments, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json, text/javascript, */*; q=0.01',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      cache: 'no-store',
+      referrer: `https://gall.dcinside.com/${galleryType}board/view/?id=${args.gallery}&no=${args.id}`,
+      body:
+        `id=${args.gallery}&no=${Number(args.id)}&cmt_id=${args.commentId ||
+          args.gallery}&cmt_no=${Number(args.commentNo || args.id)}&e_s_n_o=${
+          (document.getElementById('e_s_n_o') as HTMLInputElement).value
+        }&comment_page=1&sort=&_GALLTYPE_=` + http.galleryTypeName(args.link),
+      signal
+    })
+
+    return JSON.parse(response)
+  },
+  async delete (args: GalleryHTTPRequestArguments) {
+    if (!args.link) {
+      throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
+    }
+
+    const galleryType = http.galleryType(args.link, '/')
+
+    const response = await http.make(
+      galleryType === 'mini/'
+        ? http.urls.manage.deleteMini
+        : http.urls.manage.delete,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json, text/javascript, */*; q=0.01',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        cache: 'no-store',
+        referrer: `https://gall.dcinside.com/${galleryType}board/lists/?id=${args.gallery}`,
+        body:
+          `ci_t=${get_cookie('ci_c')}&id=${args.gallery}&nos[]=${Number(
+            args.id
+          )}&_GALLTYPE_=` + http.galleryTypeName(args.link)
+      }
+    )
+
+    let result
+
+    try {
+      result = JSON.parse(response)
+    } catch (e) {
+      result = response
+    }
+
+    return result
+  },
+
+  async block (
+    args: GalleryHTTPRequestArguments,
+    avoid_hour: number,
+    avoid_reason: number,
+    avoid_reason_txt: string,
+    del_chk: number
+  ) {
+    if (!args.link) {
+      throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
+    }
+
+    const galleryType = http.galleryType(args.link, '/')
+
+    const response = await http.make(
+      galleryType == 'mini/'
+        ? http.urls.manage.blockMini
+        : http.urls.manage.block,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json, text/javascript, */*; q=0.01',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        cache: 'no-store',
+        referrer: `https://gall.dcinside.com/${galleryType}board/lists/?id=${args.gallery}`,
+        body: `ci_t=${get_cookie('ci_c')}&id=${args.gallery}&nos[]=${Number(
+          args.id
+        )}&parent=&_GALLTYPE_=${http.galleryTypeName(
+          args.link
+        )}&avoid_hour=${avoid_hour}&avoid_reason=${avoid_reason}&avoid_reason_txt=${avoid_reason_txt}&del_chk=${del_chk}`
+      }
+    )
+
+    let result
+
+    try {
+      result = JSON.parse(response)
+    } catch (e) {
+      result = response
+    }
+
+    return result
+  },
+
+  async setNotice (args: GalleryHTTPRequestArguments, set: boolean) {
+    if (!args.link) {
+      throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
+    }
+
+    const galleryType = http.galleryType(args.link, '/')
+
+    const response = await http.make(
+      galleryType == 'mini/'
+        ? http.urls.manage.setNoticeMini
+        : http.urls.manage.setNotice,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json, text/javascript, */*; q=0.01',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        cache: 'no-store',
+        referrer: `https://gall.dcinside.com/${galleryType}board/lists/?id=${args.gallery}`,
+        body:
+          `ci_t=${get_cookie('ci_c')}&mode=${set ? 'SET' : 'REL'}&id=${
+            args.gallery
+          }&no=${Number(args.id)}&_GALLTYPE_=` + http.galleryTypeName(args.link)
+      }
+    )
+
+    let result
+
+    try {
+      result = JSON.parse(response)
+    } catch (e) {
+      result = response
+    }
+
+    return result
+  },
+
+  async setRecommend (args: GalleryHTTPRequestArguments, set: boolean) {
+    if (!args.link) {
+      throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
+    }
+
+    const galleryType = http.galleryType(args.link, '/')
+
+    const response = await http.make(
+      galleryType == 'mini/'
+        ? http.urls.manage.setRecommendMini
+        : http.urls.manage.setRecommend,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json, text/javascript, */*; q=0.01',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        cache: 'no-store',
+        referrer: `https://gall.dcinside.com/${galleryType}board/lists/?id=${args.gallery}`,
+        body:
+          `ci_t=${get_cookie('ci_c')}&mode=${set ? 'SET' : 'REL'}&id=${
+            args.gallery
+          }&nos[]=${Number(args.id)}&_GALLTYPE_=` +
+          http.galleryTypeName(args.link)
+      }
+    )
+
+    let result
+
+    try {
+      result = JSON.parse(response)
+    } catch (e) {
+      result = response
+    }
+
+    return result
+  },
+
+  async captcha (args: GalleryHTTPRequestArguments, kcaptchaType: string) {
+    if (!args.link) {
+      throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
+    }
+
+    const galleryType = http.galleryType(args.link, '/')
+    const galleryTypeName = http.galleryTypeName(args.link)
+
+    await http.make(http.urls.captcha, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json, text/javascript, */*; q=0.01',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      cache: 'no-store',
+      referrer: `https://gall.dcinside.com/${galleryType}board/lists/?id=${args.gallery}`,
+      body:
+        `ci_t=${get_cookie('ci_c')}&gall_id=${
+          args.gallery
+        }&kcaptcha_type=${kcaptchaType}&_GALLTYPE_=` + galleryTypeName
+    })
+
+    return (
+      '/kcaptcha/image/?gall_id=' +
+      args.gallery +
+      '&kcaptcha_type=' +
+      kcaptchaType +
+      '&time=' +
+      new Date().getTime() +
+      '&_GALLTYPE_=' +
+      galleryTypeName
+    )
+  }
+}
+
+const KEY_COUNTS: { [index: string]: [number, number] } = {}
+let adminKeyPress: (ev: KeyboardEvent) => void
 
 const panel = {
-  block: (callback: Function, closeCallback: Function) => {
+  block: (
+    callback: (
+      avoid_hour: number,
+      avoid_reason: number,
+      avoid_reason_txt: string,
+      del_chk: number
+    ) => void,
+    closeCallback: () => void
+  ) => {
     const element = document.createElement('div')
     element.className = 'refresher-block-popup'
 
@@ -75,7 +496,7 @@ const panel = {
     let avoid_hour = 1
     let avoid_reason = 1
 
-    element.querySelector('.close')?.addEventListener('click', _ => {
+    element.querySelector('.close')?.addEventListener('click', () => {
       closeCallback()
     })
 
@@ -83,21 +504,25 @@ const panel = {
       v.addEventListener('click', ev => {
         const selected = ev.target as HTMLInputElement
 
-        if (selected!.getAttribute('name') === 'duration') {
-          avoid_hour = Number(selected!.value)
+        if (!selected) {
+          return
         }
 
-        if (selected!.getAttribute('name') === 'reason') {
-          const value = Number(selected!.value)
+        if (selected.getAttribute('name') === 'duration') {
+          avoid_hour = Number(selected.value)
+        }
+
+        if (selected.getAttribute('name') === 'reason') {
+          const value = Number(selected.value)
 
           const blockReasonInput = document.querySelector(
             'input[name="reason_text"]'
           ) as HTMLInputElement
 
           if (!value) {
-            blockReasonInput!.style.display = 'block'
+            blockReasonInput.style.display = 'block'
           } else {
-            blockReasonInput!.style.display = 'none'
+            blockReasonInput.style.display = 'none'
           }
 
           avoid_reason = value
@@ -108,10 +533,10 @@ const panel = {
     element.querySelector('.go-block')?.addEventListener('click', () => {
       const avoid_reason_txt = (element.querySelector(
         'input[name="reason_text"]'
-      )! as HTMLInputElement).value
+      ) as HTMLInputElement).value
       const del_chk = (element.querySelector(
         'input[name="remove"]'
-      )! as HTMLInputElement).checked
+      ) as HTMLInputElement).checked
 
       callback(avoid_hour, avoid_reason, avoid_reason_txt, del_chk ? 1 : 0)
     })
@@ -242,7 +667,7 @@ const panel = {
 
     document.addEventListener('keypress', adminKeyPress)
 
-    element.querySelector('.block')?.addEventListener('click', _ => {
+    element.querySelector('.block')?.addEventListener('click', () => {
       panel.block(
         (
           avoid_hour: number,
@@ -272,13 +697,16 @@ const panel = {
         },
         () => {
           const blockPopup = document.querySelector('.refresher-block-popup')
-          blockPopup!.parentElement?.removeChild(blockPopup!)
+
+          if (blockPopup) {
+            blockPopup.parentElement?.removeChild(blockPopup)
+          }
         }
       )
     })
 
-    const pin = element.querySelector('.pin')
-    pin!.addEventListener('click', _ => {
+    const pin = element.querySelector('.pin') as HTMLElement
+    pin.addEventListener('click', () => {
       request.setNotice(preData, setAsNotice).then(response => {
         eventBus.emit('refreshRequest')
 
@@ -287,9 +715,9 @@ const panel = {
             Toast.show(response.message || response.msg, false, 3000)
 
             setAsNotice = !setAsNotice
-            pin!.querySelector('p')!.innerHTML = setAsNotice
-              ? '공지로 등록'
-              : '공지 등록 해제'
+
+            const pinP = pin.querySelector('p') as HTMLElement
+            pinP.innerHTML = setAsNotice ? '공지로 등록' : '공지 등록 해제'
           } else {
             alert(`${response.result}: ${response.message || response.msg}`)
           }
@@ -301,8 +729,8 @@ const panel = {
       })
     })
 
-    const recommend = element.querySelector('.recommend')
-    recommend!.addEventListener('click', _ => {
+    const recommend = element.querySelector('.recommend') as HTMLElement
+    recommend.addEventListener('click', () => {
       request.setRecommend(preData, setAsRecommend).then(response => {
         eventBus.emit('refreshRequest')
 
@@ -311,10 +739,16 @@ const panel = {
             Toast.show(response.message || response.msg, false, 3000)
 
             setAsRecommend = !setAsRecommend
-            recommend!.querySelector('img')!.src = setAsRecommend
-              ? upvoteImage
-              : downvoteImage
-            recommend!.querySelector('p')!.innerHTML = setAsRecommend
+
+            const recommendImg = recommend.querySelector(
+              'img'
+            ) as HTMLImageElement
+            recommendImg.src = setAsRecommend ? upvoteImage : downvoteImage
+
+            const recommendP = recommend.querySelector(
+              'p'
+            ) as HTMLParagraphElement
+            recommendP.innerHTML = setAsRecommend
               ? '개념글 등록'
               : '개념글 해제'
           } else {
@@ -333,7 +767,7 @@ const panel = {
     return element
   },
 
-  captcha (src: string, callback: Function): boolean {
+  captcha (src: string, callback: (captcha: string) => void): boolean {
     const element = document.createElement('div')
     element.className = 'refresher-captcha-popup'
 
@@ -356,7 +790,7 @@ const panel = {
 
     element.querySelector('input')?.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
-        const input = element.querySelector('input')!.value
+        const input = (element.querySelector('input') as HTMLInputElement).value
 
         callback(input)
 
@@ -364,12 +798,12 @@ const panel = {
       }
     })
 
-    element.querySelector('.close')?.addEventListener('click', _ => {
+    element.querySelector('.close')?.addEventListener('click', () => {
       element.parentElement?.removeChild(element)
     })
 
-    element.querySelector('button')?.addEventListener('click', ev => {
-      const input = element.querySelector('input')!.value
+    element.querySelector('button')?.addEventListener('click', () => {
+      const input = (element.querySelector('input') as HTMLInputElement).value
 
       callback(input)
 
@@ -384,10 +818,10 @@ const panel = {
 
 const getRelevantData = (ev: MouseEvent) => {
   const target = ev.target as HTMLElement
-  const isTR = target!.tagName === 'TR'
+  const isTR = target.tagName === 'TR'
 
   const listID = (isTR
-    ? target!.querySelector('.gall_num')
+    ? target.querySelector('.gall_num')
     : findNeighbor(target, '.gall_num', 5, null)) as HTMLElement
 
   let id = ''
@@ -401,13 +835,15 @@ const getRelevantData = (ev: MouseEvent) => {
 
   if (listID) {
     if (listID.innerText === '공지') {
-      id =
-        new URLSearchParams(
-          (isTR
-            ? document.querySelector('a')
-            : findNeighbor(target, 'a', 5, null)
-          )?.getAttribute('href')!
-        ).get('no') || ''
+      let href = ''
+
+      if (isTR) {
+        href = document.querySelector('a')?.getAttribute('href') || ''
+      } else {
+        href = findNeighbor(target, 'a', 5, null)?.getAttribute('href') || ''
+      }
+
+      id = new URLSearchParams(href).get('no') || ''
       notice = true
     } else {
       id = listID.innerText
@@ -447,15 +883,15 @@ const getRelevantData = (ev: MouseEvent) => {
 
   if (linkElement) {
     const href = linkElement.href || ''
-    const linkNumberMatch = href.match(/\&no=.+/)
-    const linkIdMatch = href.match(/\id=.+/)
+    const linkNumberMatch = href.match(/&no=.+/)
+    const linkIdMatch = href.match(/id=.+/)
 
     if (!linkNumberMatch || !linkIdMatch) {
       return
     }
 
-    id = linkNumberMatch[0].replace('&no=', '').replace(/\&.+/g, '')
-    gallery = linkIdMatch[0].replace(/id=/g, '').replace(/\&.+/g, '')
+    id = linkNumberMatch[0].replace('&no=', '').replace(/&.+/g, '')
+    gallery = linkIdMatch[0].replace(/id=/g, '').replace(/&.+/g, '')
   }
 
   if (linkElement) {
@@ -472,7 +908,7 @@ const getRelevantData = (ev: MouseEvent) => {
   }
 }
 
-const miniPreview: { [index: string]: any } = {
+const miniPreview: miniPreview = {
   element: document.createElement('div'),
   init: false,
   lastRequest: 0,
@@ -481,6 +917,7 @@ const miniPreview: { [index: string]: any } = {
   lastTimeout: 0,
   caches: {},
   shouldOutHandle: false,
+  cursorOut: false,
   create (ev: MouseEvent, use: boolean) {
     if (!use) {
       return
@@ -496,7 +933,7 @@ const miniPreview: { [index: string]: any } = {
         clearTimeout(miniPreview.lastTimeout)
       }
 
-      miniPreview.lastTimeout = setTimeout(() => {
+      miniPreview.lastTimeout = window.setTimeout(() => {
         if (!miniPreview.cursorOut && miniPreview.lastElement === ev.target) {
           miniPreview.create(ev, use)
         }
@@ -535,7 +972,11 @@ const miniPreview: { [index: string]: any } = {
       '.refresher-mini-preview-contents'
     )
 
-    new Promise<PostInfo>(async (resolve, reject) => {
+    if (!selector) {
+      return
+    }
+
+    new Promise<PostInfo>((resolve, reject) => {
       if (!preData) {
         return reject('preData is not defined.')
       }
@@ -550,26 +991,31 @@ const miniPreview: { [index: string]: any } = {
       }
 
       try {
-        const result = await request.post(
-          preData.link,
-          preData.gallery,
-          preData.id,
-          miniPreview.controller.signal,
-          false
-        )
-
-        miniPreview.caches[preData.gallery + preData.id] = result
-        resolve(result)
+        request
+          .post(
+            preData.link,
+            preData.gallery,
+            preData.id,
+            miniPreview.controller.signal,
+            false
+          )
+          .then(result => {
+            miniPreview.caches[preData.gallery + preData.id] = result
+            resolve(result)
+          })
+          .catch(e => {
+            reject(e)
+          })
       } catch (e) {
         reject(e)
       }
     })
       .then(v => {
-        selector!.innerHTML = v.contents
+        selector.innerHTML = v.contents || ''
 
         const writeDiv = selector.querySelector('.write_div')
         if (writeDiv) {
-          writeDiv.setAttribute('style', null)
+          writeDiv.setAttribute('style', '')
         }
       })
       .catch(e => {
@@ -578,8 +1024,8 @@ const miniPreview: { [index: string]: any } = {
             ? ''
             : '게시글을 새로 가져올 수 없습니다: ' + e.message
       })
-
-    miniPreview.element.querySelector('h3')!.innerHTML = preData.title
+    ;(miniPreview.element.querySelector('h3') as HTMLHeadingElement).innerHTML =
+      preData.title
   },
 
   move (ev: MouseEvent, use: boolean) {
@@ -618,395 +1064,6 @@ const miniPreview: { [index: string]: any } = {
   }
 }
 
-const request = {
-  async vote (
-    gall_id: string,
-    post_id: string,
-    type: string,
-    code: string | null,
-    link: string
-  ) {
-    setCookieTmp(
-      gall_id + post_id + '_Firstcheck' + (!type ? '_down' : ''),
-      'Y',
-      3,
-      'dcinside.com'
-    )
-
-    return http
-      .make(http.urls.vote, {
-        method: 'POST',
-        'Sec-Fetch-Site': 'same-origin',
-        headers: {
-          Origin: 'https://gall.dcinside.com',
-          'X-Requested-With': 'XMLHttpRequest',
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-        },
-        cache: 'no-store',
-        referrer: link,
-        body: `ci_t=${get_cookie('ci_c')}&id=${gall_id}&no=${post_id}&mode=${
-          type ? 'U' : 'D'
-        }&code_recommend=${code}&_GALLTYPE_=${http.galleryTypeName(
-          link
-        )}&link_id=${gall_id}`
-      })
-      .then((v: string) => {
-        const res = v.split('||')
-
-        return {
-          result: res[0],
-          counts: res[1],
-          fixedCounts: res[2]
-        }
-      })
-  },
-
-  post (
-    link: string,
-    gallery: string,
-    id: string,
-    signal: AbortSignal,
-    noCache: boolean
-  ) {
-    return http
-      .make(
-        `${
-          http.urls.base +
-          http.galleryType(link, '/') +
-          http.urls.view +
-          gallery
-        }&no=${id}`,
-        { signal, cache: noCache ? 'no-cache' : 'default' }
-      )
-      .then(response => parse(id, response))
-  },
-
-  /**
-   * 디시인사이드 서버에 댓글을 요청합니다.
-   * @param args
-   * @param signal
-   */
-  async comments (args: GalleryHTTPRequestArguments, signal: AbortSignal) {
-    if (!args.link) {
-      throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
-    }
-
-    const galleryType = http.galleryType(args.link, '/')
-
-    const response = await http.make(http.urls.comments, {
-      method: 'POST',
-      dataType: 'json',
-      headers: {
-        Accept: 'application/json, text/javascript, */*; q=0.01',
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      cache: 'no-store',
-      referrer: `https://gall.dcinside.com/${galleryType}board/view/?id=${args.gallery}&no=${args.id}`,
-      body:
-        `id=${args.gallery}&no=${Number(args.id)}&cmt_id=${
-          args.commentId || args.gallery
-        }&cmt_no=${Number(args.commentNo || args.id)}&e_s_n_o=${
-          (document.getElementById('e_s_n_o')! as HTMLInputElement).value
-        }&comment_page=1&sort=&_GALLTYPE_=` + http.galleryTypeName(args.link),
-      signal
-    })
-
-    return JSON.parse(response)
-  },
-  async delete (args: GalleryHTTPRequestArguments) {
-    if (!args.link) {
-      throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
-    }
-
-    const galleryType = http.galleryType(args.link, '/')
-
-    const response = await http.make(
-      galleryType === 'mini/'
-        ? http.urls.manage.deleteMini
-        : http.urls.manage.delete,
-      {
-        method: 'POST',
-        dataType: 'json',
-        headers: {
-          Accept: 'application/json, text/javascript, */*; q=0.01',
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        cache: 'no-store',
-        referrer: `https://gall.dcinside.com/${galleryType}board/lists/?id=${args.gallery}`,
-        body:
-          `ci_t=${get_cookie('ci_c')}&id=${args.gallery}&nos[]=${Number(
-            args.id
-          )}&_GALLTYPE_=` + http.galleryTypeName(args.link)
-      }
-    )
-
-    let result
-
-    try {
-      result = JSON.parse(response)
-    } catch (e) {
-      result = response
-    }
-
-    return result
-  },
-
-  async block (
-    args: GalleryHTTPRequestArguments,
-    avoid_hour: number,
-    avoid_reason: number,
-    avoid_reason_txt: string,
-    del_chk: number
-  ) {
-    if (!args.link) {
-      throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
-    }
-
-    const galleryType = http.galleryType(args.link, '/')
-
-    const response = await http.make(
-      galleryType == 'mini/'
-        ? http.urls.manage.blockMini
-        : http.urls.manage.block,
-      {
-        method: 'POST',
-        dataType: 'json',
-        headers: {
-          Accept: 'application/json, text/javascript, */*; q=0.01',
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        cache: 'no-store',
-        referrer: `https://gall.dcinside.com/${galleryType}board/lists/?id=${args.gallery}`,
-        body: `ci_t=${get_cookie('ci_c')}&id=${args.gallery}&nos[]=${Number(
-          args.id
-        )}&parent=&_GALLTYPE_=${http.galleryTypeName(
-          args.link
-        )}&avoid_hour=${avoid_hour}&avoid_reason=${avoid_reason}&avoid_reason_txt=${avoid_reason_txt}&del_chk=${del_chk}`
-      }
-    )
-
-    let result
-
-    try {
-      result = JSON.parse(response)
-    } catch (e) {
-      result = response
-    }
-
-    return result
-  },
-
-  async setNotice (args: GalleryHTTPRequestArguments, set: boolean) {
-    if (!args.link) {
-      throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
-    }
-
-    const galleryType = http.galleryType(args.link, '/')
-
-    const response = await http.make(
-      galleryType == 'mini/'
-        ? http.urls.manage.setNoticeMini
-        : http.urls.manage.setNotice,
-      {
-        method: 'POST',
-        dataType: 'json',
-        headers: {
-          Accept: 'application/json, text/javascript, */*; q=0.01',
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        cache: 'no-store',
-        referrer: `https://gall.dcinside.com/${galleryType}board/lists/?id=${args.gallery}`,
-        body:
-          `ci_t=${get_cookie('ci_c')}&mode=${set ? 'SET' : 'REL'}&id=${
-            args.gallery
-          }&no=${Number(args.id)}&_GALLTYPE_=` + http.galleryTypeName(args.link)
-      }
-    )
-
-    let result
-
-    try {
-      result = JSON.parse(response)
-    } catch (e) {
-      result = response
-    }
-
-    return result
-  },
-
-  async setRecommend (args: GalleryHTTPRequestArguments, set: boolean) {
-    if (!args.link) {
-      throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
-    }
-
-    const galleryType = http.galleryType(args.link, '/')
-
-    const response = await http.make(
-      galleryType == 'mini/'
-        ? http.urls.manage.setRecommendMini
-        : http.urls.manage.setRecommend,
-      {
-        method: 'POST',
-        dataType: 'json',
-        headers: {
-          Accept: 'application/json, text/javascript, */*; q=0.01',
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        cache: 'no-store',
-        referrer: `https://gall.dcinside.com/${galleryType}board/lists/?id=${args.gallery}`,
-        body:
-          `ci_t=${get_cookie('ci_c')}&mode=${set ? 'SET' : 'REL'}&id=${
-            args.gallery
-          }&nos[]=${Number(args.id)}&_GALLTYPE_=` +
-          http.galleryTypeName(args.link)
-      }
-    )
-
-    let result
-
-    try {
-      result = JSON.parse(response)
-    } catch (e) {
-      result = response
-    }
-
-    return result
-  },
-
-  async captcha (args: GalleryHTTPRequestArguments, kcaptchaType: string) {
-    if (!args.link) {
-      throw new Error('link 값이 주어지지 않았습니다. (확장 프로그램 오류)')
-    }
-
-    const galleryType = http.galleryType(args.link, '/')
-    const galleryTypeName = http.galleryTypeName(args.link)
-
-    await http.make(http.urls.captcha, {
-      method: 'POST',
-      dataType: 'json',
-      headers: {
-        Accept: 'application/json, text/javascript, */*; q=0.01',
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      cache: 'no-store',
-      referrer: `https://gall.dcinside.com/${galleryType}board/lists/?id=${args.gallery}`,
-      body:
-        `ci_t=${get_cookie('ci_c')}&gall_id=${
-          args.gallery
-        }&kcaptcha_type=${kcaptchaType}&_GALLTYPE_=` + galleryTypeName
-    })
-
-    return (
-      '/kcaptcha/image/?gall_id=' +
-      args.gallery +
-      '&kcaptcha_type=' +
-      kcaptchaType +
-      '&time=' +
-      new Date().getTime() +
-      '&_GALLTYPE_=' +
-      galleryTypeName
-    )
-  }
-}
-
-const parse = (id: string, body: string) => {
-  const dom = new DOMParser().parseFromString(body, 'text/html')
-
-  let header = dom.querySelector('.view_content_wrap span.title_headtext')
-    ?.innerHTML
-
-  if (header) {
-    header = header.replace(/(\[|\])/g, '')
-  }
-
-  const title = dom.querySelector('.view_content_wrap span.title_subject')
-    ?.innerHTML
-
-  const date = dom.querySelector('.view_content_wrap div.fl > span.gall_date')
-    ?.innerHTML
-
-  let expire = dom.querySelector(
-    '.view_content_wrap div.fl > span.mini_autodeltime > div.pop_tipbox > div'
-  )?.innerHTML
-
-  if (expire) {
-    expire = expire.replace(/\s자동\s삭제/, '')
-  }
-
-  const views = dom
-    .querySelector('.view_content_wrap div.fr > span.gall_count')
-    ?.innerHTML.replace(/조회\s/, '')
-  const upvotes = dom
-    .querySelector('.view_content_wrap div.fr > span.gall_reply_num')
-    ?.innerHTML.replace(/추천\s/, '')
-
-  const downvotes = dom.querySelector('div.btn_recommend_box.clear .down_num')
-    ?.innerHTML
-
-  const content_query = dom.querySelector(
-    '.view_content_wrap > div > div.inner.clear > div.writing_view_box'
-  )
-
-  const writeDiv = content_query?.querySelector('.write_div') as HTMLElement
-  if (writeDiv && writeDiv.style.width) {
-    const width = writeDiv.style.width
-    writeDiv.style.width = 'unset'
-    writeDiv.style.maxWidth = width
-    writeDiv.style.overflow = ''
-  }
-  const contents = content_query?.innerHTML
-
-  const commentId = body
-    .match(ISSUE_ZOOM_ID)![0]
-    .match(QUOTES)![1]
-    .replace(/\'/g, '')
-
-  const commentNo = body
-    .match(ISSUE_ZOOM_NO)![0]
-    .match(QUOTES)![1]
-    .replace(/\'/g, '')
-
-  const noticeElement = dom.querySelector(
-    '.user_control .option_box li:first-child'
-  )
-  const isNotice = noticeElement && noticeElement.innerHTML !== '공지 등록'
-
-  const requireCaptcha = dom.querySelector('.recommend_kapcode') !== null
-  const requireCommentCaptcha =
-    dom.querySelector('.cmt_write_box input[name="comment_code"]') !== null
-
-  const disabledDownvote = dom.querySelector('.icon_recom_down') === null
-
-  return new PostInfo(id, {
-    header,
-    title,
-    date,
-    expire,
-    user: new User('', '', '', '').import(
-      dom.querySelector(
-        'div.view_content_wrap > header > div > div.gall_writer'
-      ) || null
-    ),
-    views,
-    upvotes,
-    downvotes,
-    contents,
-    commentId,
-    commentNo,
-    isNotice,
-    disabledDownvote,
-    requireCaptcha,
-    requireCommentCaptcha,
-    dom
-  })
-}
-
 let frame: RefresherFrame
 
 export default {
@@ -1035,7 +1092,7 @@ export default {
     lastPress: 0,
     uuid: null,
     uuid2: null,
-    popStateHandler: (_: PopStateEvent) => {},
+    popStateHandler: null,
     signal: null,
     historyClose: false,
     titleStore: '',
@@ -1154,7 +1211,7 @@ export default {
     Frame: RefresherFrame,
     http: RefresherHTTP,
     block: RefresherBlock
-  ) {
+  ): void {
     let postFetchedData: PostInfo
     const makeFirstFrame = (
       frame: RefresherFrame,
@@ -1258,7 +1315,7 @@ export default {
         request
           .post(
             preData.link || '',
-            preData.gallery || http.queryString('id')!,
+            preData.gallery || http.queryString('id') || '',
             preData.id,
             signal,
             this.status.noCacheHeader
@@ -1287,9 +1344,9 @@ export default {
 
             postFetchedData = obj
 
-            frame.contents = obj.contents
-            frame.upvotes = obj.upvotes
-            frame.downvotes = obj.downvotes
+            frame.contents = obj.contents || ''
+            frame.upvotes = obj.upvotes || '0'
+            frame.downvotes = obj.downvotes || '0'
 
             frame.data.disabledDownvote = obj.disabledDownvote
 
@@ -1298,7 +1355,11 @@ export default {
             }
 
             frame.data.user = obj.user
-            frame.data.date = new Date(obj.date!.replace(/\./g, '-'))
+
+            if (obj.date) {
+              frame.data.date = new Date(obj.date.replace(/\./g, '-'))
+            }
+
             frame.data.expire = obj.expire
             frame.data.buttons = true
             frame.data.views = `조회 ${obj.views}회`
@@ -1316,8 +1377,11 @@ export default {
           .catch((e: Error) => {
             frame.error = {
               title: '게시글',
-              detail: e.message || e || '알 수 없는 오류'
+              detail: e.message || e.stack || '알 수 없는 오류'
             }
+
+            logger('Error occured while loading a post.', e)
+
             frame.data.load = false
           })
       }
@@ -1327,7 +1391,9 @@ export default {
 
       frame.functions.openOriginal = () => {
         if (this.status.colorPreviewLink) location.reload()
-        else location.href = preData.link
+        else location.href = preData.link || location.href
+
+        return true
       }
     }
 
@@ -1342,9 +1408,9 @@ export default {
 
       frame.data.useWriteComment = this.status.experimentalComment
 
-      let postDom: HTMLElement
+      let postDom: Document
 
-      new Promise<GalleryPreData>((resolve, _) => {
+      new Promise<GalleryPreData>((resolve) => {
         if (preData.gallery !== 'issuezoom') {
           resolve({
             gallery: preData.gallery,
@@ -1369,13 +1435,13 @@ export default {
 
         if (postFetchedData) {
           frame.data.postUserId = postFetchedData.user?.id
-          postDom = postFetchedData.dom
+          postDom = postFetchedData.dom as Document
         } else {
           eventBus.on(
             'RefresherPostDataLoaded',
             (obj: PostInfo) => {
               frame.data.postUserId = obj.user?.id
-              postDom = obj.dom
+              postDom = obj.dom as Document
             },
             {
               once: true
@@ -1384,12 +1450,12 @@ export default {
         }
       }).then(postData => {
         if (postFetchedData) {
-          postDom = postFetchedData.dom
+          postDom = postFetchedData.dom as Document
         } else {
           eventBus.on(
             'RefresherPostDataLoaded',
             (obj: PostInfo) => {
-              postDom = obj.dom
+              postDom = obj.dom as Document
             },
             {
               once: true
@@ -1397,10 +1463,10 @@ export default {
           )
         }
 
-        frame.functions.load = () => {
+        frame.functions.load = async () => {
           frame.error = false
 
-          request
+          return request
             .comments(
               {
                 link: preData.link || location.href,
@@ -1411,7 +1477,7 @@ export default {
               },
               signal
             )
-            .then((comments: { [index: string]: any }) => {
+            .then((comments: dcinsideComments) => {
               if (!comments) {
                 frame.error = {
                   detail: 'No comments'
@@ -1422,12 +1488,12 @@ export default {
 
               if (comments.comments) {
                 comments.comments = comments.comments.filter(
-                  (v: { [index: string]: any }) => {
+                  (v: dcinsideCommentObject) => {
                     return v.nicktype !== 'COMMENT_BOY'
                   }
                 )
 
-                comments.comments.map((v: { [index: string]: any }) => {
+                comments.comments.map((v: dcinsideCommentObject) => {
                   v.user = new User(
                     v.name,
                     v.user_id,
@@ -1435,28 +1501,28 @@ export default {
                     ((new DOMParser()
                       .parseFromString(v.gallog_icon, 'text/html')
                       .querySelector('a.writer_nikcon img') ||
-                      {})! as HTMLImageElement).src
+                      {}) as HTMLImageElement).src
                   )
                 })
 
-                comments.comments = comments.comments.filter((comment: any) => {
-                  return !block.checkAll({
-                    NICK: comment.name,
-                    ID: comment.user_id,
-                    IP: comment.ip
-                  })
-                })
+                comments.comments = comments.comments.filter(
+                  (comment: dcinsideCommentObject) => {
+                    return !block.checkAll({
+                      NICK: comment.name,
+                      ID: comment.user_id || '',
+                      IP: comment.ip || ''
+                    })
+                  }
+                )
 
                 threadCounts = comments.comments
-                  .map((v: { [index: string]: any }) => Number(v.depth == 0))
+                  .map((v: dcinsideCommentObject) => Number(v.depth == 0))
                   .reduce((a: number, b: number) => a + b)
               }
 
-              frame.subtitle = `${
-                (comments.total_cnt !== threadCounts &&
-                  `쓰레드 ${threadCounts}개, 총 댓글`) ||
-                ''
-              } ${comments.total_cnt}개`
+              frame.subtitle = `${(comments.total_cnt !== threadCounts &&
+                `쓰레드 ${threadCounts}개, 총 댓글`) ||
+                ''} ${comments.total_cnt}개`
 
               frame.data.comments = comments
               frame.data.load = false
@@ -1477,12 +1543,12 @@ export default {
         frame.functions.writeComment = async (
           type: string,
           memo: string,
-          user?: any
-        ) => {
+          user?: User
+        ): Promise<boolean> => {
           // TODO : 디시콘 추가시 type 핸들링 (현재 text만)
           if (!postFetchedData) {
             Toast.show('게시글이 로딩될 때까지 잠시 기다려주세요.', true, 3000)
-            return
+            return false
           }
 
           const requireCapCode = postFetchedData.requireCommentCaptcha
@@ -1510,7 +1576,7 @@ export default {
           }
 
           if (codeSrc) {
-            return new Promise((resolve, reject) =>
+            return new Promise(resolve =>
               panel.captcha(codeSrc, async (str: string) => {
                 resolve(await req(str))
               })
@@ -1520,10 +1586,45 @@ export default {
           return req()
         }
 
-        this.memory.refreshIntervalId = setInterval(() => {
+        this.memory.refreshIntervalId = window.setInterval(() => {
           frame.functions.retry()
         }, this.status.commentRefreshInterval * 1000)
       })
+    }
+
+    const newPostWithData = (
+      preData: GalleryPreData,
+      historySkip?: boolean
+    ) => {
+      const firstApp = frame.app.first()
+      const secondApp = frame.app.second()
+
+      if (firstApp.data.load) {
+        return
+      }
+
+      const params = new URLSearchParams(preData.link)
+      params.set('no', preData.id)
+      preData.link = unescape(params.toString())
+
+      preData.title = '게시글 로딩 중...'
+      firstApp.contents = ''
+
+      makeFirstFrame(firstApp, preData, this.memory.signal, historySkip)
+      makeSecondFrame(secondApp, preData, this.memory.signal)
+
+      if (
+        this.status.toggleAdminPanel &&
+        document.querySelector('.useradmin_btnbox button') !== null
+      ) {
+        panel.admin(
+          preData,
+          frame,
+          this.status.toggleBlur,
+          eventBus,
+          this.status.useKeyPress
+        )
+      }
     }
 
     const previewFrame = (
@@ -1565,11 +1666,44 @@ export default {
       const controller = new AbortController()
       this.memory.signal = controller.signal
 
-      let appStore: any
+      let appStore: RefresherFrameAppVue
       let groupStore: HTMLElement
 
       const detector = new ScrollDetection()
       let scrolledCount = 0
+
+      frame = new Frame(
+        [
+          {
+            relative: true,
+            center: true,
+            preview: true,
+            blur: this.status.toggleBlur
+          },
+          {
+            relative: true,
+            center: true,
+            preview: true,
+            blur: this.status.toggleBlur
+          }
+        ],
+        {
+          background: true,
+          stack: true,
+          groupOnce: true,
+          onScroll: (ev: WheelEvent, app: RefresherFrameAppVue, group: HTMLElement) => {
+            if (!this.status.scrollToSkip) {
+              return
+            }
+
+            appStore = app
+            groupStore = group
+
+            detector.addMouseEvent(ev)
+          },
+          blur: this.status.toggleBackgroundBlur
+        }
+      )
 
       detector.listen('scroll', (ev: WheelEvent) => {
         const scrolledTop = groupStore.scrollTop === 0
@@ -1630,39 +1764,6 @@ export default {
           appStore.clearScrollMode()
         }
       })
-
-      frame = new Frame(
-        [
-          {
-            relative: true,
-            center: true,
-            preview: true,
-            blur: this.status.toggleBlur
-          },
-          {
-            relative: true,
-            center: true,
-            preview: true,
-            blur: this.status.toggleBlur
-          }
-        ],
-        {
-          background: true,
-          stack: true,
-          groupOnce: true,
-          onScroll: (ev: WheelEvent, app: any, group: HTMLElement) => {
-            if (!this.status.scrollToSkip) {
-              return
-            }
-
-            appStore = app
-            groupStore = group
-
-            detector.addMouseEvent(ev)
-          },
-          blur: this.status.toggleBackgroundBlur
-        }
-      )
 
       frame.app.$on('close', () => {
         controller.abort()
@@ -1731,41 +1832,6 @@ export default {
       }
     }
 
-    const newPostWithData = (
-      preData: GalleryPreData,
-      historySkip?: boolean
-    ) => {
-      const firstApp = frame.app.first()
-      const secondApp = frame.app.second()
-
-      if (firstApp.data.load) {
-        return
-      }
-
-      const params = new URLSearchParams(preData.link)
-      params.set('no', preData.id)
-      preData.link = unescape(params.toString())
-
-      preData.title = '게시글 로딩 중...'
-      firstApp.contents = ''
-
-      makeFirstFrame(firstApp, preData, this.memory.signal, historySkip)
-      makeSecondFrame(secondApp, preData, this.memory.signal)
-
-      if (
-        this.status.toggleAdminPanel &&
-        document.querySelector('.useradmin_btnbox button') !== null
-      ) {
-        panel.admin(
-          preData,
-          frame,
-          this.status.toggleBlur,
-          eventBus,
-          this.status.useKeyPress
-        )
-      }
-    }
-
     const handleMousePress = (ev: MouseEvent) => {
       if (ev.button != 2) {
         return ev
@@ -1797,13 +1863,20 @@ export default {
         e.addEventListener('contextmenu', e => {
           e.preventDefault()
 
-          let href = (e.target as any).href
+          let href = (e.target as HTMLAnchorElement).href
 
           if (!href) {
-            href = ((e.target as HTMLElement).tagName === 'TR'
-              ? document.querySelector('a')
-              : findNeighbor(e.target as HTMLElement, 'a', 5, null)
-            )?.getAttribute('href')!
+            if ((e.target as HTMLElement).tagName === 'TR') {
+              href = document.querySelector('a')?.getAttribute('href') || ''
+            } else {
+              href =
+                findNeighbor(
+                  e.target as HTMLElement,
+                  'a',
+                  5,
+                  null
+                )?.getAttribute('href') || ''
+            }
           }
 
           location.href = href
@@ -1815,7 +1888,7 @@ export default {
       e.addEventListener('mousemove', ev =>
         miniPreview.move(ev, this.status.tooltipMode)
       )
-      e.addEventListener('mouseleave', _ =>
+      e.addEventListener('mouseleave', () =>
         miniPreview.close(this.status.tooltipMode)
       )
     }
@@ -1853,7 +1926,7 @@ export default {
     window.addEventListener('popstate', this.memory.popStateHandler)
   },
 
-  revoke (filter: RefresherFilter, eventBus: RefresherEventBus) {
+  revoke (filter: RefresherFilter): void {
     if (this.memory.uuid) {
       filter.remove(this.memory.uuid, true)
     }

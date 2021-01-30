@@ -27,11 +27,15 @@ export default {
     eventBus: RefresherEventBus,
     block: RefresherBlock,
     dom: RefresherDOM
-  ) {
+  ): void {
     this.memory.uuid = filter.add(
       '.ub-writer',
       async (elem: HTMLElement) => {
-        const gallery = queryString('id')!
+        const gallery = queryString('id')
+
+        if (!gallery) {
+          return
+        }
 
         const nick = elem.dataset.nick || ''
         const uid = elem.dataset.uid || ''
@@ -42,7 +46,7 @@ export default {
         const blockIP = block.check('IP', ip, gallery)
 
         if (!elem.oncontextmenu) {
-          elem.oncontextmenu = _ => {
+          elem.oncontextmenu = () => {
             this.memory.selected = {
               nick,
               uid,
@@ -63,7 +67,9 @@ export default {
           } else {
             const content = dom.findNeighbor(post, '.ub-content', 3)
 
-            content!.style.display = 'none'
+            if (content) {
+              content.style.display = 'none'
+            }
           }
         }
       },
@@ -114,12 +120,7 @@ export default {
     })
   },
 
-  revoke (
-    filter: RefresherFilter,
-    eventBus: RefresherEventBus,
-    block: RefresherBlock,
-    dom: RefresherDOM
-  ) {
+  revoke (filter: RefresherFilter): void {
     if (this.memory.uuid) {
       filter.remove(this.memory.uuid)
     }

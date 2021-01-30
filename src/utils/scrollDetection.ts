@@ -16,7 +16,7 @@ interface ScrollSession {
 
 export class ScrollDetection {
   lastEvent: number
-  events: { [index: string]: Function[] }
+  events: { [index: string]: ((...args: unknown[]) => void)[] }
   session: ScrollSession
   mode: number
 
@@ -46,7 +46,7 @@ export class ScrollDetection {
     }
   }
 
-  emit (event: string, ...args: Record<string, unknown>[]): void {
+  emit (event: string, ...args: unknown[]): void {
     if (this.events[event]) {
       this.events[event].forEach(func => {
         func(...args)
@@ -54,7 +54,7 @@ export class ScrollDetection {
     }
   }
 
-  listen (event: string, cb: Function): void {
+  listen (event: string, cb: (...args: unknown[]) => void): void {
     if (!this.events[event]) {
       this.events[event] = []
     }

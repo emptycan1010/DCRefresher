@@ -10,10 +10,10 @@ export default {
   enable: true,
   default_enable: true,
   require: ['filter', 'ip'],
-  func (filter: RefresherFilter, ip) {
+  func (filter: RefresherFilter, ip: RefresherIP): void {
     const ipInfoAdd = (elem: HTMLElement) => {
       if (!elem || !elem.dataset.ip || elem.dataset.refresherIp) return false
-      const ip_data = ip.ISPData(elem.dataset.ip, '')
+      const ip_data = ip.ISPData(elem.dataset.ip)
 
       const text = document.createElement('span')
       text.className = 'ip refresherIP'
@@ -88,7 +88,7 @@ export default {
 
     elemAdd(document)
   },
-  revoke (filter: RefresherFilter, ip) {
+  revoke (filter: RefresherFilter): void {
     if (this.memory.always) {
       filter.remove(this.memory.always, true)
     }

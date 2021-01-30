@@ -38,9 +38,9 @@ window.addEventListener('DOMContentLoaded', () => {
         title: '',
         id: 0,
         content: '',
-        clickCb: null,
+        clickCb: () => {},
         open: false,
-        type: null,
+        type: '',
         autoClose: 0
       }
     },
@@ -49,7 +49,7 @@ window.addEventListener('DOMContentLoaded', () => {
         content: string,
         type: string,
         autoClose: boolean,
-        click?: Function
+        click?: () => void
       ) {
         this.content = content
         this.id = Math.random()
@@ -57,7 +57,7 @@ window.addEventListener('DOMContentLoaded', () => {
         this.clickCb = click
 
         if ((typeof autoClose !== 'boolean' && !autoClose) || autoClose) {
-          this.autoClose = setTimeout(
+          this.autoClose = window.setTimeout(
             this.hide,
             autoClose && typeof autoClose === 'number' ? autoClose : 5000
           )
@@ -92,8 +92,8 @@ export const show = (
   content: string,
   type: boolean,
   autoClose: number,
-  click?: Function
-) => {
+  click?: () => void
+): void => {
   if (Toast.autoClose) {
     clearTimeout(Toast.autoClose)
   }

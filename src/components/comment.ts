@@ -1,8 +1,6 @@
 import User from './user'
 import TimeStamp from './timestamp'
 import { eventBus } from '../core/eventbus'
-import { User as UserClass } from '../structs/user'
-import { PostInfo } from '../structs/post'
 
 const NRegex = /(ㄴ)(\s)?([^ ]+)/g
 
@@ -19,21 +17,6 @@ interface CommentClass extends CommentVueData, CommentVueMethods {
   comment: dcinsideCommentObject
   index: number
   postUser: string
-}
-
-interface dcinsideCommentObject {
-  no: string
-  parent: string
-  name: string
-  ip: string | null
-  user_id: string | null
-  user: UserClass
-  nicktype: string
-  memo: string
-  depth: number
-  vr_player: boolean | string
-  gallog_icon: string
-  vr_player_tag: string
 }
 
 interface VoiceDataComputed {
@@ -145,7 +128,7 @@ export default {
     },
 
     extractID (str: string): string | null {
-      const match = str.match(/gallog\.dcinside.com\/.+\'/g)
+      const match = str.match(/gallog\.dcinside.com\/.+'/g)
       return match ? match[0].replace(/gallog\.dcinside.com\/|'/g, '') : null
     },
 

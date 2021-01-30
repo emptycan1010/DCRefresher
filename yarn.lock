@@ -1567,6 +1567,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/webpack-env@npm:^1.16.0":
+  version: 1.16.0
+  resolution: "@types/webpack-env@npm:1.16.0"
+  checksum: eaf62fb65ba18737174a520a444bb7407e5a6f32581690c5a7a687e6f86e9d4ce336fd9e79989aafa19e5f390046ad54b9100cd3d70a43dcf0ab0161d30cd5bd
+  languageName: node
+  linkType: hard
+
 "@types/webpack-sources@npm:*":
   version: 2.1.0
   resolution: "@types/webpack-sources@npm:2.1.0"
@@ -1575,6 +1582,20 @@ __metadata:
     "@types/source-list-map": "*"
     source-map: ^0.7.3
   checksum: 26aba8ae682529be737eff726dcf08019460b180e9d22e80925e65240c908312096067b5547ac3dcb6d7b383a4bf0473eb68d0fd4ff483b17f3147fefce149af
+  languageName: node
+  linkType: hard
+
+"@types/webpack@npm:^4.41.26":
+  version: 4.41.26
+  resolution: "@types/webpack@npm:4.41.26"
+  dependencies:
+    "@types/anymatch": "*"
+    "@types/node": "*"
+    "@types/tapable": "*"
+    "@types/uglify-js": "*"
+    "@types/webpack-sources": "*"
+    source-map: ^0.6.0
+  checksum: c84012af1d0159e6c17b065139d8c15ffe18042445db4f9c61e2fe3aff1d4ebeb8a65af6824e991eb161334c2842c6d2b55f9d700bd7e64bf492f3dcbf1a92d1
   languageName: node
   linkType: hard
 
@@ -3900,6 +3921,8 @@ __metadata:
     "@types/chrome": ^0.0.127
     "@types/mocha": ^8.2.0
     "@types/node": ^14.14.20
+    "@types/webpack": ^4.41.26
+    "@types/webpack-env": ^1.16.0
     "@typescript-eslint/eslint-plugin": ^4.14.1
     "@typescript-eslint/parser": ^4.14.1
     "@yarnpkg/pnpify": ^2.4.0

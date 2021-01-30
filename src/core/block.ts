@@ -33,15 +33,17 @@ const BLOCK_DETECT_MODE = {
 
 const BLOCK_DETECT_MODE_KEYS = Object.keys(BLOCK_DETECT_MODE)
 
-interface RefresherBlockValue {
-  content: string
-  isRegex: boolean
-  gallery?: string
-  extra?: string
-}
-
 let BLOCK_CACHE: { [index: string]: RefresherBlockValue[] } = {}
 let BLOCK_MODE_CACHE: { [index: string]: string } = {}
+
+const SendToBackground = () => {
+  runtime.sendMessage(
+    JSON.stringify({
+      blocks_store: BLOCK_CACHE,
+      blockModes_store: BLOCK_MODE_CACHE
+    })
+  )
+}
 
 BLOCK_TYPES_KEYS.forEach(async key => {
   const keyCache = await store.get(`${BLOCK_NAMESPACE}:${key}`)
@@ -56,15 +58,6 @@ BLOCK_TYPES_KEYS.forEach(async key => {
 
   SendToBackground()
 })
-
-const SendToBackground = () => {
-  runtime.sendMessage(
-    JSON.stringify({
-      blocks_store: BLOCK_CACHE,
-      blockModes_store: BLOCK_MODE_CACHE
-    })
-  )
-}
 
 const checkValidType = (type: string) => {
   return BLOCK_TYPES_KEYS.filter(key => type === key).length > 0
@@ -267,12 +260,15 @@ export const checkAll = (
  * @param store
  * @param mode
  */
-export const setStore = (store: any, mode: any): void => {
+export const setStore = (
+  store: { [index: string]: RefresherBlockValue[] },
+  mode: { [index: string]: string }
+): void => {
   BLOCK_CACHE = store
   BLOCK_MODE_CACHE = mode
 }
 
-runtime.onMessage.addListener((msg: { [index: string]: any }) => {
+runtime.onMessage.addListener((msg: { [index: string]: unknown }) => {
   if (msg.blockSelected) {
     eventBus.emit('RefresherRequestBlock')
   } else if (msg.updateBlocks) {

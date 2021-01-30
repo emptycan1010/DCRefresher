@@ -23,7 +23,7 @@ const UTILS: { [index: string]: Record<string, unknown> } = {
   dom
 }
 
-const module_store: { [index: string]: any } = {}
+const module_store: { [index: string]: RefresherModule } = {}
 
 const runtime = browser && browser.runtime
 
@@ -64,26 +64,26 @@ const revokeModule = (mod: RefresherModule) => {
 }
 
 export const modules = {
-  lists: () => {
+  lists: (): { [index: string]: RefresherModule } => {
     return module_store
   },
-  load: (...mods: RefresherModule[]) =>
-    new Promise<void>(async (resolve, reject) => {
-      for (let i = 0; i < mods.length; i++) {
-        await modules.register(mods[i])
-      }
-
-      resolve()
+  load: (...mods: RefresherModule[]): Promise<void> =>
+    new Promise<void>(resolve => {
+      Promise.all(
+        new Array(mods.length).map(({ index }) => modules.register(mods[index]))
+      ).then(() => {
+        resolve()
+      })
     }),
 
-  register: async (mod: RefresherModule) => {
+  register: async (mod: RefresherModule): Promise<void> => {
     const start = performance.now()
 
     if (typeof module_store[mod.name] !== 'undefined') {
       throw new Error(`${mod.name} is already registered.`)
     }
 
-    const enable = await store.get(`${mod.name}.enable`)
+    const enable = (await store.get(`${mod.name}.enable`)) as boolean
     mod.enable = enable
 
     if (typeof enable === 'undefined' || enable === null) {
@@ -117,7 +117,7 @@ export const modules = {
 
     if (mod.url && !mod.url.test(location.href)) {
       log(
-        `📁 ignoring ${mod.name}. current URL is not matching with the module\'s URL value.`
+        `📁 ignoring ${mod.name}. current URL is not matching with the module's URL value.`
       )
       return
     }
@@ -133,9 +133,9 @@ export const modules = {
 }
 
 if (runtime.onMessage) {
-  runtime.onMessage.addListener((msg: { [index: string]: any }) => {
+  runtime.onMessage.addListener((msg: RefresherRuntimeMessage) => {
     if (typeof msg === 'object' && msg.updateModuleSettings) {
-      module_store[msg.name].enable = msg.value
+      module_store[msg.name].enable = msg.value as boolean
       store.set(`${msg.name}.enable`, msg.value)
 
       runtime.sendMessage(
@@ -158,7 +158,7 @@ if (runtime.onMessage) {
 
 eventBus.on(
   'RefresherUpdateSetting',
-  (module: string, key: string, value: any) => {
+  (module: string, key: string, value: unknown) => {
     if (module_store[module]) {
       module_store[module].status[key] = value
     }
@@ -167,11 +167,12 @@ eventBus.on(
       module_store[module].update &&
       typeof module_store[module].update[key] === 'function'
     ) {
-      const utils: any[] = []
+      const utils: unknown[] = []
 
-      if (module_store[module].require.length) {
-        for (let i = 0; i < module_store[module].require.length; i++) {
-          const name = module_store[module].require[i]
+      const requires = module_store[module].require as string[]
+      if (requires) {
+        for (let i = 0; i < requires.length; i++) {
+          const name = requires[i]
 
           if (UTILS[name]) {
             utils.push(UTILS[name])

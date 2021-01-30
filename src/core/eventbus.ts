@@ -1,15 +1,15 @@
 import * as strings from '../utils/string'
 
-const lists: { [index: string]: any[] } = {}
+const lists: { [index: string]: RefresherEventBusObject[] } = {}
 
-export const eventBus = {
+export const eventBus: RefresherEventBus = {
   /**
    * lists에 등록된 이벤트 콜백을 호출합니다.
    *
    * @param event 호출 할 이벤트 이름.
    * @param params 호출 할 이벤트에 넘길 인자.
    */
-  emit: (event: string, ...params: any[]) => {
+  emit: (event: string, ...params: unknown[]) => {
     if (!lists[event]) {
       return
     }
@@ -33,7 +33,7 @@ export const eventBus = {
     // TODO : 왜 이상하게 짬?
   },
 
-  emitNextTick: (event: string, ...params: any[]) => {
+  emitNextTick: (event: string, ...params: unknown[]) => {
     return requestAnimationFrame(() => eventBus.emit(event, ...params))
   },
 
@@ -44,12 +44,12 @@ export const eventBus = {
    * @param params 호출 할 이벤트에 넘길 인자.
    * @returns {Promise} 모든 이벤트가 종료되기 전까지 대신 받을 Promise.
    */
-  emitForResult: (event: string, ...params: any[]) => {
+  emitForResult: (event: string, ...params: unknown[]) => {
     if (!lists[event]) {
       throw new Error('Given event is not defined.')
     }
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const results = []
 
       const remove_queue: number[] = []
@@ -59,7 +59,7 @@ export const eventBus = {
         const callback = lists[event][iter]
 
         try {
-          results.push(await callback.func(...params))
+          results.push(callback.func(...params))
         } catch (e) {
           reject(e)
         }
@@ -69,7 +69,9 @@ export const eventBus = {
         lists[event].splice(v - i, 1)
       })
 
-      resolve(results)
+      Promise.all(results).then(value => {
+        resolve(...value)
+      })
     })
   },
 
@@ -80,15 +82,18 @@ export const eventBus = {
    * @param cb 나중에 호출 될 이벤트 콜백 함수.
    * @param options 이벤트에 등록할 옵션.
    */
-  on: (event: string, cb: Function, options?: { [index: string]: any }) => {
-    // TODO : { [index: string]: any } 타입을 RefresherEventBusOptions interface로
+  on: (
+    event: string,
+    cb: () => void,
+    options?: RefresherEventBusOptions
+  ): string => {
     const uuid = strings.uuid()
 
     if (typeof lists[event] === 'undefined') {
       lists[event] = []
     }
 
-    const obj: { [index: string]: any } = {
+    const obj: RefresherEventBusObject = {
       func: cb,
       uuid
     }

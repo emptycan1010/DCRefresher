@@ -28,7 +28,7 @@ const tempButtonCreate = (elem: HTMLElement): void => {
       '#temp_button_text'
     ) as HTMLElement
 
-    button.addEventListener('click', _ => {
+    button.addEventListener('click', () => {
       if (elem.className.indexOf(TEMPORARY_STEALTH) < 0) {
         elem.classList.add(TEMPORARY_STEALTH)
         buttonText.innerText = '이미지 숨기기'
@@ -53,7 +53,7 @@ export default {
   enable: false,
   default_enable: false,
   require: ['eventBus'],
-  func (eventBus: RefresherEventBus) {
+  func (eventBus: RefresherEventBus): void {
     if (
       document &&
       document.documentElement &&
@@ -76,14 +76,16 @@ export default {
     )
   },
 
-  revoke (eventBus: RefresherEventBus) {
+  revoke (eventBus: RefresherEventBus): void {
     document.documentElement.classList.remove('refresherStealth')
 
     const buttons = document.querySelectorAll(CONTROL_BUTTON)
 
     if (buttons && buttons.length) {
       buttons.forEach((button: Element) => {
-        button.parentElement!.removeChild(button)
+        if (button.parentElement) {
+          button.parentElement.removeChild(button)
+        }
       })
     }
 

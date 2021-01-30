@@ -1,7 +1,8 @@
 import * as http from './http'
-import { GalleryPreData } from '../structs/post'
 
-const _d = function (r) {
+const _d = function (r: string) {
+  const i = 'yL/M=zNa0bcPQdReSfTgUhViWjXkYIZmnpo+qArOBs1Ct2D3uE4Fv5G6wHl78xJ9K'
+
   let a,
     e,
     n,
@@ -9,7 +10,6 @@ const _d = function (r) {
     f,
     d,
     h,
-    i = 'yL/M=zNa0bcPQdReSfTgUhViWjXkYIZmnpo+qArOBs1Ct2D3uE4Fv5G6wHl78xJ9K',
     o = '',
     c = 0
   for (r = r.replace(/[^A-Za-z0-9+/=]/g, ''); c < r.length; )
@@ -41,12 +41,12 @@ const requestBeforeServiceCode = (dom: HTMLElement) => {
 
     _r = _rpre.innerHTML
 
-    const _rmatch = _r.match(/_d\(\'(.+)\'/g)
+    const _rmatch = _r.match(/_d\('(.+)'/g)
     if (!_rmatch || !_rmatch[0]) {
       throw new Error('_d 값을 찾을 수 없습니다.')
     }
 
-    _r = _d(_rmatch[0].replace(/(_d\(|\')/g, ''))
+    _r = _d(_rmatch[0].replace(/(_d\(|')/g, ''))
 
     if (!_r || typeof _r !== 'string') {
       throw new Error('_r이 적절한 값이 아닙니다.')
@@ -66,7 +66,7 @@ const requestBeforeServiceCode = (dom: HTMLElement) => {
   if ('string' == typeof _r) {
     const r = (dom.querySelector(
       'input[name="service_code"]'
-    )! as HTMLInputElement).value
+    ) as HTMLInputElement).value
     const _rs = _r.split(',')
     let t = ''
     for (let e = 0; e < _rs.length; e++)
@@ -80,8 +80,8 @@ const requestBeforeServiceCode = (dom: HTMLElement) => {
 const secretKey = (dom: HTMLElement) => {
   return (
     Array.from(dom.querySelectorAll('#focus_cmt > input'))
-      .map(el => {
-        const id = el.name || el.id
+      .map((el) => {
+        const id = el.getAttribute("name") || el.id
         if (
           id === 'service_code' ||
           id === 'gallery_no' ||
@@ -96,13 +96,18 @@ const secretKey = (dom: HTMLElement) => {
   )
 }
 
+interface CommentResult {
+  result: string
+  message: string | null
+}
+
 export async function submitComment (
   preData: GalleryPreData,
-  user: { [index: string]: any },
+  user: User,
   dom: HTMLElement,
   memo: string,
   captcha?: string
-) {
+): Promise<CommentResult> {
   let code: string
 
   try {
@@ -148,7 +153,6 @@ export async function submitComment (
 
   const response = await http.make(http.urls.comments_submit, {
     method: 'POST',
-    dataType: 'json',
     headers: {
       Accept: '*/*',
       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',

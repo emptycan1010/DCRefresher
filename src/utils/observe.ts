@@ -64,6 +64,7 @@ export const listen = (
 
     if (!executed) return
     const lists = document.querySelectorAll(elem)
+
     if (!lists || !lists.length) return
 
     cb(lists)

@@ -1,32 +1,16 @@
 import * as Color from '../utils/color'
 import * as DOM from '../utils/dom'
 
-const contentColorFix = (el: HTMLElement) => {
-  if (!el) return
-
-  const qSelector = el.querySelector(
-    '.refresher-frame:first-child .refresher-preview-contents'
-  )! as HTMLElement
-
-  DOM.traversal(qSelector).forEach(elem => {
-    if (
-      !elem.style ||
-      !(elem.style.color || elem.hasAttribute('color')) ||
-        elem.style.background ||
-        elem.style.backgroundColor
-    )
-      return
-
-    colorCorrection(elem)
-  })
-}
-
 const colorCorrection = (elem: HTMLElement) => {
   const fontAttr = elem.hasAttribute('color')
 
-  const textColor = Color.parse(
-    fontAttr ? elem.getAttribute('color') : elem.style.color
-  )
+  const color = fontAttr ? elem.getAttribute('color') : elem.style.color
+
+  if (!color) {
+    return
+  }
+
+  const textColor = Color.parse(color)
 
   const contrast = Color.contrast(textColor, [41, 41, 41])
 
@@ -46,6 +30,26 @@ const colorCorrection = (elem: HTMLElement) => {
   }
 }
 
+const contentColorFix = (el: HTMLElement) => {
+  if (!el) return
+
+  const qSelector = el.querySelector(
+    '.refresher-frame:first-child .refresher-preview-contents'
+  ) as HTMLElement
+
+  DOM.traversal(qSelector).forEach(elem => {
+    if (
+      !elem.style ||
+      !(elem.style.color || elem.hasAttribute('color')) ||
+      elem.style.background ||
+      elem.style.backgroundColor
+    )
+      return
+
+    colorCorrection(elem)
+  })
+}
+
 export default {
   name: '다크 모드',
   description: '페이지와 DCRefresher의 창을 어두운 색상으로 변경합니다.',
@@ -60,7 +64,7 @@ export default {
   enable: false,
   default_enable: false,
   require: ['filter', 'eventBus'],
-  func (filter: RefresherFilter, eventBus: RefresherEventBus) {
+  func (filter: RefresherFilter, eventBus: RefresherEventBus): void {
     if (
       document &&
       document.documentElement &&
@@ -91,7 +95,7 @@ export default {
     this.memory.contentViewUUID = eventBus.on('contentPreview', contentColorFix)
   },
 
-  revoke (filter: RefresherFilter, eventBus: RefresherEventBus) {
+  revoke (filter: RefresherFilter, eventBus: RefresherEventBus): void {
     document.documentElement.classList.remove('refresherDark')
 
     if (this.memory.uuid) {

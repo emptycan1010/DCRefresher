@@ -39,14 +39,7 @@ const IP_TYPE_STR: { [index: number]: string } = {
   1001: 'Cloud'
 }
 
-interface ISPInfo {
-  name: string
-  country: number
-  type: number
-  detail?: string
-}
-
-const DCREF_ISP = {
+const DCREF_ISP: { [index: string]: ISPInfo } = {
   SKT_3G: { name: 'SKT 3G', country: COUNTRY.KR, type: IP_TYPE.MOBILE },
   SKT_LTE: { name: 'SKT LTE', country: COUNTRY.KR, type: IP_TYPE.MOBILE },
   SKT_INT: { name: 'SKT', country: COUNTRY.KR, type: IP_TYPE.ISP },
@@ -247,14 +240,14 @@ const DCREF_ISP = {
   }
 }
 
-const detailWrap = (obj: ISPInfo, detail: string) => {
+const detailWrap = (obj: ISPInfo, detail: string): ISPInfo => {
   return {
     ...obj,
     detail
   }
 }
 
-const DCREF_COMMON_IP: { [index: string]: any } = {
+const DCREF_COMMON_IP: { [index: string]: ISPInfo } = {
   '63.160': DCREF_ISP.SPRINT,
   '63.161': DCREF_ISP.SPRINT,
   '63.162': DCREF_ISP.SPRINT,
@@ -11528,10 +11521,10 @@ const DCREF_COMMON_IP: { [index: string]: any } = {
   '223.255': detailWrap(DCREF_ISP.GENERAL, 'KT, NHN')
 }
 
-export const ISPData = (ip: number | string, replace: any) =>
-  DCREF_COMMON_IP[ip] || replace || {}
+export const ISPData = (ip: string): ISPInfo =>
+  DCREF_COMMON_IP[ip] || {}
 
-export const format = (data: ISPInfo) => {
+export const format = (data: ISPInfo): string => {
   if (!data.name) {
     return ''
   }

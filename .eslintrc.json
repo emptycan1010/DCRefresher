@@ -22,8 +22,11 @@
     "comma-dangle": "off",
     "quote-props": "off",
     "semi": ["error", "never"],
+    "no-extra-semi": "off",
     "indent": [2, 2],
     "no-unused-expressions": "off",
-    "space-before-function-paren": "error"
+    "space-before-function-paren": "error",
+    "@typescript-eslint/no-extra-semi": "off",
+    "@typescript-eslint/no-empty-function": "off"
   }
 }

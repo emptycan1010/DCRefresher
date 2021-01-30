@@ -1,4 +1,4 @@
-import * as ip from '../utils/ip'
+import * as ip from './ip'
 
 const USERTYPE = {
   UNFIXED: 0,
@@ -62,22 +62,21 @@ export class User {
     this.type = getType(this.icon)
   }
 
-  import (dom: HTMLElement | null) {
+  import (dom: HTMLElement | null): this {
     if (dom === null) {
-      return
+      return this
     }
 
     const nick = dom.dataset.nick || ''
     const uid = dom.dataset.uid || ''
     const ip = dom.dataset.ip || ''
+    let icon = ''
 
-    const icon =
-      uid !== null
-        ? (
-          (dom.querySelector('a.writer_nikcon img')! as HTMLImageElement) ||
-            {}
-        ).src
-        : ''
+    if (uid !== null) {
+      icon = (
+        (dom.querySelector('a.writer_nikcon img') as HTMLImageElement) || {}
+      ).src
+    }
 
     this.nick = nick
     this.id = uid
@@ -88,20 +87,25 @@ export class User {
     return this
   }
 
-  isLogout () {
+  isLogout (): boolean {
     return this.ip !== null
   }
 
-  isMember () {
+  isMember (): boolean {
     return this.id !== null
   }
 
   set ip (v: string | null) {
-    this.ip_data = ip.format(ip.ISPData(v, ''))
+    if (v) {
+      this.ip_data = ip.format(ip.ISPData(v))
+    } else {
+      this.ip_data = ''
+    }
+
     this.__ip = v || null
   }
 
-  get ip () {
+  get ip (): string | null {
     return this.__ip
   }
 }

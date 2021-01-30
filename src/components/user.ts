@@ -55,11 +55,11 @@ export default {
     }
   },
   methods: {
-    openLink (url: string) {
+    openLink (url: string): void {
       window.open(url, '_blank')
     },
 
-    clickHandle () {
+    clickHandle (): void {
       if (typeof this.click === 'function') {
         return this.click(this.user)
       }
@@ -69,7 +69,7 @@ export default {
       }
     },
 
-    contextMenu () {
+    contextMenu (): void {
       eventBus.emit(
         'RefresherAddToBlock',
         this.user.nick,

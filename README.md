@@ -65,7 +65,7 @@ yarn build
 
 모듈은 DCRefresher에서 페이지 DOM 제어 등을 담당하는 실질적인 기능 집합입니다. 모듈 파일은 `src/modules` 폴더에 모여 있습니다. 추후에는 외부에서 스크립트를 불러와 따로 빌드 없이 모듈을 사용할 수 있도록 할 예정도 있습니다.
 
-모듈 파일은 오직 하나의 `RefresherModule` 형식의 객체를 가집니다. 객체에 들어가야할 값들은 `src/structs/module.ts` 파일에 `RefresherModule`라는 이름의 interface로 정의되어 있으며, 해당 interface를 참고하시며 개발하시면 도움이 되실겁니다.
+모듈 파일은 오직 하나의 `RefresherModule` 형식의 객체를 가집니다. 객체에 들어가야할 값들은 `src/@types/module.d.ts` 파일에 `RefresherModule`라는 이름의 interface로 정의되어 있으며, 해당 interface를 참고하시며 개발하시면 도움이 되실겁니다.
 
 `RefresherModule`의 구조는 업데이트되면서 변경될 수 있으며, 추가되었으면 하는 API가 있으시면 언제든지 이슈나 Pull Request 남겨주시면 감사하겠습니다.
 

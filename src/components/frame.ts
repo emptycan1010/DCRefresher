@@ -164,7 +164,7 @@ export const Frame = Vue.component('refresher-frame', {
       return this.frame.functions.retry()
     },
 
-    async writeComment (...args: any) {
+    async writeComment (...args: unknown[]) {
       let result = false
 
       if (this.frame.functions.writeComment) {
@@ -177,7 +177,10 @@ export const Frame = Vue.component('refresher-frame', {
     },
 
     toCommentWrite () {
-      document.getElementById('comment_main').focus()
+      const commentMain = document.getElementById('comment_main')
+      if (commentMain) {
+        commentMain.focus()
+      }
       return true
     },
 
@@ -231,7 +234,7 @@ export const Group = Vue.component('refresher-group', {
     }
   },
   methods: {
-    clickHandle (ev) {
+    clickHandle (ev: Event) {
       if (ev.target !== this.$el) return ev
       this.$root.outerClick(ev)
     }

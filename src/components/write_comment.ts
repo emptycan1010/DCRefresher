@@ -1,6 +1,6 @@
 import PreviewButton from './button'
 
-import { User } from '../structs/user'
+import { User } from '../utils/user'
 
 import * as Toast from './toast'
 
@@ -34,7 +34,7 @@ export default {
       </div>
     </div>
   </div>`,
-  data () {
+  data (): {[index:string]: unknown} {
     return {
       focused: false,
       disabled: false,
@@ -79,8 +79,9 @@ export default {
         '#login_box .user_info .writer_nikcon img'
       ) as HTMLImageElement
 
-      const id = gallogIcon
-        .getAttribute('onclick')!
+      const attribute = gallogIcon.getAttribute('onclick') as string
+
+      const id = attribute
         .replace(/window\.open\('\/\/gallog\.dcinside\.com\//g, '')
         .replace(/'\\;/g, '')
 
@@ -112,7 +113,7 @@ export default {
       }
     },
 
-    toggleEditUser () {
+    toggleEditUser (): void {
       if (!this.user.id) {
         this.editUser = !this.editUser
       }

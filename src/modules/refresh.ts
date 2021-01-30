@@ -79,45 +79,31 @@ export default {
     http: RefresherHTTP,
     eventBus: RefresherEventBus,
     block: RefresherBlock
-  ) {
+  ): void {
     if (document && document.documentElement && this.status.doNotColorVisited) {
       document.documentElement.classList.add('refresherDoNotColorVisited')
     }
 
     const body = (url: string) => {
-      return new Promise<Element | null>(async (resolve, reject) => {
-        let body = await http.make(url)
+      return new Promise<Element | null>((resolve, reject) => {
+        http.make(url).then(body => {
+          try {
+            const bodyParse = new DOMParser().parseFromString(body, 'text/html')
 
-        try {
-          const bodyParse = new DOMParser().parseFromString(body, 'text/html')
-          body = ''
+            eventBus.emit('refresherGetPost', bodyParse)
 
-          eventBus.emit('refresherGetPost', bodyParse)
-
-          resolve(bodyParse.querySelector('.gall_list tbody'))
-        } catch (e) {
-          reject(e)
-        }
+            resolve(bodyParse.querySelector('.gall_list tbody'))
+          } catch (e) {
+            reject(e)
+          }
+        })
       })
-    }
-
-    const run = () => {
-      if (!this.status.autoRate) {
-        this.memory.delay = Math.max(1000, this.status.refreshRate || 2500)
-      }
-
-      if (this.memory.refresh) {
-        clearTimeout(this.memory.refresh)
-      }
-
-      this.memory.refresh = window.setTimeout(load, this.memory.delay)
     }
 
     const isPostView = location.href.indexOf('/board/view') > -1
     const currentPostNo = new URLSearchParams(location.href).get('no')
 
-    const load = async (skipRun?: boolean) => {
-      // 도배 방지용
+    const load = async (): Promise<boolean> => {
       if (Date.now() - lastAccess < 500) {
         return false
       }
@@ -125,9 +111,11 @@ export default {
       if (document.hidden) {
         return false
       }
+
       lastAccess = Date.now()
 
-      const isAdmin = document.querySelector('.useradmin_btnbox button') !== null
+      const isAdmin =
+        document.querySelector('.useradmin_btnbox button') !== null
 
       // 글 선택 체크박스에 체크된 경우 새로 고침 건너 뜀
       if (
@@ -136,7 +124,7 @@ export default {
           v => (v as HTMLInputElement).checked
         ).length > 0
       ) {
-        return
+        return false
       }
 
       this.memory.new_counts = 0
@@ -145,14 +133,16 @@ export default {
       const newList = await body(url)
 
       let oldList = document.querySelector('.gall_list tbody')
-      if (!oldList || !newList) return
+      if (!oldList || !newList) return false
 
       const cached = Array.from(oldList.querySelectorAll('td.gall_num'))
         .map(v => v.innerHTML)
         .join('|')
 
-      oldList.parentElement!.appendChild(newList)
-      oldList.parentElement!.removeChild(oldList)
+      if (oldList.parentElement) {
+        oldList.parentElement.appendChild(newList)
+        oldList.parentElement.removeChild(oldList)
+      }
       oldList = null
 
       const posts = newList.querySelectorAll('tr.us-post')
@@ -180,13 +170,17 @@ export default {
 
       const postNoIter = newList.querySelectorAll('td.gall_num')
 
-      const containsEmpty = newList.parentElement!.classList.contains('empty')
-      if (postNoIter.length) {
-        if (containsEmpty) {
-          newList.parentElement!.classList.remove('empty')
+      let containsEmpty = false
+      if (newList.parentElement) {
+        containsEmpty = newList.parentElement.classList.contains('empty')
+
+        if (postNoIter.length) {
+          if (containsEmpty) {
+            newList.parentElement.classList.remove('empty')
+          }
+        } else if (!containsEmpty) {
+          newList.parentElement.classList.add('empty')
         }
-      } else if (!containsEmpty) {
-        newList!.parentElement!.classList.add('empty')
       }
 
       postNoIter.forEach(v => {
@@ -194,9 +188,11 @@ export default {
 
         if (cached.indexOf(value) == -1 && value != currentPostNo) {
           if (this.status.fadeIn && !this.memory.calledByPageTurn) {
-            v.parentElement!.className += ' refresherNewPost'
-            v.parentElement!.style.animationDelay =
-              this.memory.new_counts * 23 + 'ms'
+            if (v.parentElement) {
+              v.parentElement.className += ' refresherNewPost'
+              v.parentElement.style.animationDelay =
+                this.memory.new_counts * 23 + 'ms'
+            }
           }
           this.memory.new_counts++
         }
@@ -241,7 +237,7 @@ export default {
             return
           }
 
-          elem!.innerHTML = tmpl.innerHTML + elem!.innerHTML
+          elem.innerHTML = tmpl.innerHTML + elem.innerHTML
         })
 
         if (!noTempl) {
@@ -272,9 +268,21 @@ export default {
 
       eventBus.emit('refresh', newList)
 
-      if (!skipRun) {
-        run()
+      return true
+    }
+
+    const run = () => {
+      load()
+
+      if (!this.status.autoRate) {
+        this.memory.delay = Math.max(1000, this.status.refreshRate || 2500)
       }
+
+      if (this.memory.refresh) {
+        clearTimeout(this.memory.refresh)
+      }
+
+      this.memory.refresh = window.setTimeout(run, this.memory.delay)
     }
 
     document.addEventListener('visibilitychange', () => {
@@ -286,7 +294,7 @@ export default {
         return
       }
 
-      load()
+      run()
     })
 
     run()
@@ -302,38 +310,46 @@ export default {
     if (this.status.useBetterBrowse) {
       this.memory.uuid = filter.add(
         '.left_content .bottom_paging_box a',
-        (a: HTMLAnchorElement) => {
-          if (a.href.indexOf('javascript:') > -1) {
+        (a: Element) => {
+          if ((a as HTMLAnchorElement).href.indexOf('javascript:') > -1) {
             return
           }
 
-          a.onclick = () => false
-          a.addEventListener('click', async (ev: MouseEvent) => {
+          ;(a as HTMLAnchorElement).onclick = () => false
+          ;(a as HTMLAnchorElement).addEventListener('click', async () => {
             const isPageView = location.href.indexOf('/board/view') > -1
 
             if (isPageView) {
               history.pushState(
                 null,
                 document.title,
-                http.mergeParamURL(location.href, a.href)
+                http.mergeParamURL(location.href, (a as HTMLAnchorElement).href)
               )
             } else {
-              history.pushState(null, document.title, a.href)
+              history.pushState(
+                null,
+                document.title,
+                (a as HTMLAnchorElement).href
+              )
             }
             this.memory.calledByPageTurn = true
 
-            await load(true)
+            await load()
 
-            document
-              .querySelector(isPageView ? '.view_bottom_btnbox' : '.page_head')!
-              .scrollIntoView({ block: 'start', behavior: 'smooth' })
+            const query = document.querySelector(
+              isPageView ? '.view_bottom_btnbox' : '.page_head'
+            )
+
+            if (query) {
+              query.scrollIntoView({ block: 'start', behavior: 'smooth' })
+            }
           })
         }
       )
 
-      window.addEventListener('popstate', async _ => {
+      window.addEventListener('popstate', () => {
         this.memory.calledByPageTurn = true
-        await load(true)
+        load()
       })
 
       this.memory.uuid2 = eventBus.on(
@@ -343,52 +359,60 @@ export default {
             '.left_content .bottom_paging_box'
           )
 
-          document.querySelector(
+          const currentBottomPagingBox = document.querySelector(
             '.left_content .bottom_paging_box'
-          )!.innerHTML = pagingBox!.innerHTML
-          document
-            .querySelectorAll('.left_content .bottom_paging_box a')!
-            .forEach(async a => {
+          )
+
+          if (currentBottomPagingBox && pagingBox) {
+            currentBottomPagingBox.innerHTML = pagingBox.innerHTML
+          }
+
+          const pagingBoxAnchors = document.querySelectorAll(
+            '.left_content .bottom_paging_box a'
+          )
+
+          if (pagingBoxAnchors) {
+            pagingBoxAnchors.forEach(async a => {
               const href = (a as HTMLAnchorElement).href
               if (href.indexOf('javascript:') > -1) {
                 return
               }
 
-              (a as HTMLAnchorElement).onclick = () => false
-              ;(a as HTMLAnchorElement).addEventListener(
-                'click',
-                async (ev: MouseEvent) => {
-                  const isPageView = location.href.indexOf('/board/view') > -1
+              ;(a as HTMLAnchorElement).onclick = () => false
+              ;(a as HTMLAnchorElement).addEventListener('click', async () => {
+                const isPageView = location.href.indexOf('/board/view') > -1
 
-                  if (isPageView) {
-                    history.pushState(
-                      null,
-                      document.title,
-                      http.mergeParamURL(location.href, href)
-                    )
-                  } else {
-                    history.pushState(null, document.title, href)
-                  }
-                  this.memory.calledByPageTurn = true
-
-                  await load(true)
-
-                  document
-                    .querySelector(
-                      location.href.indexOf('/board/view') > -1
-                        ? '.view_bottom_btnbox'
-                        : '.page_head'
-                    )!
-                    .scrollIntoView({ block: 'start', behavior: 'smooth' })
+                if (isPageView) {
+                  history.pushState(
+                    null,
+                    document.title,
+                    http.mergeParamURL(location.href, href)
+                  )
+                } else {
+                  history.pushState(null, document.title, href)
                 }
-              )
+                this.memory.calledByPageTurn = true
+
+                load()
+
+                const query = document.querySelector(
+                  location.href.indexOf('/board/view') > -1
+                    ? '.view_bottom_btnbox'
+                    : '.page_head'
+                )
+
+                if (query) {
+                  query.scrollIntoView({ block: 'start', behavior: 'smooth' })
+                }
+              })
             })
+          }
         }
       )
     }
   },
 
-  revoke () {
+  revoke (): void {
     if (document && document.body) {
       document.body.classList.remove('refresherDoNotColorVisited')
     }
