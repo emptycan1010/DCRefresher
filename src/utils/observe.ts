@@ -1,13 +1,16 @@
-export const find = (elem: string, parent: HTMLElement) =>
+export const find = (
+  elem: string,
+  parent: HTMLElement
+): Promise<NodeListOf<Element>> =>
   new Promise<NodeListOf<Element>>((resolve, reject) => {
-    let parentFind = parent.querySelectorAll(elem)
+    const parentFind = parent.querySelectorAll(elem)
     if (parentFind.length) {
       resolve(parentFind)
     }
 
-    let tout: number = 0
+    let timeout = 0
 
-    var observer = new MutationObserver(muts => {
+    const observer = new MutationObserver(muts => {
       let executed = false
       let iter = muts.length
       while (iter--) {
@@ -17,14 +20,14 @@ export const find = (elem: string, parent: HTMLElement) =>
       }
 
       if (!executed) return
-      let lists = document.querySelectorAll(elem)
+      const lists = document.querySelectorAll(elem)
       if (!lists.length) return
 
       resolve(lists)
       observer.disconnect()
 
-      if (tout) {
-        clearTimeout(tout)
+      if (timeout) {
+        clearTimeout(timeout)
       }
     })
 
@@ -33,20 +36,24 @@ export const find = (elem: string, parent: HTMLElement) =>
       subtree: true
     })
 
-    tout = setTimeout(() => {
+    timeout = window.setTimeout(() => {
       if (!observer) return
       observer.disconnect()
       reject('Too long execution.')
     }, 3000)
   })
 
-export const listen = (elem: string, parent: HTMLElement, cb: Function) => {
-  let parentFind = parent.querySelectorAll(elem)
+export const listen = (
+  elem: string,
+  parent: HTMLElement,
+  cb: (elem: NodeListOf<Element>) => void
+): MutationObserver => {
+  const parentFind = parent.querySelectorAll(elem)
   if (parentFind.length) {
     cb(parentFind)
   }
 
-  var observer = new MutationObserver(muts => {
+  const observer = new MutationObserver(muts => {
     let executed = false
     let iter = muts.length
     while (iter--) {
@@ -56,7 +63,8 @@ export const listen = (elem: string, parent: HTMLElement, cb: Function) => {
     }
 
     if (!executed) return
-    let lists = document.querySelectorAll(elem)
+    const lists = document.querySelectorAll(elem)
+
     if (!lists || !lists.length) return
 
     cb(lists)

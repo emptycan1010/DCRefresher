@@ -38,7 +38,7 @@ export default {
   },
 
   update: {
-    customFonts: (fontName: string | boolean) => {
+    customFonts: (fontName: string | boolean): void => {
       let fontElement = document.querySelector('#refresherFontStyle')
       if (fontElement && !fontName) {
         fontElement.parentElement?.removeChild(fontElement)
@@ -56,12 +56,12 @@ export default {
         fontElement.innerHTML = `.refresherFont .refresher-block-popup, .refresherFont .refresher-captcha-popup, .refresherFont .refresher-frame, .refresherFont .refresher-popup, .refresherChangeDCFont, .refresherChangeDCFont body, .refresherChangeDCFont .gall_list, .refresherChangeDCFont button, .refresherChangeDCFont input, .refresherChangeDCFont .view_comment div, .refresherChangeDCFont .view_content_wrap, .refresherChangeDCFont .view_content_wrap a, .refresherChangeDCFont .btn_cmt_close, .refresherChangeDCFont .btn_cmt_close span, .refresherChangeDCFont .btn_cmt_refresh, .refresherChangeDCFont .btn_cmt_open{font-family:${fontName},-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans','Helvetica Neue',sans-serif!important}`
       }
     },
-    changeDCFont: (vaule: boolean) => {
+    changeDCFont: (vaule: boolean): void => {
       document.documentElement.classList[vaule ? 'add' : 'remove'](
         'refresherChangeDCFont'
       )
     },
-    bodyFontSize: (fontSize: number) => {
+    bodyFontSize: (fontSize: number | boolean): void => {
       let fontElement = document.querySelector('#refresherFontStyleSize')
       if (fontElement && !fontSize) {
         fontElement.parentElement?.removeChild(fontElement)
@@ -78,22 +78,22 @@ export default {
 
         fontElement.innerHTML = `.refresherChangeDCFont .write_div {font-size: ${fontSize}px;}
         .refresherFont .refresher-preview-contents-actual, .refresherFont .refresher-preview-contents-actual .write_div{font-size: ${Number(
-          fontSize
-        ) + 2}px;}`
+    fontSize
+  ) + 2}px;}`
       }
     }
   },
   enable: true,
   default_enable: true,
   require: [],
-  func () {
+  func (): void {
     document.documentElement.classList.add('refresherFont')
     this.update.changeDCFont(this.status.changeDCFont)
     this.update.customFonts(this.status.customFonts)
     this.update.bodyFontSize(this.status.bodyFontSize)
   },
 
-  revoke () {
+  revoke (): void {
     document.documentElement.classList.remove('refresherFont')
     this.update.changeDCFont(false)
     this.update.customFonts(false)

@@ -12,7 +12,7 @@ const tempButtonCreate = (elem: HTMLElement): void => {
   ).length
 
   if (buttonNum == 0 && contentNum != 0) {
-    let buttonFrame: HTMLElement = document.createElement('div')
+    const buttonFrame: HTMLElement = document.createElement('div')
     buttonFrame.classList.add(CONTROL_BUTTON.replace('.', ''))
     buttonFrame.classList.add('blur')
 
@@ -23,12 +23,12 @@ const tempButtonCreate = (elem: HTMLElement): void => {
       </div>
     `
 
-    let button = buttonFrame.querySelector('#tempview') as HTMLElement
-    let buttonText = buttonFrame.querySelector(
+    const button = buttonFrame.querySelector('#tempview') as HTMLElement
+    const buttonText = buttonFrame.querySelector(
       '#temp_button_text'
     ) as HTMLElement
 
-    button.addEventListener('click', _ => {
+    button.addEventListener('click', () => {
       if (elem.className.indexOf(TEMPORARY_STEALTH) < 0) {
         elem.classList.add(TEMPORARY_STEALTH)
         buttonText.innerText = '이미지 숨기기'
@@ -53,7 +53,7 @@ export default {
   enable: false,
   default_enable: false,
   require: ['eventBus'],
-  func (eventBus: RefresherEventBus) {
+  func (eventBus: RefresherEventBus): void {
     if (
       document &&
       document.documentElement &&
@@ -76,14 +76,16 @@ export default {
     )
   },
 
-  revoke (eventBus: RefresherEventBus) {
+  revoke (eventBus: RefresherEventBus): void {
     document.documentElement.classList.remove('refresherStealth')
 
-    let buttons = document.querySelectorAll(CONTROL_BUTTON)
+    const buttons = document.querySelectorAll(CONTROL_BUTTON)
 
     if (buttons && buttons.length) {
       buttons.forEach((button: Element) => {
-        button.parentElement!.removeChild(button)
+        if (button.parentElement) {
+          button.parentElement.removeChild(button)
+        }
       })
     }
 

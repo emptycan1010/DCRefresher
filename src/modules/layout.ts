@@ -1,7 +1,7 @@
 const updateWindowSize = (
   forceActive: boolean,
-  active: Number,
-  width: Number
+  active: number,
+  width: number
 ) => {
   if (typeof active === 'string') {
     active = Number(active)
@@ -35,7 +35,7 @@ export default {
   memory: {
     uuid: null,
     uuiddc: null,
-    resize: () => {}
+    resize: (): void => {}
   },
   settings: {
     activePixel: {
@@ -98,27 +98,29 @@ export default {
   default_enable: true,
   require: ['filter'],
   update: {
-    activePixel (this: RefresherModule, value: Number) {
-      updateWindowSize(this.status.forceCompact, value, window.innerWidth)
+    activePixel (this: RefresherModule, value: number): void {
+      if (this.status) {
+        updateWindowSize(this.status.forceCompact, value, window.innerWidth)
+      }
     },
 
-    forceCompact (this: RefresherModule, value: boolean) {
+    forceCompact (this: RefresherModule, value: boolean): void {
       updateWindowSize(value, this.status.activePixel, window.innerWidth)
     },
 
-    hideGalleryView (value: boolean) {
+    hideGalleryView (value: boolean): void {
       document.documentElement.classList[value ? 'add' : 'remove'](
         'refresherHideGalleryView'
       )
     },
 
-    hideUselessView (value: boolean) {
+    hideUselessView (value: boolean): void {
       document.documentElement.classList[value ? 'add' : 'remove'](
         'refresherHideUselessView'
       )
     },
 
-    pushToRight (value: boolean) {
+    pushToRight (value: boolean): void {
       document.documentElement.classList[value ? 'add' : 'remove'](
         'refresherPushToRight'
       )
@@ -128,26 +130,27 @@ export default {
       this: RefresherModule,
       value: boolean,
       filter: RefresherFilter
-    ) {
-      if (!this.memory!.uuid && value) {
-        this.memory!.uuid = filter.add(
+    ): void {
+      if (!this.memory) {
+        return
+      }
+
+      if (!this.memory.uuid && value) {
+        this.memory.uuid = filter.add(
           `.gall_list .us-post b`,
           (elem: HTMLElement) => {
-            if (
-              elem.parentElement!.parentElement!.parentElement! &&
-              elem.parentElement!.parentElement!
-            ) {
-              elem.parentElement!.parentElement!.parentElement!.removeChild(
-                elem.parentElement!.parentElement!
-              )
+            const pelem = (elem.parentElement as HTMLElement)
+              .parentElement as HTMLElement
+            if (pelem as HTMLElement) {
+              pelem.style.display = 'none'
             }
           },
           {
             neverExpire: true
           }
         )
-      } else if (this.memory!.uuid && !value) {
-        filter.remove(this.memory!.uuid)
+      } else if (this.memory.uuid && !value) {
+        filter.remove(this.memory.uuid)
       }
     },
 
@@ -155,36 +158,37 @@ export default {
       this: RefresherModule,
       value: boolean,
       filter: RefresherFilter
-    ) {
-      if (!this.memory!.uuiddc && value) {
-        this.memory!.uuiddc = filter.add(
+    ): void {
+      if (!this.memory) {
+        return
+      }
+
+      if (!this.memory.uuiddc && value) {
+        this.memory.uuiddc = filter.add(
           `.gall_list .ub-content .ub-writer`,
           (elem: HTMLElement) => {
-            let adminAttribute = elem.getAttribute('user_name')
+            const adminAttribute = elem.getAttribute('user_name')
 
             if (!adminAttribute || adminAttribute !== '운영자') {
               return
             }
 
-            if (
-              elem.parentElement!.parentElement! &&
-              elem.parentElement!
-            ) {
-              elem.parentElement!.parentElement!.removeChild(
-                elem.parentElement!
-              )
+            const pelem = (elem.parentElement as HTMLElement)
+              .parentElement as HTMLElement
+            if (pelem as HTMLElement) {
+              pelem.style.display = 'none'
             }
           },
           {
             neverExpire: true
           }
         )
-      } else if (this.memory!.uuiddc && !value) {
-        filter.remove(this.memory!.uuiddc)
+      } else if (this.memory.uuiddc && !value) {
+        filter.remove(this.memory.uuiddc)
       }
     }
   },
-  func (filter: RefresherFilter) {
+  func (filter: RefresherFilter): void {
     this.memory.resize = () =>
       updateWindowSize(
         this.status.forceCompact,
@@ -202,7 +206,7 @@ export default {
     this.update.removeDCNotice.bind(this)(this.status.removeDCNotice, filter)
   },
 
-  revoke (filter: RefresherFilter) {
+  revoke (filter: RefresherFilter): void {
     window.removeEventListener('resize', this.memory.resize)
 
     this.update.hideGalleryView(false)

@@ -1,21 +1,21 @@
-var s = 1000
-var m = s * 60
-var h = m * 60
-var d = h * 24
-var w = d * 7
-var y = d * 365.25
+const s = 1000
+const m = s * 60
+const h = m * 60
+const d = h * 24
+const w = d * 7
+const y = d * 365.25
 
-let timeCounts = [y, w, d, h, m, s]
-let timeFilters = ['년', '주', '일', '시간', '분', '초']
+const timeCounts = [y, w, d, h, m, s]
+const timeFilters = ['년', '주', '일', '시간', '분', '초']
 
 const convertTime = (date: Date) => {
-  let elapsed = Date.now() - date.getTime()
+  const elapsed = Date.now() - date.getTime()
 
   if (elapsed < 3000) {
     return '방금 전'
   }
 
-  let abs = Math.abs(elapsed)
+  const abs = Math.abs(elapsed)
   for (let f = 0; f < timeCounts.length; f++) {
     if (abs >= timeCounts[f]) {
       return Math.round(elapsed / timeCounts[f]) + timeFilters[f] + ' 전'
@@ -23,6 +23,15 @@ const convertTime = (date: Date) => {
   }
 
   return '아주 오래 전'
+}
+
+interface TimestampVueData {
+  mode: number
+  stamp: string
+}
+interface TimestampVue extends TimestampVueData {
+  date: Date
+  updates: number
 }
 
 export default {
@@ -37,26 +46,26 @@ export default {
       required: true
     }
   },
-  data: () => {
+  data: (): TimestampVueData => {
     return {
       mode: 0,
       stamp: ''
     }
   },
   computed: {
-    locale (): string {
+    locale (this: TimestampVue): string {
       return this.date.toLocaleString()
     }
   },
-  mounted () {
+  mounted (this: TimestampVue): void {
     this.stamp = convertTime(this.date)
 
-    this.updates = setInterval(() => {
+    this.updates = window.setInterval(() => {
       this.stamp = convertTime(this.date)
     }, 3000)
   },
 
-  beforeUnload () {
+  beforeUnload (this: TimestampVue): void {
     clearInterval(this.updates)
   }
 }

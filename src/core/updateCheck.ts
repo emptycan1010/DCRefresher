@@ -2,20 +2,20 @@ import * as store from '../utils/store'
 import * as Toast from '../components/toast'
 
 setTimeout(async () => {
-  let nav =
+  const nav =
     typeof chrome !== 'undefined'
       ? chrome
       : typeof browser !== 'undefined'
-      ? browser
-      : undefined
+        ? browser
+        : undefined
 
   if (typeof nav === 'undefined') {
     return
   }
 
-  let key = await store.get('refresher.lastVersion')
+  const key = await store.get('refresher.lastVersion')
 
-  let currentVersion =
+  const currentVersion =
     nav &&
     nav.runtime &&
     nav.runtime.getManifest &&

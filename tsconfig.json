@@ -5,7 +5,12 @@
     "target": "esnext",
     "jsx": "preserve",
     "esModuleInterop": true,
-    "sourceMap": true
+    "baseUrl": "./",
+    "sourceMap": true,
+    "lib": ["DOM"],
+    "paths": {
+      "*": ["src/@types/*.d.ts"]
+    }
   },
-  "exclude": ["node_modules", "**/node_modules/*"]
+  "exclude": ["node_modules", "**/node_modules/*"],
 }

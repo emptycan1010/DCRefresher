@@ -2,16 +2,20 @@ import * as store from '../utils/store'
 import { eventBus } from './eventbus'
 import { browser } from 'webextension-polyfill-ts'
 
-let settings_store: { [index: string]: any } = {}
+const settings_store: { [index: string]: unknown } = {}
 
 const runtime = (chrome && chrome.runtime) || (browser && browser.runtime)
 
-export const set = async (module: string, key: string, value: any) => {
+export const set = async (
+  module: string,
+  key: string,
+  value: unknown
+): Promise<void> => {
   eventBus.emit('RefresherUpdateSetting', module, key, value)
 
   settings_store[module][key].value = value
 
-  let s = await store.set(`${module}.${key}`, value)
+  await store.set(`${module}.${key}`, value)
 
   if (runtime) {
     runtime.sendMessage(
@@ -20,20 +24,18 @@ export const set = async (module: string, key: string, value: any) => {
       })
     )
   }
-
-  return s
 }
 
-export const setStore = async (module: string, key: string, value: any) => {
+export const setStore = (module: string, key: string, value: unknown): void => {
   eventBus.emit('RefresherUpdateSetting', module, key, value)
   settings_store[module][key].value = value
 }
 
-export const get = async (module: string, key: string) => {
+export const get = (module: string, key: string): Promise<unknown> => {
   return store.get(`${module}.${key}`)
 }
 
-export const dump = () => {
+export const dump = (): { [index: string]: unknown } => {
   return settings_store
 }
 
@@ -41,7 +43,7 @@ export const loadDefault = async (
   module: string,
   key: string,
   settings: RefresherSettings
-) => {
+): Promise<unknown> => {
   if (!settings_store[module]) {
     settings_store[module] = {}
   }

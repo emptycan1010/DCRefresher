@@ -9,7 +9,7 @@ export default {
     }
   },
   methods: {
-    getURL (u) {
+    getURL (u: string): string {
       return chrome.extension.getURL(u)
     }
   }

@@ -28,11 +28,11 @@ export default {
       return (this.user.id
         ? '(' + this.user.id + ')'
         : this.user.ip
-        ? '(' +
+          ? '(' +
           this.user.ip +
           (this.user.ip_data ? ', ' + this.user.ip_data : '') +
           ')'
-        : ''
+          : ''
       )
         .replace('\\n', ' ')
         .replace(/  +/g, ' ')
@@ -42,7 +42,7 @@ export default {
       return this.user.id
         ? '(' + this.user.id + ')'
         : this.user.ip
-        ? '(' +
+          ? '(' +
           this.user.ip +
           (this.user.ip_data
             ? ', ' +
@@ -51,15 +51,15 @@ export default {
                 : this.user.ip_data)
             : '') +
           ')'
-        : ''
+          : ''
     }
   },
   methods: {
-    openLink (url: string) {
+    openLink (url: string): void {
       window.open(url, '_blank')
     },
 
-    clickHandle () {
+    clickHandle (): void {
       if (typeof this.click === 'function') {
         return this.click(this.user)
       }
@@ -69,7 +69,7 @@ export default {
       }
     },
 
-    contextMenu () {
+    contextMenu (): void {
       eventBus.emit(
         'RefresherAddToBlock',
         this.user.nick,

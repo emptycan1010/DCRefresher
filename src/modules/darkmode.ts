@@ -1,39 +1,23 @@
 import * as Color from '../utils/color'
 import * as DOM from '../utils/dom'
 
-const contentColorFix = (el: HTMLElement) => {
-  if (!el) return
-
-  let qSelector = el.querySelector(
-    '.refresher-frame:first-child .refresher-preview-contents'
-  )! as HTMLElement
-
-  DOM.traversal(qSelector).forEach(elem => {
-    if (
-      !elem.style ||
-      !(elem.style.color || elem.hasAttribute('color')) ||
-        elem.style.background ||
-        elem.style.backgroundColor
-    )
-      return
-
-    colorCorrection(elem)
-  })
-}
-
 const colorCorrection = (elem: HTMLElement) => {
-  let fontAttr = elem.hasAttribute('color')
+  const fontAttr = elem.hasAttribute('color')
 
-  let textColor = Color.parse(
-    fontAttr ? elem.getAttribute('color') : elem.style.color
-  )
+  const color = fontAttr ? elem.getAttribute('color') : elem.style.color
 
-  let contrast = Color.contrast(textColor, [41, 41, 41])
+  if (!color) {
+    return
+  }
+
+  const textColor = Color.parse(color)
+
+  const contrast = Color.contrast(textColor, [41, 41, 41])
 
   if (contrast < 3) {
-    let trans = Color.RGBtoHSL(textColor[0], textColor[1], textColor[2])
+    const trans = Color.RGBtoHSL(textColor[0], textColor[1], textColor[2])
     trans[2] = Color.inverseColor(trans[2])
-    let rollback = Color.HSLtoRGB(trans[0], trans[1], trans[2])
+    const rollback = Color.HSLtoRGB(trans[0], trans[1], trans[2])
 
     if (fontAttr) {
       elem.setAttribute(
@@ -44,6 +28,26 @@ const colorCorrection = (elem: HTMLElement) => {
       elem.style.color = `rgb(${rollback[0]}, ${rollback[1]}, ${rollback[2]})`
     }
   }
+}
+
+const contentColorFix = (el: HTMLElement) => {
+  if (!el) return
+
+  const qSelector = el.querySelector(
+    '.refresher-frame:first-child .refresher-preview-contents'
+  ) as HTMLElement
+
+  DOM.traversal(qSelector).forEach(elem => {
+    if (
+      !elem.style ||
+      !(elem.style.color || elem.hasAttribute('color')) ||
+      elem.style.background ||
+      elem.style.backgroundColor
+    )
+      return
+
+    colorCorrection(elem)
+  })
 }
 
 export default {
@@ -60,7 +64,7 @@ export default {
   enable: false,
   default_enable: false,
   require: ['filter', 'eventBus'],
-  func (filter: RefresherFilter, eventBus: RefresherEventBus) {
+  func (filter: RefresherFilter, eventBus: RefresherEventBus): void {
     if (
       document &&
       document.documentElement &&
@@ -91,7 +95,7 @@ export default {
     this.memory.contentViewUUID = eventBus.on('contentPreview', contentColorFix)
   },
 
-  revoke (filter: RefresherFilter, eventBus: RefresherEventBus) {
+  revoke (filter: RefresherFilter, eventBus: RefresherEventBus): void {
     document.documentElement.classList.remove('refresherDark')
 
     if (this.memory.uuid) {

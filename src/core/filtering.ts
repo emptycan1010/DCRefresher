@@ -1,29 +1,18 @@
 import * as strings from '../utils/string'
 import * as observe from '../utils/observe'
 
-interface RefresherFilteringLists {
-  func: Function
-  scope: string
-  status: { [index: string]: any }
-  events: { [index: string]: any }
-  options?: RefresherFilteringOptions
-  expire?: Function
-}
+const lists: { [index: string]: RefresherFilteringLists } = {}
 
-interface RefresherFilteringOptions {
-  neverExpire?: boolean
-  expireFunc?: Function
-}
-
-let lists: { [index: string]: RefresherFilteringLists } = {}
-
-export const filter = {
-  __run: async (a: RefresherFilteringLists, e: NodeListOf<Element>) => {
+export const filter: RefresherFilter = {
+  __run: async (
+    a: RefresherFilteringLists,
+    e: NodeListOf<Element>
+  ): Promise<void> => {
     let iter = e.length
 
-    if (!iter) return false
+    if (!iter) return
     while (iter--) {
-      await a.func(e[iter])
+      a.func(e[iter])
     }
   },
   /**
@@ -31,21 +20,19 @@ export const filter = {
    *
    * @param non_blocking 비차단 방식으로 렌더링 합니다. (페이지 로드 후)
    */
-  run: async (non_blocking: boolean) => {
-    let listsKeys = Object.keys(lists)
+  run: async (): Promise<void> => {
+    const listsKeys = Object.keys(lists)
 
     let len = listsKeys.length
     while (len--) {
-      let filterObj = lists[listsKeys[len]]
-
-      let observer: any
+      const filterObj = lists[listsKeys[len]]
 
       if (filterObj.options && filterObj.options.neverExpire) {
         if (lists[listsKeys[len]].expire) {
-          lists[listsKeys[len]].expire!()
+          lists[listsKeys[len]].expire()
         }
 
-        observer = observe.listen(
+        const observer = observe.listen(
           filterObj.scope,
           document.documentElement,
           (e: NodeListOf<Element>) => {
@@ -55,27 +42,19 @@ export const filter = {
 
         lists[listsKeys[len]].expire = () => {
           if (observer) {
-            ;(observer as MutationObserver).disconnect()
-            observer = null
+            observer.disconnect()
           }
         }
       } else {
-        if (non_blocking) {
-          observer = observe.find(filterObj.scope, document.documentElement)
-        } else {
-          observer = await observe.find(
-            filterObj.scope,
-            document.documentElement
-          )
-        }
-
-        Promise.resolve(observer).then(e => filter.__run(filterObj, e))
+        observe
+          .find(filterObj.scope, document.documentElement)
+          .then(e => filter.__run(filterObj, e))
       }
     }
   },
 
-  runSpecific: (id: string) => {
-    let item = lists[id]
+  runSpecific: (id: string): Promise<void> => {
+    const item = lists[id]
 
     return observe
       .find(item.scope, document.documentElement)
@@ -85,14 +64,17 @@ export const filter = {
   /**
    * 필터 lists 에 필터 함수를 등록합니다.
    */
-  add: (scope: string, cb: Function, options?: RefresherFilteringOptions) => {
-    let uuid = strings.uuid()
+  add: (
+    scope: string,
+    cb: (elem: Element) => void,
+    options?: RefresherFilteringOptions
+  ): string => {
+    const uuid = strings.uuid()
 
     if (typeof lists[uuid] === 'undefined') {
-      let obj = {
+      const obj = {
         func: cb,
         scope,
-        status: {},
         events: {},
         options
       }
@@ -103,11 +85,10 @@ export const filter = {
     return uuid
   },
 
-  addGlobal: (id: string, scope: string, cb: Function) => {
+  addGlobal: (id: string, scope: string, cb: () => void): void => {
     lists[id] = {
       func: cb,
       scope,
-      status: {},
       events: {}
     }
 
@@ -117,7 +98,7 @@ export const filter = {
   /**
    * 필터 lists 에 있는 필터 함수를 제거합니다.
    */
-  remove: (uuid: string, skip?: boolean) => {
+  remove: (uuid: string, skip?: boolean): void => {
     if (skip && typeof lists[uuid] === 'undefined') {
       return
     }
@@ -129,7 +110,9 @@ export const filter = {
     filter.events(uuid, `remove`)
 
     if (lists[uuid].options && lists[uuid].options?.neverExpire) {
-      lists[uuid].expire!()
+      if (typeof lists[uuid].expire === 'function') {
+        lists[uuid].expire()
+      }
     }
 
     delete lists[uuid]
@@ -138,7 +121,7 @@ export const filter = {
   /**
    * 해당 UUID의 이벤트에 콜백 함수를 등록합니다.
    */
-  on: (uuid: string, event: string, cb: Function) => {
+  on: (uuid: string, event: string, cb: (...args: unknown[]) => void): void => {
     if (uuid == '' || event == '') {
       throw new Error('Given UUID or event is not valid.')
     }
@@ -157,7 +140,7 @@ export const filter = {
   /**
    * 해당 UUID에 이벤트를 발생시킵니다.
    */
-  events: (uuid: string, event: string, ...args: any[]) => {
+  events: (uuid: string, event: string, ...args: unknown[]): void => {
     if (uuid == '' || event == '') {
       throw new Error('Given UUID or event is not valid.')
     }
@@ -170,7 +153,7 @@ export const filter = {
       return
     }
 
-    let eventObj = lists[uuid].events[event]
+    const eventObj = lists[uuid].events[event]
     let eventIter = eventObj.length
 
     while (eventIter--) {
