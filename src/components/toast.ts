@@ -27,7 +27,7 @@ Vue.component('refresher-toast', {
 
 window.addEventListener('DOMContentLoaded', () => {
   if (!document.querySelector('.refresher-toast')) {
-    let element = document.createElement('refresher-toast')
+    const element = document.createElement('refresher-toast')
     document.querySelector('body')?.appendChild(element)
   }
 
@@ -38,9 +38,9 @@ window.addEventListener('DOMContentLoaded', () => {
         title: '',
         id: 0,
         content: '',
-        clickCb: null,
+        clickCb: () => {},
         open: false,
-        type: null,
+        type: '',
         autoClose: 0
       }
     },
@@ -49,7 +49,7 @@ window.addEventListener('DOMContentLoaded', () => {
         content: string,
         type: string,
         autoClose: boolean,
-        click?: Function
+        click?: () => void
       ) {
         this.content = content
         this.id = Math.random()
@@ -57,7 +57,7 @@ window.addEventListener('DOMContentLoaded', () => {
         this.clickCb = click
 
         if ((typeof autoClose !== 'boolean' && !autoClose) || autoClose) {
-          this.autoClose = setTimeout(
+          this.autoClose = window.setTimeout(
             this.hide,
             autoClose && typeof autoClose === 'number' ? autoClose : 5000
           )
@@ -89,11 +89,11 @@ window.addEventListener('keydown', ev => {
  * @param click 클릭하면 실행할 함수
  */
 export const show = (
-  content: String,
-  type: Boolean,
-  autoClose: Number,
-  click?: Function
-) => {
+  content: string,
+  type: boolean,
+  autoClose: number,
+  click?: () => void
+): void => {
   if (Toast.autoClose) {
     clearTimeout(Toast.autoClose)
   }

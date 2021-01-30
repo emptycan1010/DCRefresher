@@ -4,6 +4,27 @@ import { eventBus } from '../core/eventbus'
 
 const NRegex = /(ㄴ)(\s)?([^ ]+)/g
 
+interface CommentVueData {
+  currentId: string
+  me: boolean
+  rereply: boolean
+}
+interface CommentVueMethods {
+  checkReReply: () => boolean
+}
+
+interface CommentClass extends CommentVueData, CommentVueMethods {
+  comment: dcinsideCommentObject
+  index: number
+  postUser: string
+}
+
+interface VoiceDataComputed {
+  iframe: boolean
+  src: string
+  memo: string
+}
+
 export default {
   components: {
     TimeStamp,
@@ -23,7 +44,7 @@ export default {
     </div>
     <p v-else class="refresher-comment-content" :class="{dccon: comment.memo.indexOf('<img class=') > -1 || comment.memo.indexOf('<video class=') > -1}" v-html="comment.memo"></p>
   </div>`,
-  data () {
+  data (): CommentVueData {
     return {
       currentId: '',
       me: false,
@@ -44,23 +65,24 @@ export default {
       type: String
     }
   },
-  mounted () {
+  mounted (this: CommentClass): void {
     this.rereply = this.checkReReply()
 
     if (!this.comment.user.id) {
       return
     }
 
-    let gallogImageElement = document.querySelector(
+    const gallogImageElement = document.querySelector(
       '#login_box .user_info .writer_nikcon > img'
     ) as HTMLImageElement
 
-    let click = gallogImageElement && gallogImageElement.getAttribute('onclick')
+    const click =
+      gallogImageElement && gallogImageElement.getAttribute('onclick')
 
     if (click) {
       this.currentId = click
-        .replace(/window\.open\(\'\/\/gallog\.dcinside\.com\//g, '')
-        .replace(/\'\)\;/g, '')
+        .replace(/window\.open\('\/\/gallog\.dcinside\.com\//g, '')
+        .replace(/'\);/g, '')
 
       this.me = this.currentId === this.comment.user.id
     }
@@ -82,11 +104,11 @@ export default {
     }
   },
   computed: {
-    getVoiceData (): { [index: string]: any } | null {
+    getVoiceData (this: CommentClass): VoiceDataComputed | null {
       if (!this.comment.vr_player) {
         return null
       }
-      let memo = this.comment.memo.split('@^dc^@')
+      const memo = this.comment.memo.split('@^dc^@')
 
       return {
         iframe: memo[0].indexOf('iframe') > -1,
@@ -99,20 +121,20 @@ export default {
     }
   },
   methods: {
-    date (str: string) {
+    date (str: string): string {
       return str.substring(0, 4).match(/\./)
         ? `${new Date().getFullYear()}-${str.replace(/\./g, '-')}`
         : str.replace(/\./g, '-')
     },
 
-    extractID (str: string) {
-      let match = str.match(/gallog\.dcinside.com\/.+\'/g)
-      return match ? match[0].replace(/gallog\.dcinside.com\/|\'/g, '') : null
+    extractID (str: string): string | null {
+      const match = str.match(/gallog\.dcinside.com\/.+'/g)
+      return match ? match[0].replace(/gallog\.dcinside.com\/|'/g, '') : null
     },
 
-    checkReReply (): boolean {
-      let content = this.comment.memo
-      let depth = this.comment.depth
+    checkReReply (this: CommentClass): boolean {
+      const content = this.comment.memo
+      const depth = this.comment.depth
 
       if (depth < 1) {
         return false

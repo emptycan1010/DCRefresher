@@ -12,7 +12,9 @@ const blockScripts = (elem: HTMLScriptElement) => {
       ].filter(v => elem.src.indexOf(v) > -1).length) ||
     (!elem.src && elem.innerHTML.indexOf('taboola') > -1)
   ) {
-    elem.parentElement!.removeChild(elem)
+    if (elem.parentElement) {
+      elem.parentElement.removeChild(elem)
+    }
   }
 }
 
@@ -21,7 +23,9 @@ const blockLinks = (elem: HTMLLinkElement) => {
     elem.href &&
     ['ads', 'adservice'].filter(v => elem.href.indexOf(v) > -1).length
   ) {
-    elem.parentElement!.removeChild(elem)
+    if (elem.parentElement) {
+      elem.parentElement.removeChild(elem)
+    }
   }
 }
 
@@ -49,7 +53,7 @@ export default {
   enable: true,
   default_enable: true,
   require: ['filter', 'eventBus'],
-  func (filter: RefresherFilter, eventBus: RefresherEventBus) {
+  func (filter: RefresherFilter, eventBus: RefresherEventBus): void {
     if (document.documentElement) {
       document.documentElement.classList.add('refresherAdBlock')
     }
@@ -63,11 +67,11 @@ export default {
     )
 
     this.memory.eventRefresh = eventBus.on('refresh', () => {
-      filter.runSpecific('listAd').catch((_: Error) => {})
+      filter.runSpecific('listAd').catch(() => {})
     })
   },
 
-  revoke (filter: RefresherFilter, eventBus: RefresherEventBus) {
+  revoke (filter: RefresherFilter, eventBus: RefresherEventBus): void {
     document.documentElement.classList.remove('refresherAdBlock')
 
     if (this.memory.uuid) {

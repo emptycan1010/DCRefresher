@@ -4,21 +4,21 @@
  * @param element 탐색할 element.
  */
 export const traversal = (element: HTMLElement): HTMLElement[] => {
-  let result = []
+  const result = []
 
   if (element.nodeType !== Node.ELEMENT_NODE) {
     return []
   }
 
-  let childs = element.children
-  let child_len = childs.length
+  const childs = element.children
+  const child_len = childs.length
 
   result.push(element)
 
-  for (var i = 0; i < child_len; i++) {
-    let child = childs[i] as HTMLElement
+  for (let i = 0; i < child_len; i++) {
+    const child = childs[i] as HTMLElement
 
-    let travel = traversal(child)
+    const travel = traversal(child)
     if (travel.length) {
       result.push(...travel)
     }
@@ -54,14 +54,14 @@ export const findNeighbor = (
 
   if (el.parentElement) {
     if (el.parentElement && el.parentElement.parentElement) {
-      let qsa = el.parentElement.parentElement.querySelectorAll(find)
+      const qsa = el.parentElement.parentElement.querySelectorAll(find)
 
       if (qsa && qsa.length && Array.from(qsa).includes(el.parentElement)) {
         return el.parentElement
       }
     }
 
-    let query = el.parentElement.querySelector(find) as HTMLElement
+    const query = el.parentElement.querySelector(find) as HTMLElement
 
     if (!query) {
       current++

@@ -1,6 +1,6 @@
 import PreviewButton from './button'
 
-import { User } from '../structs/user'
+import { User } from '../utils/user'
 
 import * as Toast from './toast'
 
@@ -34,7 +34,7 @@ export default {
       </div>
     </div>
   </div>`,
-  data () {
+  data (): {[index:string]: unknown} {
     return {
       focused: false,
       disabled: false,
@@ -57,32 +57,33 @@ export default {
     }
   },
   watch: {
-    unsignedUserID (value: string) {
+    unsignedUserID (value: string): void {
       localStorage.setItem('nonmember_nick', value)
       this.user.nick = value
     },
 
-    unsignedUserPW (value: string) {
+    unsignedUserPW (value: string): void {
       localStorage.setItem('nonmember_pw', value)
     }
   },
-  mounted () {
-    let gallogName = document.querySelector(
+  mounted (): void {
+    const gallogName = document.querySelector(
       '#login_box .user_info .nickname em'
     ) as HTMLElement
 
-    let fixedName = gallogName && gallogName.innerHTML
+    const fixedName = gallogName && gallogName.innerHTML
     if (fixedName) {
       this.fixedUser = true
 
-      let gallogIcon = document.querySelector(
+      const gallogIcon = document.querySelector(
         '#login_box .user_info .writer_nikcon img'
       ) as HTMLImageElement
 
-      let id = gallogIcon
-        .getAttribute('onclick')!
-        .replace(/window\.open\(\'\/\/gallog\.dcinside\.com\//g, '')
-        .replace(/\'\)\;/g, '')
+      const attribute = gallogIcon.getAttribute('onclick') as string
+
+      const id = attribute
+        .replace(/window\.open\('\/\/gallog\.dcinside\.com\//g, '')
+        .replace(/'\\;/g, '')
 
       this.user = new User(fixedName, id, null, gallogIcon.src)
     } else {
@@ -90,14 +91,14 @@ export default {
     }
   },
   methods: {
-    validCheck (type: string, value: string) {
+    validCheck (type: string, value: string): void {
       if (type === 'id' && (!value || value.length < 2)) {
         Toast.show('아이디는 최소 2자리 이상이어야 합니다.', true, 2000)
         this.unsignedUserID = 'ㅇㅇ'
       }
 
       if (type === 'pw' && (!value || value.length < 2)) {
-        let random = Math.random()
+        const random = Math.random()
           .toString(36)
           .substring(5)
 
@@ -112,13 +113,13 @@ export default {
       }
     },
 
-    toggleEditUser () {
+    toggleEditUser (): void {
       if (!this.user.id) {
         this.editUser = !this.editUser
       }
     },
 
-    async write () {
+    async write (): Promise<boolean> {
       this.disabled = true
 
       if (!this.unsignedUserID || !this.unsignedUserPW) {
@@ -127,7 +128,7 @@ export default {
       }
 
       if (this.func) {
-        let result = await this.func(
+        const result = await this.func(
           'text',
           this.text,
           this.fixedUser
@@ -142,17 +143,17 @@ export default {
       return true
     },
 
-    focus () {
+    focus (): void {
       this.focused = true
       this.$root.inputFocus = true
     },
 
-    blur () {
+    blur (): void {
       this.focused = false
       this.$root.inputFocus = false
     },
 
-    type (ev: KeyboardEvent) {
+    type (ev: KeyboardEvent): void {
       if (ev.key !== 'Enter') {
         return ev
       }

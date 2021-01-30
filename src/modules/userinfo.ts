@@ -10,22 +10,22 @@ export default {
   enable: true,
   default_enable: true,
   require: ['filter', 'ip'],
-  func (filter: RefresherFilter, ip) {
-    let ipInfoAdd = (elem: HTMLElement) => {
+  func (filter: RefresherFilter, ip: RefresherIP): void {
+    const ipInfoAdd = (elem: HTMLElement) => {
       if (!elem || !elem.dataset.ip || elem.dataset.refresherIp) return false
-      let ip_data = ip.ISPData(elem.dataset.ip, '')
+      const ip_data = ip.ISPData(elem.dataset.ip)
 
-      let text = document.createElement('span')
+      const text = document.createElement('span')
       text.className = 'ip refresherIP'
-      let format = ip.format(ip_data)
+      const format = ip.format(ip_data)
       text.innerHTML = `<span>${
         format.length > 100 ? format.substring(0, 97) + '...' : format
       }</span>`
       text.title = format
 
-      let fl = elem.querySelector('.fl')
+      const fl = elem.querySelector('.fl')
       if (fl) {
-        let flIpQuery = fl.querySelector('.ip')
+        const flIpQuery = fl.querySelector('.ip')
 
         if (flIpQuery) {
           fl.insertBefore(text, flIpQuery.nextSibling)
@@ -37,22 +37,22 @@ export default {
       elem.dataset.refresherIp = ip_data && ip_data.name && format
     }
 
-    let IdInfoAdd = (elem: HTMLElement) => {
+    const IdInfoAdd = (elem: HTMLElement) => {
       if (!elem || !elem.dataset.uid || elem.dataset.refresherId) return false
 
-      let img = elem.querySelector('img')
+      const img = elem.querySelector('img')
       if (!img || img.src.indexOf('dc/w/images/nik.gif') === -1) {
         return false
       }
 
-      let text = document.createElement('span')
+      const text = document.createElement('span')
       text.className = 'ip refresherIP'
       text.innerHTML = `<span>(${elem.dataset.uid})</span>`
       text.title = elem.dataset.uid
 
-      let fl = elem.querySelector('.fl')
+      const fl = elem.querySelector('.fl')
       if (fl) {
-        let flIpQuery = fl.querySelector('.ip')
+        const flIpQuery = fl.querySelector('.ip')
 
         if (flIpQuery) {
           fl.insertBefore(text, flIpQuery.nextSibling)
@@ -65,7 +65,7 @@ export default {
     }
 
     const elemAdd = (elem: HTMLElement | Document) => {
-      let list = elem.querySelectorAll('.ub-writer')
+      const list = elem.querySelectorAll('.ub-writer')
       let iter = list.length
 
       while (iter--) {
@@ -88,12 +88,12 @@ export default {
 
     elemAdd(document)
   },
-  revoke (filter: RefresherFilter, ip) {
+  revoke (filter: RefresherFilter): void {
     if (this.memory.always) {
       filter.remove(this.memory.always, true)
     }
 
-    let lists = document.querySelectorAll('.refresherIP')
+    const lists = document.querySelectorAll('.refresherIP')
 
     lists.forEach(elem => {
       elem.parentElement?.removeChild(elem)

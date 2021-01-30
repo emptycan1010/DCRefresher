@@ -12,4 +12,6 @@ _old_src
 !.yarn/versions
 .pnp.*
 
+.eslintcache
+
 src/modules/private-*.ts

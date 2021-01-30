@@ -1,9 +1,11 @@
-export default (...inputs: any) => {
-  inputs.forEach((str: any) => {
-    str = typeof str === 'object' ? JSON.stringify(str) : str
+export default (...inputs: unknown[]): void => {
+  inputs.map((str: unknown) => {
+    if (typeof str === 'object') {
+      str = JSON.stringify(str)
+    }
   })
 
-  return console.log(
+  console.log(
     `🔧 %c${new Date().toLocaleTimeString('en-US')} %c:`,
     `color: #888;`,
     `color: unset;`,
