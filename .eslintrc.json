@@ -15,7 +15,7 @@
   "plugins": ["@typescript-eslint"],
   "rules": {
     "@typescript-eslint/no-use-before-define": "error",
-    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-explicit-any": ["error", { "ignoreRestArgs": true }],
     "linebreak-style": "off",
     "no-use-before-define": "off",
     "camelcase": "off",

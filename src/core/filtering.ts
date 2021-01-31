@@ -121,7 +121,7 @@ export const filter: RefresherFilter = {
   /**
    * 해당 UUID의 이벤트에 콜백 함수를 등록합니다.
    */
-  on: (uuid: string, event: string, cb: (...args: unknown[]) => void): void => {
+  on: (uuid: string, event: string, cb: (...args: any[]) => void): void => {
     if (uuid == '' || event == '') {
       throw new Error('Given UUID or event is not valid.')
     }
@@ -140,7 +140,7 @@ export const filter: RefresherFilter = {
   /**
    * 해당 UUID에 이벤트를 발생시킵니다.
    */
-  events: (uuid: string, event: string, ...args: unknown[]): void => {
+  events: (uuid: string, event: string, ...args: any[]): void => {
     if (uuid == '' || event == '') {
       throw new Error('Given UUID or event is not valid.')
     }

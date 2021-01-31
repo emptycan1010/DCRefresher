@@ -164,7 +164,7 @@ export const Frame = Vue.component('refresher-frame', {
       return this.frame.functions.retry()
     },
 
-    async writeComment (...args: unknown[]) {
+    async writeComment (...args: any[]) {
       let result = false
 
       if (this.frame.functions.writeComment) {
@@ -230,13 +230,13 @@ export const Group = Vue.component('refresher-group', {
     </div>`,
   data () {
     return {
-      frames: this.$root.frames
+      frames: (this.$root as RefresherFrameAppVue).frames
     }
   },
   methods: {
     clickHandle (ev: Event) {
       if (ev.target !== this.$el) return ev
-      this.$root.outerClick(ev)
+      ;(this.$root as RefresherFrameAppVue).outerClick()
     }
   }
 })

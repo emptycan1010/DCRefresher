@@ -1,4 +1,4 @@
-export default (...inputs: unknown[]): void => {
+export default (...inputs: any[]): void => {
   inputs.map((str: unknown) => {
     if (typeof str === 'object') {
       str = JSON.stringify(str)

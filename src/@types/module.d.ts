@@ -41,7 +41,7 @@ declare global {
     /**
      * 해당 모듈이 가질 상탯값. 모듈 설정 저장용으로 사용됩니다.
      */
-    status: { [index: string]: unknown } | null | boolean
+    status: { [index: string]: unknown } | null
 
     /**
      * 해당 모듈이 가질 메모리 값. 모듈에 일시적으로 데이터를 저장하고 싶을 때 사용됩니다.
@@ -76,11 +76,11 @@ declare global {
     /**
      * 해당 모듈이 작동할 때를 처리하기 위한 함수. require에서 적어 넣은 변수 순서대로의 인자를 인자로 넘겨줍니다.
      */
-    func: (...args: unknown[]) => void
+    func: (...args: any[]) => void
 
     /**
      * 해당 모듈이 회수될 때 (비활성화될 때) 를 처리하기 위한 함수. require에서 적어 넣은 변수 순서대로의 인자를 인자로 넘겨줍니다.
      */
-    revoke: (...args: unknown[]) => void
+    revoke: (...args: any[]) => void
   }
 }

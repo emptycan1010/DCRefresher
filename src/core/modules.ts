@@ -69,8 +69,10 @@ export const modules = {
   },
   load: (...mods: RefresherModule[]): Promise<void> =>
     new Promise<void>(resolve => {
-      Promise.all(
-        new Array(mods.length).map(({ index }) => modules.register(mods[index]))
+      return Promise.all(
+        mods.map(v => {
+          return modules.register(v)
+        })
       ).then(() => {
         resolve()
       })
@@ -93,7 +95,11 @@ export const modules = {
 
     if (mod.settings) {
       for (const key in mod.settings) {
-        mod.status[key] = await settings.loadDefault(
+        if (!mod.status) {
+          mod.status = {}
+        }
+        
+        mod.status[key] = await settings.load(
           mod.name,
           key,
           mod.settings[key]
@@ -157,7 +163,7 @@ if (runtime.onMessage) {
 }
 
 eventBus.on(
-  'RefresherUpdateSetting',
+  'refresherUpdateSetting',
   (module: string, key: string, value: unknown) => {
     if (module_store[module]) {
       module_store[module].status[key] = value
