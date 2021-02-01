@@ -20,8 +20,8 @@
   }
 
   #refresher-app {
-    height: 395px;
-    width: 600px;
+    height: 435px;
+    width: 715px;
   }
 
   body {
@@ -153,13 +153,17 @@
     overflow: auto;
     position: absolute;
     width: 90%;
-    height: 280px;
+    height: 345px;
+
+    & > *:first-child {
+      margin-top: 5px;
+    }
   }
 
   .refresher-title-zone {
     margin-left: 2.5vw;
-    margin-bottom: 4vh;
-    height: 55px;
+    margin-bottom: 10px;
+    height: 48px;
     display: flex;
     width: 90%;
 

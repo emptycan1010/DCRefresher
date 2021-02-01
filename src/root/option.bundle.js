@@ -87,8 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
             blockModes_store: this.blockModes
           })
         })
-
-        debugger
       },
 
       addEmptyBlockedUser (key) {
@@ -585,7 +583,7 @@ Vue.component('refresher-dccon', {
     select (ev) {
       chrome.windows.create(
         {
-          url: 'views/dcconSel.html',
+          url: 'views/dcconSelection.html',
           type: 'popup',
           height: 800,
           width: 400
