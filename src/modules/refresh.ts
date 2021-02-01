@@ -103,6 +103,8 @@ export default {
     const isPostView = location.href.indexOf('/board/view') > -1
     const currentPostNo = new URLSearchParams(location.href).get('no')
 
+    const originalLocation = location.href
+
     const load = async (): Promise<boolean> => {
       if (Date.now() - lastAccess < 500) {
         return false
@@ -129,7 +131,7 @@ export default {
 
       this.memory.new_counts = 0
 
-      const url = http.view(location.href)
+      const url = http.view(originalLocation)
       const newList = await body(url)
 
       let oldList = document.querySelector('.gall_list tbody')
