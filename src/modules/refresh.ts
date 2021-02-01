@@ -273,7 +273,7 @@ export default {
       return true
     }
 
-    const run = (skipLoad: boolean) => {
+    const run = (skipLoad?: boolean) => {
       if (!skipLoad) {
         load()
       }
