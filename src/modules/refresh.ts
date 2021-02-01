@@ -273,8 +273,10 @@ export default {
       return true
     }
 
-    const run = () => {
-      load()
+    const run = (skipLoad: boolean) => {
+      if (!skipLoad) {
+        load()
+      }
 
       if (!this.status.autoRate) {
         this.memory.delay = Math.max(1000, this.status.refreshRate || 2500)
@@ -299,7 +301,7 @@ export default {
       run()
     })
 
-    run()
+    run(true)
 
     this.memory.refreshRequest = eventBus.on('refreshRequest', () => {
       if (this.memory.refresh) {
