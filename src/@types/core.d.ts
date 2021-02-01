@@ -89,6 +89,7 @@ declare global {
     downvotes: string | null
     buttonError: unknown
     error?: unknown
+    collapse?: boolean
 
     data: { [index: string]: unknown }
     functions: {

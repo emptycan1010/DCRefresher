@@ -1386,7 +1386,10 @@ export default {
           })
       }
 
-      frame.functions.load()
+      if (!frame.collapse) {
+        frame.functions.load()
+      }
+
       frame.functions.retry = frame.functions.load
 
       frame.functions.openOriginal = () => {
