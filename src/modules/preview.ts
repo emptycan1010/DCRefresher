@@ -859,11 +859,11 @@ const getRelevantData = (ev: MouseEvent) => {
     linkElement = (isTR
       ? target.querySelector('a:not(.reply_numbox)')
       : findNeighbor(
-        target,
-        'a:not(.reply_numbox)',
-        3,
-        null
-      )) as HTMLLinkElement
+          target,
+          'a:not(.reply_numbox)',
+          3,
+          null
+        )) as HTMLLinkElement
 
     if (typeof linkElement !== null) {
       title = linkElement.innerText
@@ -1413,7 +1413,7 @@ export default {
 
       let postDom: Document
 
-      new Promise<GalleryPreData>((resolve) => {
+      new Promise<GalleryPreData>(resolve => {
         if (preData.gallery !== 'issuezoom') {
           resolve({
             gallery: preData.gallery,
@@ -1694,7 +1694,11 @@ export default {
           background: true,
           stack: true,
           groupOnce: true,
-          onScroll: (ev: WheelEvent, app: RefresherFrameAppVue, group: HTMLElement) => {
+          onScroll: (
+            ev: WheelEvent,
+            app: RefresherFrameAppVue,
+            group: HTMLElement
+          ) => {
             if (!this.status.scrollToSkip) {
               return
             }
@@ -1713,6 +1717,10 @@ export default {
         const scrolledToBottom =
           groupStore.scrollHeight - groupStore.scrollTop ===
           groupStore.clientHeight
+
+        if (!scrolledTop && !scrolledToBottom) {
+          scrolledCount = 0
+        }
 
         if (ev.deltaY < 0) {
           appStore.$data.scrollModeBottom = false
