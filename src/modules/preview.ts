@@ -859,11 +859,11 @@ const getRelevantData = (ev: MouseEvent) => {
     linkElement = (isTR
       ? target.querySelector('a:not(.reply_numbox)')
       : findNeighbor(
-          target,
-          'a:not(.reply_numbox)',
-          3,
-          null
-        )) as HTMLLinkElement
+        target,
+        'a:not(.reply_numbox)',
+        3,
+        null
+      )) as HTMLLinkElement
 
     if (typeof linkElement !== null) {
       title = linkElement.innerText
