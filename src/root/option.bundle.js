@@ -66,6 +66,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 behavior: 'smooth',
                 block: 'center'
               })
+
+              setTimeout(() => {
+                this.$el
+                  .querySelectorAll('.refresher-module.highlight')
+                  .forEach(v => {
+                    v.classList.remove('highlight')
+                  })
+              }, 1000)
             })
 
             return
