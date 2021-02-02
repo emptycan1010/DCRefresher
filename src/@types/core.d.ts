@@ -86,6 +86,7 @@ declare global {
     contents: string
     comments: dcinsideComments | Record<string, unknown>
     upvotes: string | null
+    fixedUpvotes: string | null
     downvotes: string | null
     buttonError: unknown
     error?: unknown

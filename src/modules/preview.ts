@@ -17,6 +17,7 @@ class PostInfo implements PostInfo {
   expire?: string
   user?: User
   views?: string
+  fixedUpvotes?: string
   upvotes?: string
   downvotes?: string
   contents?: string
@@ -87,6 +88,10 @@ const parse = (id: string, body: string) => {
     .querySelector('.view_content_wrap div.fr > span.gall_reply_num')
     ?.innerHTML.replace(/추천\s/, '')
 
+  const fixedUpvotes = dom
+    .querySelector('.view_content_wrap .btn_recommend_box .sup_num .smallnum')
+    ?.innerHTML
+
   const downvotes = dom.querySelector('div.btn_recommend_box.clear .down_num')
     ?.innerHTML
 
@@ -140,6 +145,7 @@ const parse = (id: string, body: string) => {
     ),
     views,
     upvotes,
+    fixedUpvotes,
     downvotes,
     contents,
     commentId,
@@ -1346,6 +1352,7 @@ export default {
 
             frame.contents = obj.contents || ''
             frame.upvotes = obj.upvotes || '0'
+            frame.fixedUpvotes = obj.fixedUpvotes || '0'
             frame.downvotes = obj.downvotes || '0'
 
             frame.data.disabledDownvote = obj.disabledDownvote
