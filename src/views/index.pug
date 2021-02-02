@@ -31,11 +31,12 @@ html.refresher-popup
             div(v-if="!Object.keys(settings).length")
               h3.need-refresh 우선 디시 페이지를 열고 설정 해주세요.
             div(v-else class="refresher-setting-category" v-for="(module, i) in Object.keys(settings)")
-              h3 {{module}}
+              h3(v-on:click="moveToModuleTab(module)") {{module}} <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" width="18px" height="18px"><path d="M0 0h24v24H0z" fill="none"/><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
               div.refresher-setting(v-for="(setting, i) in Object.keys(settings[module])" v-if="!settings[module][setting].advanced")
                 .info
                   h4 {{settings[module][setting].name}}
-                  p {{settings[module][setting].desc}} <span class="mute">(기본 값 : {{settings[module][setting].default}})</span>
+                  p {{settings[module][setting].desc}}
+                  p.mute (기본 값 : {{settings[module][setting].default}})
                 .control
                   refresher-checkbox(v-if="settings[module][setting].type === 'check'" :checked="settings[module][setting].value" :change="updateUserSetting" :modname="module" :id="setting")
                   refresher-input(v-if="settings[module][setting].type === 'text'" :placeholder="settings[module][setting].default" :value="settings[module][setting].value" :id="setting" :modname="module" :change="updateUserSetting")

@@ -48,6 +48,31 @@ document.addEventListener('DOMContentLoaded', () => {
         window.open(url, '_blank')
       },
 
+      moveToModuleTab (moduleName) {
+        this.tab = 3
+
+        this.$el.querySelectorAll('.refresher-module.highlight').forEach(v => {
+          v.classList.remove('highlight')
+        })
+
+        let modules = this.$el.querySelectorAll('.tab .refresher-module .title')
+
+        for (var i = 0; i < modules.length; i++) {
+          if (modules[i].innerText === moduleName) {
+            requestAnimationFrame(() => {
+              modules[i].parentElement.parentElement.classList.add('highlight')
+
+              modules[i].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+              })
+            })
+
+            return
+          }
+        }
+      },
+
       advancedSettingsCount (obj) {
         return Object.keys(obj).filter(v => obj[v] && obj[v].advanced).length
       },
