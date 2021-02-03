@@ -77,8 +77,8 @@ module.exports = (env, argv) => {
         }
       }),
       new HtmlWebpackPlugin({
-        template: './src/views/dcconSel.pug',
-        filename: 'views/dcconSel.html',
+        template: './src/views/dcconSelection.pug',
+        filename: 'views/dcconSelection.html',
         inject: false,
         templateParameters: {
           RefresherVersion: pkg.version || '1.0.0',

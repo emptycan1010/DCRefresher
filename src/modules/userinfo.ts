@@ -3,7 +3,6 @@ export default {
   description: '유동, 반고닉 사용자의 IP, 아이디 정보를 표시합니다.',
   author: { name: 'Sochiru', url: '' },
   url: /gall\.dcinside\.com\/(mgallery\/|mini\/)?board\/(view|lists)/g,
-  status: false,
   memory: {
     always: ''
   },

@@ -43,7 +43,6 @@ export default {
   name: '광고 차단',
   description: '페이지 로드 속도를 느리게 만드는 광고를 차단합니다.',
   author: { name: 'Sochiru', url: '' },
-  status: false,
   memory: {
     uuid: null,
     uuidf2: null,

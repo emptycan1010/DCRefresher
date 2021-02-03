@@ -26,7 +26,7 @@ class InternalFrame implements RefresherFrame {
   subtitle: string
   comments: dcinsideComments | Record<string, unknown>
   functions: {
-    [index: string]: (...args: unknown[]) => boolean | Promise<boolean>
+    [index: string]: (...args: any[]) => boolean | Promise<boolean>
   }
 
   options: FrameOption

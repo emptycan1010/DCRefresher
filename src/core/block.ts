@@ -1,6 +1,7 @@
 import * as store from '../utils/store'
 import { eventBus } from './eventbus'
 import log from '../utils/logger'
+import { browser } from 'webextension-polyfill-ts'
 
 const runtime = (chrome && chrome.runtime) || (browser && browser.runtime)
 

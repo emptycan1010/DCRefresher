@@ -139,6 +139,13 @@ export default {
         this.memory.uuid = filter.add(
           `.gall_list .us-post b`,
           (elem: HTMLElement) => {
+            if (
+              new URL(location.href).searchParams.get('exception_mode') ===
+              'notice'
+            ) {
+              return
+            }
+
             const pelem = (elem.parentElement as HTMLElement)
               .parentElement as HTMLElement
             if (pelem as HTMLElement) {

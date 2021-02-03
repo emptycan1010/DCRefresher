@@ -9,7 +9,7 @@ export const eventBus: RefresherEventBus = {
    * @param event 호출 할 이벤트 이름.
    * @param params 호출 할 이벤트에 넘길 인자.
    */
-  emit: (event: string, ...params: unknown[]) => {
+  emit: (event: string, ...params: any[]) => {
     if (!lists[event]) {
       return
     }
@@ -33,7 +33,7 @@ export const eventBus: RefresherEventBus = {
     // TODO : 왜 이상하게 짬?
   },
 
-  emitNextTick: (event: string, ...params: unknown[]) => {
+  emitNextTick: (event: string, ...params: any[]) => {
     return requestAnimationFrame(() => eventBus.emit(event, ...params))
   },
 
@@ -44,7 +44,7 @@ export const eventBus: RefresherEventBus = {
    * @param params 호출 할 이벤트에 넘길 인자.
    * @returns {Promise} 모든 이벤트가 종료되기 전까지 대신 받을 Promise.
    */
-  emitForResult: (event: string, ...params: unknown[]) => {
+  emitForResult: (event: string, ...params: any[]) => {
     if (!lists[event]) {
       throw new Error('Given event is not defined.')
     }

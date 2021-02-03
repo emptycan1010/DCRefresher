@@ -17,6 +17,7 @@ class PostInfo implements PostInfo {
   expire?: string
   user?: User
   views?: string
+  fixedUpvotes?: string
   upvotes?: string
   downvotes?: string
   contents?: string
@@ -87,6 +88,10 @@ const parse = (id: string, body: string) => {
     .querySelector('.view_content_wrap div.fr > span.gall_reply_num')
     ?.innerHTML.replace(/추천\s/, '')
 
+  const fixedUpvotes = dom.querySelector(
+    '.view_content_wrap .btn_recommend_box .sup_num .smallnum'
+  )?.innerHTML
+
   const downvotes = dom.querySelector('div.btn_recommend_box.clear .down_num')
     ?.innerHTML
 
@@ -140,6 +145,7 @@ const parse = (id: string, body: string) => {
     ),
     views,
     upvotes,
+    fixedUpvotes,
     downvotes,
     contents,
     commentId,
@@ -1072,7 +1078,7 @@ export default {
     useKeyPress: true,
     colorPreviewLink: true,
     reversePreviewKey: false,
-    autoRefreshComment: false,
+    autoRefreshComment: true,
     commentRefreshInterval: 10,
     experimentalComment: false
   },
@@ -1335,6 +1341,7 @@ export default {
 
             frame.contents = obj.contents || ''
             frame.upvotes = obj.upvotes || '0'
+            frame.fixedUpvotes = obj.fixedUpvotes || '0'
             frame.downvotes = obj.downvotes || '0'
 
             frame.data.disabledDownvote = obj.disabledDownvote
@@ -1375,7 +1382,10 @@ export default {
           })
       }
 
-      frame.functions.load()
+      if (!frame.collapse) {
+        frame.functions.load()
+      }
+
       frame.functions.retry = frame.functions.load
 
       frame.functions.openOriginal = () => {
@@ -1575,8 +1585,14 @@ export default {
           return req()
         }
 
+        if (this.memory.refreshIntervalId) {
+          window.clearInterval(this.memory.refreshIntervalId)
+        }
+
         this.memory.refreshIntervalId = window.setInterval(() => {
-          frame.functions.retry()
+          if (this.status.autoRefreshComment) {
+            frame.functions.retry()
+          }
         }, this.status.commentRefreshInterval * 1000)
       })
     }
@@ -1703,6 +1719,10 @@ export default {
         const scrolledToBottom =
           groupStore.scrollHeight - groupStore.scrollTop ===
           groupStore.clientHeight
+
+        if (!scrolledTop && !scrolledToBottom) {
+          scrolledCount = 0
+        }
 
         if (ev.deltaY < 0) {
           appStore.$data.scrollModeBottom = false

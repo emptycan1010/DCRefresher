@@ -48,6 +48,47 @@ document.addEventListener('DOMContentLoaded', () => {
         window.open(url, '_blank')
       },
 
+      typeWrap (value) {
+        if (typeof value === 'boolean') {
+          return value ? 'On' : 'Off'
+        }
+
+        return value
+      },
+
+      moveToModuleTab (moduleName) {
+        this.tab = 3
+
+        this.$el.querySelectorAll('.refresher-module.highlight').forEach(v => {
+          v.classList.remove('highlight')
+        })
+
+        let modules = this.$el.querySelectorAll('.tab .refresher-module .title')
+
+        for (var i = 0; i < modules.length; i++) {
+          if (modules[i].innerText === moduleName) {
+            requestAnimationFrame(() => {
+              modules[i].parentElement.parentElement.classList.add('highlight')
+
+              modules[i].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+              })
+
+              setTimeout(() => {
+                this.$el
+                  .querySelectorAll('.refresher-module.highlight')
+                  .forEach(v => {
+                    v.classList.remove('highlight')
+                  })
+              }, 1000)
+            })
+
+            return
+          }
+        }
+      },
+
       advancedSettingsCount (obj) {
         return Object.keys(obj).filter(v => obj[v] && obj[v].advanced).length
       },
@@ -87,8 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
             blockModes_store: this.blockModes
           })
         })
-
-        debugger
       },
 
       addEmptyBlockedUser (key) {
@@ -128,6 +167,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         this.blocks[key][index].content = result
         this.syncBlock()
+      },
+
+      updateDarkMode (v) {
+        document.documentElement.classList[v ? 'add' : 'remove'](
+          'refresherDark'
+        )
+      }
+    },
+
+    watch: {
+      modules (modules) {
+        if (modules['다크 모드']) {
+          this.updateDarkMode(modules['다크 모드'].enable)
+        }
       }
     }
   })
@@ -217,6 +270,12 @@ Vue.component('refresher-module', {
       let obj = {}
       obj[`${this.name}.enable`] = value
       stor.sync.set(obj)
+
+      // TODO : 전체 로직 깔끔하게 변경
+
+      if (this.name === '다크 모드') {
+        this.$root.updateDarkMode(value)
+      }
 
       if (this.name === '광고 차단') {
         port.postMessage({
@@ -585,7 +644,7 @@ Vue.component('refresher-dccon', {
     select (ev) {
       chrome.windows.create(
         {
-          url: 'views/dcconSel.html',
+          url: 'views/dcconSelection.html',
           type: 'popup',
           height: 800,
           width: 400

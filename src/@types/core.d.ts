@@ -4,7 +4,7 @@ declare global {
   interface RefresherFilteringLists {
     func: (element: Element) => void
     scope: string
-    events: { [index: string]: ((...args: unknown[]) => void)[] }
+    events: { [index: string]: ((...args: any[]) => void)[] }
     options?: RefresherFilteringOptions
     expire?: () => void
   }
@@ -49,11 +49,11 @@ declare global {
     /**
      * 해당 UUID의 이벤트에 콜백 함수를 등록합니다.
      */
-    on: (uuid: string, event: string, cb: (...args: unknown[]) => void) => void
+    on: (uuid: string, event: string, cb: (...args: any[]) => void) => void
     /**
      * 해당 UUID에 이벤트를 발생시킵니다.
      */
-    events: (uuid: string, event: string, ...args: unknown[]) => void
+    events: (uuid: string, event: string, ...args: any[]) => void
   }
 
   interface RefresherEventBusOptions {
@@ -61,19 +61,19 @@ declare global {
   }
 
   interface RefresherEventBus {
-    emit: (event: string, ...params: unknown[]) => void
-    emitNextTick: (event: string, ...params: unknown[]) => void
-    emitForResult: (event: string, ...params: unknown[]) => Promise<void>
+    emit: (event: string, ...params: any[]) => void
+    emitNextTick: (event: string, ...params: any[]) => void
+    emitForResult: (event: string, ...params: any[]) => Promise<void>
     on: (
       event: string,
-      cb: () => void,
+      cb: (...any: any[]) => void,
       options?: RefresherEventBusOptions
     ) => string
     remove: (event: string, uuid: string, skip?: boolean) => void
   }
 
   interface RefresherEventBusObject {
-    func: (...params: unknown[]) => void
+    func: (...params: any[]) => void
     uuid: string
     once?: boolean
   }
@@ -86,13 +86,15 @@ declare global {
     contents: string
     comments: dcinsideComments | Record<string, unknown>
     upvotes: string | null
+    fixedUpvotes: string | null
     downvotes: string | null
     buttonError: unknown
     error?: unknown
+    collapse?: boolean
 
     data: { [index: string]: unknown }
     functions: {
-      [index: string]: (...args: unknown[]) => Promise<boolean> | boolean
+      [index: string]: (...args: any[]) => Promise<boolean> | boolean
     }
   }
 
