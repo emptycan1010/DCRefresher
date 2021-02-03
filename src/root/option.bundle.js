@@ -159,6 +159,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         this.blocks[key][index].content = result
         this.syncBlock()
+      },
+
+      updateDarkMode(v) {
+        document.documentElement.classList[v ? 'add' : 'remove']('refresherDark')
+      }
+    },
+
+    watch: {
+      modules (modules) {
+        if (modules['다크 모드']) {
+          this.updateDarkMode(modules['다크 모드'].enable)
+        }
       }
     }
   })
