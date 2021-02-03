@@ -161,8 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
         this.syncBlock()
       },
 
-      updateDarkMode(v) {
-        document.documentElement.classList[v ? 'add' : 'remove']('refresherDark')
+      updateDarkMode (v) {
+        document.documentElement.classList[v ? 'add' : 'remove'](
+          'refresherDark'
+        )
       }
     },
 
@@ -260,6 +262,12 @@ Vue.component('refresher-module', {
       let obj = {}
       obj[`${this.name}.enable`] = value
       stor.sync.set(obj)
+
+      // TODO : 전체 로직 깔끔하게 변경
+
+      if (this.name === '다크 모드') {
+        this.$root.updateDarkMode(value)
+      }
 
       if (this.name === '광고 차단') {
         port.postMessage({
