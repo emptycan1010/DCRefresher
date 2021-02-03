@@ -48,6 +48,14 @@ document.addEventListener('DOMContentLoaded', () => {
         window.open(url, '_blank')
       },
 
+      typeWrap (value) {
+        if (typeof value === 'boolean') {
+          return value ? 'On' : 'Off'
+        }
+
+        return value
+      },
+
       moveToModuleTab (moduleName) {
         this.tab = 3
 
