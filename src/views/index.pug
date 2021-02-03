@@ -23,7 +23,9 @@ html.refresher-popup
       transition-group(name="refresher-slide-left" mode="in-out")
         div.tab.tab1(v-show="tab == 0" key="tab1")
           .info
-            img(class="icon" data-image="icon")
+            .icon-wrap
+              img(class="icon" data-image="icon")
+              img(class="icon-backdrop" data-image="icon")
             .text
               h3 DCRefresher
               p <span class="version">v#{RefresherVersion}#{RefresherDevMode ? ' (dev mode)' : ''}</span>  <a v-for="(link, i) in links" v-on:click="open(link.url)">{{link.text}}</a>
