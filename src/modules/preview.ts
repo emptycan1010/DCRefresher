@@ -967,8 +967,7 @@ const miniPreview: miniPreview = {
     }
 
     if (!miniPreview.init) {
-      miniPreview.element.innerHTML =
-        '<h3>제목</h3><br><div class="refresher-mini-preview-contents"></div>'
+      miniPreview.element.innerHTML = `<h3>${preData.title}</h3><br><div class="refresher-mini-preview-contents"></div><p class="read-more">더 읽으려면 클릭하세요.</p>`
 
       document.body.appendChild(miniPreview.element)
       miniPreview.init = true
