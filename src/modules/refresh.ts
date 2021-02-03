@@ -103,9 +103,9 @@ export default {
     const isPostView = location.href.indexOf('/board/view') > -1
     const currentPostNo = new URLSearchParams(location.href).get('no')
 
-    const originalLocation = location.href
+    let originalLocation = location.href
 
-    const load = async (): Promise<boolean> => {
+    const load = async (customURL?: string): Promise<boolean> => {
       if (Date.now() - lastAccess < 500) {
         return false
       }
@@ -130,6 +130,10 @@ export default {
       }
 
       this.memory.new_counts = 0
+
+      if (customURL) {
+        originalLocation = customURL
+      }
 
       const url = http.view(originalLocation)
       const newList = await body(url)
@@ -338,7 +342,7 @@ export default {
             }
             this.memory.calledByPageTurn = true
 
-            await load()
+            await load(location.href)
 
             const query = document.querySelector(
               isPageView ? '.view_bottom_btnbox' : '.page_head'
@@ -397,7 +401,7 @@ export default {
                 }
                 this.memory.calledByPageTurn = true
 
-                load()
+                await load(location.href)
 
                 const query = document.querySelector(
                   location.href.indexOf('/board/view') > -1
