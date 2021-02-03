@@ -88,9 +88,9 @@ const parse = (id: string, body: string) => {
     .querySelector('.view_content_wrap div.fr > span.gall_reply_num')
     ?.innerHTML.replace(/추천\s/, '')
 
-  const fixedUpvotes = dom
-    .querySelector('.view_content_wrap .btn_recommend_box .sup_num .smallnum')
-    ?.innerHTML
+  const fixedUpvotes = dom.querySelector(
+    '.view_content_wrap .btn_recommend_box .sup_num .smallnum'
+  )?.innerHTML
 
   const downvotes = dom.querySelector('div.btn_recommend_box.clear .down_num')
     ?.innerHTML
@@ -1089,7 +1089,7 @@ export default {
     useKeyPress: true,
     colorPreviewLink: true,
     reversePreviewKey: false,
-    autoRefreshComment: false,
+    autoRefreshComment: true,
     commentRefreshInterval: 10,
     experimentalComment: false
   },
@@ -1596,8 +1596,14 @@ export default {
           return req()
         }
 
+        if (this.memory.refreshIntervalId) {
+          window.clearInterval(this.memory.refreshIntervalId)
+        }
+
         this.memory.refreshIntervalId = window.setInterval(() => {
-          frame.functions.retry()
+          if (this.status.autoRefreshComment) {
+            frame.functions.retry()
+          }
         }, this.status.commentRefreshInterval * 1000)
       })
     }
