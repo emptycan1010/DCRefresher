@@ -103,7 +103,9 @@ export default {
     const isPostView = location.href.indexOf('/board/view') > -1
     const currentPostNo = new URLSearchParams(location.href).get('no')
 
-    const load = async (): Promise<boolean> => {
+    let originalLocation = location.href
+
+    const load = async (customURL?: string): Promise<boolean> => {
       if (Date.now() - lastAccess < 500) {
         return false
       }
@@ -129,7 +131,11 @@ export default {
 
       this.memory.new_counts = 0
 
-      const url = http.view(location.href)
+      if (customURL) {
+        originalLocation = customURL
+      }
+
+      const url = http.view(originalLocation)
       const newList = await body(url)
 
       let oldList = document.querySelector('.gall_list tbody')
@@ -271,8 +277,10 @@ export default {
       return true
     }
 
-    const run = () => {
-      load()
+    const run = (skipLoad?: boolean) => {
+      if (!skipLoad) {
+        load()
+      }
 
       if (!this.status.autoRate) {
         this.memory.delay = Math.max(1000, this.status.refreshRate || 2500)
@@ -297,7 +305,7 @@ export default {
       run()
     })
 
-    run()
+    run(true)
 
     this.memory.refreshRequest = eventBus.on('refreshRequest', () => {
       if (this.memory.refresh) {
@@ -334,7 +342,7 @@ export default {
             }
             this.memory.calledByPageTurn = true
 
-            await load()
+            await load(location.href)
 
             const query = document.querySelector(
               isPageView ? '.view_bottom_btnbox' : '.page_head'
@@ -393,7 +401,7 @@ export default {
                 }
                 this.memory.calledByPageTurn = true
 
-                load()
+                await load(location.href)
 
                 const query = document.querySelector(
                   location.href.indexOf('/board/view') > -1

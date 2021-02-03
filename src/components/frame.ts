@@ -91,7 +91,7 @@ export const Frame = Vue.component('refresher-frame', {
         </div>
       </div>
       <div v-if="frame.collapse" class="refresher-collapse-text">
-        <h3>댓글 보기를 클릭하여 댓글만 표시합니다.</h3>
+        <h3 v-on:click="() => {frame.collapse = !frame.collapse; frame.functions.load()}">댓글 보기를 클릭하여 댓글만 표시합니다. 여기를 눌러 글을 볼 수 있습니다.</h3>
       </div>
       <div class="refresher-preview-contents refresher-error" v-if="frame.error">
         <h3>{{frame.error.title}}을 불러올 수 없습니다.</h3>
@@ -164,7 +164,7 @@ export const Frame = Vue.component('refresher-frame', {
       return this.frame.functions.retry()
     },
 
-    async writeComment (...args: unknown[]) {
+    async writeComment (...args: any[]) {
       let result = false
 
       if (this.frame.functions.writeComment) {
@@ -230,13 +230,13 @@ export const Group = Vue.component('refresher-group', {
     </div>`,
   data () {
     return {
-      frames: this.$root.frames
+      frames: (this.$root as RefresherFrameAppVue).frames
     }
   },
   methods: {
     clickHandle (ev: Event) {
       if (ev.target !== this.$el) return ev
-      this.$root.outerClick(ev)
+      ;(this.$root as RefresherFrameAppVue).outerClick()
     }
   }
 })

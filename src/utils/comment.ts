@@ -56,7 +56,7 @@ const requestBeforeServiceCode = (dom: HTMLElement) => {
       let tvl = _r,
         fi = parseInt(tvl.substr(0, 1))
       ;(fi = fi > 5 ? fi - 5 : fi + 4),
-      (tvl = tvl.replace(/^./, fi)),
+      (tvl = tvl.replace(/^./, fi.toString())),
       (_r = tvl)
     }
   }
@@ -101,9 +101,14 @@ interface CommentResult {
   message: string | null
 }
 
+interface LogoutUser {
+  name: string
+  pw: string
+}
+
 export async function submitComment (
   preData: GalleryPreData,
-  user: User,
+  user: LogoutUser,
   dom: HTMLElement,
   memo: string,
   captcha?: string

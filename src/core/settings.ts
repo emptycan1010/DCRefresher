@@ -2,32 +2,33 @@ import * as store from '../utils/store'
 import { eventBus } from './eventbus'
 import { browser } from 'webextension-polyfill-ts'
 
-const settings_store: { [index: string]: unknown } = {}
+const settings_store: {
+  [index: string]: { [index: string]: RefresherSettings }
+} = {}
 
 const runtime = (chrome && chrome.runtime) || (browser && browser.runtime)
+
+const REFRESHER_NAMESPACE = 'DCRefresher'
 
 export const set = async (
   module: string,
   key: string,
   value: unknown
 ): Promise<void> => {
-  eventBus.emit('RefresherUpdateSetting', module, key, value)
+  eventBus.emit('refresherUpdateSetting', module, key, value)
 
   settings_store[module][key].value = value
-
   await store.set(`${module}.${key}`, value)
 
-  if (runtime) {
-    runtime.sendMessage(
-      JSON.stringify({
-        settings_store
-      })
-    )
-  }
+  eventBus.emit('refresherSettingsSync', settings_store)
+}
+
+export const setGlobal = async (key: string, value: unknown): Promise<void> => {
+  return set(REFRESHER_NAMESPACE, key, value)
 }
 
 export const setStore = (module: string, key: string, value: unknown): void => {
-  eventBus.emit('RefresherUpdateSetting', module, key, value)
+  eventBus.emit('refresherUpdateSetting', module, key, value)
   settings_store[module][key].value = value
 }
 
@@ -39,7 +40,7 @@ export const dump = (): { [index: string]: unknown } => {
   return settings_store
 }
 
-export const loadDefault = async (
+export const load = async (
   module: string,
   key: string,
   settings: RefresherSettings
@@ -61,3 +62,13 @@ export const loadDefault = async (
 
   return got
 }
+
+eventBus.on('refresherSettingsSync', store => {
+  if (runtime) {
+    runtime.sendMessage(
+      JSON.stringify({
+        store
+      })
+    )
+  }
+})

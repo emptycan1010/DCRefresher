@@ -46,7 +46,6 @@ export default {
   name: '스텔스 모드',
   description: '페이지내에서 표시되는 이미지를 비활성화합니다',
   author: { name: 'pyo', url: '' },
-  status: false,
   memory: {
     contentViewUUID: null
   },

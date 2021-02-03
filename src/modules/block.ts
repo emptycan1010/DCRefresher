@@ -7,7 +7,6 @@ export default {
   description: '유저, 컨텐츠 등의 보고 싶지 않은 컨텐츠들을 삭제합니다.',
   author: { name: 'Sochiru', url: '' },
   url: /gall\.dcinside\.com\/(mgallery\/|mini\/)?board\/(view|lists)/g,
-  status: false,
   memory: {
     uuid: '',
     selected: {
