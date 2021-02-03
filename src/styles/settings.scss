@@ -9,6 +9,18 @@
   }
 }
 
+@keyframes highlight-blink-dark {
+  0%,
+  50% {
+    background-color: #223957;
+  }
+
+  40%,
+  100% {
+    background-color: #2c2c2c;
+  }
+}
+
 .refresherDark .refresher-popup {
   color: white;
 
@@ -92,6 +104,10 @@
 
   .refresher-module {
     background-color: #2c2c2c;
+
+    &.highlight {
+      animation: highlight-blink-dark 1s;
+    }
   }
 
   svg {
