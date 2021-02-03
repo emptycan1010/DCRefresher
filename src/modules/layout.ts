@@ -180,9 +180,9 @@ export default {
               return
             }
 
-            const pelem = (elem.parentElement as HTMLElement)
-              .parentElement as HTMLElement
-            if (pelem as HTMLElement) {
+            const pelem = elem.parentElement as HTMLElement
+
+            if (pelem) {
               pelem.style.display = 'none'
             }
           },
