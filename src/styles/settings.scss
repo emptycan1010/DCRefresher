@@ -255,9 +255,12 @@
       margin-right: auto;
       margin-bottom: 15px;
 
+      .info {
+        transition: transform 0.24s cubic-bezier(0.19, 1, 0.22, 1);
+      }
+      
       .info,
       .control {
-        transition: transform 0.24s cubic-bezier(0.19, 1, 0.22, 1);
         transform: translateX(0px);
       }
 
@@ -280,7 +283,7 @@
         }
 
         .control {
-          transform: translateX(-10px);
+          transform: translateX(-5px);
         }
 
         .info::before {
