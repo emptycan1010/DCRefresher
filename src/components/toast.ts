@@ -25,7 +25,7 @@ Vue.component('refresher-toast', {
   }
 })
 
-window.addEventListener('DOMContentLoaded', () => {
+const initToast = () => {
   if (!document.querySelector('.refresher-toast')) {
     const element = document.createElement('refresher-toast')
     document.querySelector('body')?.appendChild(element)
@@ -73,7 +73,9 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     }
   })
-})
+}
+
+window.addEventListener('DOMContentLoaded', initToast)
 
 window.addEventListener('keydown', ev => {
   if (ev.keyCode == 27 && Toast.open) Toast.open = false
@@ -94,6 +96,10 @@ export const show = (
   autoClose: number,
   click?: () => void
 ): void => {
+  if (!document.querySelector('.refresher-toast')) {
+    initToast()
+  }
+
   if (Toast.autoClose) {
     clearTimeout(Toast.autoClose)
   }

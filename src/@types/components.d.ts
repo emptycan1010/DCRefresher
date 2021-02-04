@@ -7,6 +7,7 @@ declare global {
     name: string
     ip: string | null
     user_id: string | null
+    my_cmt: 'Y' | 'N'
     user: User
     nicktype: string
     memo: string

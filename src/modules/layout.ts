@@ -173,7 +173,7 @@ export default {
       if (!this.memory.uuiddc && value) {
         this.memory.uuiddc = filter.add(
           `.gall_list .ub-content .ub-writer`,
-          (elem: HTMLElement) => {
+          (elem: Element) => {
             const adminAttribute = elem.getAttribute('user_name')
 
             if (!adminAttribute || adminAttribute !== '운영자') {

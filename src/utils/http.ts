@@ -14,6 +14,10 @@ export const urls = {
     deleteMini:
       'https://gall.dcinside.com/ajax/mini_manager_board_ajax/delete_list',
     deleteUser: 'https://gall.dcinside.com/board/forms/delete_submit',
+    deleteComment:
+      'https://gall.dcinside.com/ajax/minor_manager_board_ajax/delete_comment',
+    deleteCommentMini:
+      'https://gall.dcinside.com/ajax/mini_manager_board_ajax/delete_comment',
     setNotice:
       'https://gall.dcinside.com/ajax/minor_manager_board_ajax/set_notice',
     setNoticeMini:
@@ -29,6 +33,7 @@ export const urls = {
   },
   comments: 'https://gall.dcinside.com/board/comment/',
   comments_submit: 'https://gall.dcinside.com/board/forms/comment_submit',
+  comment_remove: 'https://gall.dcinside.com/board/comment/comment_delete_submit',
   dccon: {
     detail: 'https://gall.dcinside.com/dccon/package_detail',
     info: 'https://dccon.dcinside.com/index/get_info',

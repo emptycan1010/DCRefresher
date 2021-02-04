@@ -3,22 +3,34 @@ export {}
 declare global {
   interface RefresherHTTP {
     urls: {
-      base: string
+      base: 'https://gall.dcinside.com/'
       gall: {
-        major: string
-        mini: string
-        minor: string
+        major: 'https://gall.dcinside.com/'
+        mini: 'https://gall.dcinside.com/mini/'
+        minor: 'https://gall.dcinside.com/mgallery/'
       }
-      view: string
-      vote: string
+      view: 'board/view/?id='
+      vote: 'https://gall.dcinside.com/board/recommend/vote'
+      captcha: 'https://gall.dcinside.com/kcaptcha/session'
       manage: {
-        delete: string
+        delete: 'https://gall.dcinside.com/ajax/minor_manager_board_ajax/delete_list'
+        deleteMini: 'https://gall.dcinside.com/ajax/mini_manager_board_ajax/delete_list'
+        deleteUser: 'https://gall.dcinside.com/board/forms/delete_submit'
+        deleteComment: 'Request URL: https://gall.dcinside.com/ajax/minor_manager_board_ajax/delete_comment'
+        deleteCommentMini: 'Request URL: https://gall.dcinside.com/ajax/mini_manager_board_ajax/delete_comment'
+        setNotice: 'https://gall.dcinside.com/ajax/minor_manager_board_ajax/set_notice'
+        setNoticeMini: 'https://gall.dcinside.com/ajax/mini_manager_board_ajax/set_notice'
+        block: 'https://gall.dcinside.com/ajax/minor_manager_board_ajax/update_avoid_list'
+        blockMini: 'https://gall.dcinside.com/ajax/mini_manager_board_ajax/update_avoid_list'
+        setRecommend: 'https://gall.dcinside.com/ajax/minor_manager_board_ajax/set_recommend'
+        setRecommendMini: 'https://gall.dcinside.com/ajax/mini_manager_board_ajax/set_recommend'
       }
-      comments: string
+      comments: 'https://gall.dcinside.com/board/comment/'
+      comments_submit: 'https://gall.dcinside.com/board/forms/comment_submit'
       dccon: {
-        detail: string
-        info: string
-        buy: string
+        detail: 'https://gall.dcinside.com/dccon/package_detail'
+        info: 'https://dccon.dcinside.com/index/get_info'
+        buy: 'https://dccon.dcinside.com/index/buy'
       }
     }
     types: {
