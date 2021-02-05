@@ -1,6 +1,6 @@
 export const find = (
   elem: string,
-  parent: HTMLElement
+  parent: HTMLElement,
 ): Promise<NodeListOf<Element>> =>
   new Promise<NodeListOf<Element>>((resolve, reject) => {
     const parentFind = parent.querySelectorAll(elem)
@@ -39,7 +39,8 @@ export const find = (
     timeout = window.setTimeout(() => {
       if (!observer) return
       observer.disconnect()
-      reject('Too long execution.')
+
+      reject(`Couldn't find the element(${elem}).`)
     }, 3000)
   })
 

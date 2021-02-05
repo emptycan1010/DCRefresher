@@ -11,6 +11,7 @@ declare global {
 
   interface RefresherFilteringOptions {
     neverExpire?: boolean
+    skipIfNotExists?: boolean
   }
 
   interface RefresherFilter {

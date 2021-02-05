@@ -49,6 +49,11 @@ export const filter: RefresherFilter = {
         observe
           .find(filterObj.scope, document.documentElement)
           .then(e => filter.__run(filterObj, e))
+          .catch(e => {
+            if (!filterObj.options || !filterObj.options.skipIfNotExists) {
+              throw e
+            }
+          })
       }
     }
   },
