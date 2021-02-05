@@ -28,6 +28,17 @@ $dark-red: #e21919;
     &.blur {
       background-color: $dark-tint-light-opacity;
     }
+
+    & .read-more {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      margin: 0;
+      padding: 30px 0;
+      background-image: linear-gradient(transparent 0%, black 80%);
+    }
   }
 
   .refresher-frame-outer {
@@ -142,6 +153,10 @@ $dark-red: #e21919;
   .minor_uadmin_top .uadmin_top_tit,
   .miniwrap .minor_uadmin_top .uadmin_top_tit {
     color: $dark-dc-color;
+  }
+
+  .refresher-comment svg {
+    filter: invert(1);
   }
 
   .icon_mini {

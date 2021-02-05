@@ -17,6 +17,7 @@ interface CommentClass extends CommentVueData, CommentVueMethods {
   comment: dcinsideCommentObject
   index: number
   postUser: string
+  delete: (id: string, password: string, admin: boolean) => void
 }
 
 interface VoiceDataComputed {
@@ -35,6 +36,9 @@ export default {
       <User :user="comment.user" :me="me"></User>
       <div class="float-right">
         <TimeStamp :date="new Date(date(comment.reg_date))"></TimeStamp>
+        <div class="delete" v-if="((comment.del_btn === 'Y' && comment.my_cmt === 'Y') || isAdmin) && comment.del_yn !== 'Y' && this.delete" v-on:click="this.safeDelete">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" width="14px" height="14px"><path d="M0 0h24v24H0z" fill="none"/><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </div>
       </div>
     </div>
     <div v-if="comment.vr_player">
@@ -63,6 +67,10 @@ export default {
 
     postUser: {
       type: String
+    },
+
+    delete: {
+      type: [Function, Boolean]
     }
   },
   mounted (this: CommentClass): void {
@@ -118,6 +126,10 @@ export default {
             : 'https://vr.dcinside.com/' + memo[0],
         memo: memo[1]
       }
+    },
+
+    isAdmin () {
+      return document.querySelector('.useradmin_btnbox button') !== null
     }
   },
   methods: {
@@ -149,6 +161,27 @@ export default {
       }
 
       return true
+    },
+
+    safeDelete (this: CommentClass): void {
+      if (this.delete) {
+        let password = ''
+
+        if (this.comment.ip && this.comment.my_cmt !== 'Y') {
+          password = prompt('비밀번호를 입력하세요.') || ''
+
+          if (!password) {
+            return
+          }
+        }
+
+        this.delete(
+          this.comment.no,
+          password,
+          this.comment.my_cmt !== 'Y' &&
+            document.querySelector('.useradmin_btnbox button') !== null
+        )
+      }
     }
   }
 }

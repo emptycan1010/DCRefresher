@@ -8,6 +8,7 @@ import { ScrollDetection } from '../utils/scrollDetection'
 import { get_cookie, setCookieTmp } from '../utils/webStorage'
 import { submitComment } from '../utils/comment'
 import logger from '../utils/logger'
+import { sign } from 'crypto'
 
 class PostInfo implements PostInfo {
   id: string
@@ -88,9 +89,9 @@ const parse = (id: string, body: string) => {
     .querySelector('.view_content_wrap div.fr > span.gall_reply_num')
     ?.innerHTML.replace(/추천\s/, '')
 
-  const fixedUpvotes = dom
-    .querySelector('.view_content_wrap .btn_recommend_box .sup_num .smallnum')
-    ?.innerHTML
+  const fixedUpvotes = dom.querySelector(
+    '.view_content_wrap .btn_recommend_box .sup_num .smallnum'
+  )?.innerHTML
 
   const downvotes = dom.querySelector('div.btn_recommend_box.clear .down_num')
     ?.innerHTML
@@ -442,6 +443,95 @@ const request = {
       '&_GALLTYPE_=' +
       galleryTypeName
     )
+  },
+
+  async adminDeleteComment (
+    preData: GalleryPreData,
+    commentId: string,
+    signal: AbortSignal
+  ): Promise<boolean | string> {
+    if (!preData.link) {
+      return false
+    }
+
+    const typeName = http.galleryTypeName(preData.link)
+    if (!typeName.length) {
+      return false
+    }
+
+    let url = `${http.urls.manage.deleteComment}`
+
+    if (http.checkMini(preData.link)) {
+      url = http.urls.manage.deleteCommentMini
+    }
+
+    const galleryType = http.galleryType(preData.link, '/')
+
+    return http
+      .make(url, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json, text/javascript, */*; q=0.01',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        cache: 'no-store',
+        referrer: `https://gall.dcinside.com/${galleryType}board/view/?id=${preData.gallery}&no=${preData.id}`,
+        body: `ci_t=${get_cookie('ci_c')}&id=${
+          preData.gallery
+        }&_GALLTYPE_=${typeName}&pno=${Number(
+          preData.id
+        )}&cmt_nos[]=${commentId}`,
+        signal
+      })
+      .then(v => {
+        return v
+      })
+      .catch(e => {
+        return false
+      })
+  },
+
+  async userDeleteComment (
+    preData: GalleryPreData,
+    commentId: string,
+    signal: AbortSignal,
+    password?: string
+  ): Promise<boolean | string> {
+    if (!preData.link) {
+      return false
+    }
+
+    const typeName = http.galleryTypeName(preData.link)
+    if (!typeName.length) {
+      return false
+    }
+
+    const galleryType = http.galleryType(preData.link, '/')
+
+    return http
+      .make(http.urls.comment_remove, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json, text/javascript, */*; q=0.01',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        cache: 'no-store',
+        referrer: `https://gall.dcinside.com/${galleryType}board/view/?id=${preData.gallery}&no=${preData.id}`,
+        body: `ci_t=${get_cookie('ci_c')}&id=${
+          preData.gallery
+        }&_GALLTYPE_=${typeName}&mode=del&re_no=${Number(commentId)}${
+          password ? `&re_password=${password}` : '&g-recaptcha-response='
+        }`,
+        signal
+      })
+      .then(v => {
+        return v
+      })
+      .catch(e => {
+        return false
+      })
   }
 }
 
@@ -967,8 +1057,7 @@ const miniPreview: miniPreview = {
     }
 
     if (!miniPreview.init) {
-      miniPreview.element.innerHTML =
-        '<h3>제목</h3><br><div class="refresher-mini-preview-contents"></div>'
+      miniPreview.element.innerHTML = `<h3>${preData.title}</h3><br><div class="refresher-mini-preview-contents"></div><p class="read-more">더 읽으려면 클릭하세요.</p>`
 
       document.body.appendChild(miniPreview.element)
       miniPreview.init = true
@@ -1040,19 +1129,8 @@ const miniPreview: miniPreview = {
       const width = rect.width
       const height = rect.height
 
-      const y =
-        ev.clientY + height > window.innerHeight
-          ? ev.clientY - height < 0
-            ? 20
-            : ev.clientY - height
-          : ev.clientY
-
-      const x =
-        ev.clientX + width > window.innerWidth
-          ? ev.clientX - width < 0
-            ? 20
-            : ev.clientX - width
-          : ev.clientX
+      const x = Math.min(ev.clientX, window.innerWidth - width - 10)
+      const y = Math.min(ev.clientY, window.innerHeight - height - 10)
 
       miniPreview.element.style.transform = `translate(${x}px, ${y}px)`
     }
@@ -1089,7 +1167,7 @@ export default {
     useKeyPress: true,
     colorPreviewLink: true,
     reversePreviewKey: false,
-    autoRefreshComment: false,
+    autoRefreshComment: true,
     commentRefreshInterval: 10,
     experimentalComment: false
   },
@@ -1596,10 +1674,97 @@ export default {
           return req()
         }
 
+        if (this.memory.refreshIntervalId) {
+          window.clearInterval(this.memory.refreshIntervalId)
+        }
+
         this.memory.refreshIntervalId = window.setInterval(() => {
-          frame.functions.retry()
+          if (this.status.autoRefreshComment) {
+            frame.functions.retry()
+          }
         }, this.status.commentRefreshInterval * 1000)
       })
+
+      const deletePressCount: { [index: string]: number } = {}
+
+      frame.functions.deleteComment = async (
+        commentId: string,
+        password: string,
+        admin: boolean
+      ): Promise<boolean> => {
+        if (!preData.link) {
+          return false
+        }
+
+        if (!password) {
+          if (deletePressCount[commentId] + 1000 < Date.now()) {
+            deletePressCount[commentId] = 0
+          }
+
+          if (!deletePressCount[commentId]) {
+            Toast.show('한번 더 누르면 댓글을 삭제합니다.', true, 1000)
+
+            deletePressCount[commentId] = Date.now()
+
+            return false
+          }
+
+          deletePressCount[commentId] = 0
+        }
+
+        const typeName = http.galleryTypeName(preData.link)
+        if (!typeName.length) {
+          return false
+        }
+
+        return (admin && !password
+          ? request.adminDeleteComment(preData, commentId, signal)
+          : request.userDeleteComment(preData, commentId, signal, password)
+        )
+          .then(v => {
+            if (typeof v === 'boolean') {
+              if (!v) {
+                return false
+              }
+
+              return v
+            }
+
+            if (v.indexOf('||') > -1) {
+              const parsed = v.split('||')
+
+              if (parsed[0] !== 'true') {
+                Toast.show(parsed[1], true, 3000)
+
+                return false
+              }
+            }
+
+            if (v[0] !== '{') {
+              if (v !== 'true') {
+                Toast.show(v, true, 3000)
+                return false
+              }
+
+              Toast.show('댓글을 삭제하였습니다.', false, 3000)
+            } else {
+              const parsed = JSON.parse(v)
+
+              if (parsed.result !== 'fail') {
+                Toast.show('댓글을 삭제하였습니다.', false, 3000)
+              } else {
+                Toast.show(parsed.msg, true, 5000)
+              }
+            }
+
+            frame.functions.load()
+
+            return true
+          })
+          .catch(() => {
+            return false
+          })
+      }
     }
 
     const newPostWithData = (

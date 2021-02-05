@@ -36,7 +36,7 @@ declare global {
      */
     add: (
       scope: string,
-      cb: (elem: Element) => void,
+      cb: (elem: Element | HTMLElement) => void,
       options?: RefresherFilteringOptions
     ) => string
     /**
