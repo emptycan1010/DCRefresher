@@ -30,10 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
             url: 'https://github.com/So-chiru/DCRefresher'
           },
           {
-            text: '개발자 후원',
-            url: 'https://github.com/So-chiru/So-chiru/blob/master/DONATION.md'
-          },
-          {
             text: '리뷰 남기기',
             url: /Chrome/.test(navigator.userAgent)
               ? 'https://chrome.google.com/webstore/detail/dc-refresher/gpipaoeekcphlmilndfdbfdgijjjiklh'
