@@ -88,6 +88,8 @@ export default {
           return
 
         colorCorrection(elem)
+      }, {
+        skipIfNotExists: true
       }
     )
 
