@@ -8,4 +8,9 @@ declare global {
     key?: string
     value: unknown
   }
+
+  interface runtimeMessage {
+    type: string
+    data: unknown
+  }
 }

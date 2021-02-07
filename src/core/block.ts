@@ -3,6 +3,8 @@ import { eventBus } from './eventbus'
 import log from '../utils/logger'
 import { browser } from 'webextension-polyfill-ts'
 
+import * as communicate from './communicate'
+
 const runtime = (chrome && chrome.runtime) || (browser && browser.runtime)
 
 const BLOCK_NAMESPACE = '__REFRESHER_BLOCK'
@@ -269,10 +271,10 @@ export const setStore = (
   BLOCK_MODE_CACHE = mode
 }
 
-runtime.onMessage.addListener((msg: { [index: string]: unknown }) => {
-  if (msg.blockSelected) {
-    eventBus.emit('RefresherRequestBlock')
-  } else if (msg.updateBlocks) {
-    setStore(msg.blocks_store, msg.blockModes_store)
-  }
+communicate.addHook('blockSelected', () => {
+  eventBus.emit('RefresherRequestBlock')
+})
+
+communicate.addHook('updateBlocks', data => {
+  setStore(data.blocks, data.modes)
 })

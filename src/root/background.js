@@ -49,7 +49,7 @@ const checkBlockTarget = str =>
     '://wcs.naver.net',
     '://cdn.taboola.com',
     '://securepubads.g.doubleclick.net',
-    "://www.google-analytics.com/analytics.js"
+    '://www.google-analytics.com/analytics.js'
   ].filter(v => str.indexOf(v) > -1).length
 ;(chrome || browser).webRequest.onBeforeRequest.addListener(
   details => {
@@ -111,6 +111,14 @@ const messageHandler = async (port, msg) => {
   if (msg.requestRefresherBlocks) {
     port.postMessage({ responseRefresherBlocks: true, blocks, blockModes })
   }
+
+  if (msg.openShortcutSettings) {
+    chrome.tabs.create({
+      url: /Firefox/.test(navigator.userAgent)
+        ? 'about:addons'
+        : 'chrome://extensions/shortcuts'
+    })
+  }
 }
 
 runtime.onConnect.addListener(p => {
@@ -141,7 +149,16 @@ chrome.contextMenus.create({
   documentUrlPatterns: ['*://gall.dcinside.com/*'],
   onclick: (info, tab) => {
     chrome.tabs.sendMessage(tab.id, {
-      blockSelected: true
+      type: 'blockSelected'
     })
   }
+})
+
+chrome.commands.onCommand.addListener(command => {
+  chrome.tabs.query({ currentWindow: true, active: true }, tabs => {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      type: 'executeShortcut',
+      data: command
+    })
+  })
 })

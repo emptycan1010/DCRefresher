@@ -13,6 +13,8 @@ import { browser } from 'webextension-polyfill-ts'
 import * as settings from './settings'
 import * as block from './block'
 
+import * as communicate from './communicate'
+
 const UTILS: { [index: string]: Record<string, unknown> } = {
   filter,
   Frame,
@@ -98,12 +100,8 @@ export const modules = {
         if (!mod.status) {
           mod.status = {}
         }
-        
-        mod.status[key] = await settings.load(
-          mod.name,
-          key,
-          mod.settings[key]
-        )
+
+        mod.status[key] = await settings.load(mod.name, key, mod.settings[key])
       }
     }
 
@@ -138,29 +136,41 @@ export const modules = {
   }
 }
 
-if (runtime.onMessage) {
-  runtime.onMessage.addListener((msg: RefresherRuntimeMessage) => {
-    if (typeof msg === 'object' && msg.updateModuleSettings) {
-      module_store[msg.name].enable = msg.value as boolean
-      store.set(`${msg.name}.enable`, msg.value)
+communicate.addHook('updateModuleStatus', data => {
+  module_store[data.name].enable = data.value as boolean
+  store.set(`${data.name}.enable`, data.value)
 
-      runtime.sendMessage(
-        JSON.stringify({
-          module_store
-        })
-      )
+  runtime.sendMessage(
+    JSON.stringify({
+      module_store
+    })
+  )
 
-      if (!msg.value) {
-        revokeModule(module_store[msg.name])
-        return
+  if (!data.value) {
+    revokeModule(module_store[data.name])
+    return
+  }
+
+  runModule(module_store[data.name])
+})
+
+communicate.addHook('updateSettingValue', data => {
+  settings.setStore(data.name, data.key, data.value)
+})
+
+communicate.addHook('executeShortcut', data => {
+  const keys = Object.keys(module_store)
+
+  log(`Received shortcut execute: ${data}.`)
+
+  keys.forEach(key => {
+    if (module_store[key] && typeof module_store[key].shortcuts === 'object') {
+      if (module_store[key].shortcuts[data]) {
+        module_store[key].shortcuts[data].bind(module_store[key])()
       }
-
-      runModule(module_store[msg.name])
-    } else if (typeof msg === 'object' && msg.updateUserSetting) {
-      settings.setStore(msg.name, msg.key, msg.value)
     }
   })
-}
+})
 
 eventBus.on(
   'refresherUpdateSetting',

@@ -54,6 +54,14 @@
     "page": "views/index.html"
   },
   "web_accessible_resources": ["assets/*", "popup/*"],
+  "commands": {
+    "refreshLists": {
+      "suggested_key": {
+        "default": "Alt+R"
+      },
+      "description": "글 목록 새로고침: 새로고침"
+    }
+  },
   "applications": {
     "gecko": {
       "id": "dcrefresher@sochiru.pw"

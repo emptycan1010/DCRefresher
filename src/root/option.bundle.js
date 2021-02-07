@@ -15,8 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
         tab: 0,
         modules: [],
         settings: {},
+        shortcuts: {},
         blocks: {},
         blockModes: {},
+        shortcutRegex: /(Space|⌥|⇧|⌘|⌃|Alt|Cmd|,|'|`|Home|End|PageUp|PageDown|Insert|Delete|Left|Up|Right|Down|[A-Z]|[0-9])/g,
         blockKeyNames: {
           NICK: '닉네임',
           ID: '아이디',
@@ -43,9 +45,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
 
+    computed: {
+      isFirefox () {
+        return /Firefox/.test(navigator.userAgent)
+      }
+    },
+
     methods: {
       open (url) {
         window.open(url, '_blank')
+      },
+
+      openShortcutSettings () {
+        port.postMessage({
+          openShortcutSettings: true
+        })
       },
 
       typeWrap (value) {
@@ -106,10 +120,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         chrome.tabs.query({ active: true }, tabs => {
           chrome.tabs.sendMessage(tabs[0].id, {
-            updateUserSetting: true,
-            name: module,
-            key,
-            value
+            type: 'updateUserSetting',
+            data: {
+              name: module,
+              key,
+              value
+            }
           })
         })
       },
@@ -123,9 +139,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         chrome.tabs.query({ active: true }, tabs => {
           chrome.tabs.sendMessage(tabs[0].id, {
-            updateBlocks: true,
-            blocks_store: this.blocks,
-            blockModes_store: this.blockModes
+            type: 'updateBlocks',
+            data: {
+              blocks: this.blocks,
+              modes: this.blockModes
+            }
           })
         })
       },
@@ -174,6 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
           'refresherDark'
         )
       }
+    },
+
+    mounted () {
+      chrome.commands.getAll(cmd => {
+        this.shortcuts = cmd
+      })
     },
 
     watch: {
@@ -286,9 +310,11 @@ Vue.component('refresher-module', {
       chrome.tabs.query({ active: true }, tabs => {
         tabs.forEach(v => {
           chrome.tabs.sendMessage(v.id, {
-            updateModuleSettings: true,
-            name: this.name,
-            value: value
+            type: 'updateModuleStatus',
+            data: {
+              name: this.name,
+              value: value
+            }
           })
         })
       })
@@ -555,7 +581,7 @@ Vue.component('refresher-bubble', {
       <span class="text" v-on:click="safeTextClick">{{ text }}{{ extra ? ' (' + extra + ')' : '' }}<span class="gallery"
                                                                                                          v-if="gallery">({{ gallery }}
         )</span></span>
-      <span class="remove" v-on:click="safeRemoveClick"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+      <span v-if="remove" class="remove" v-on:click="safeRemoveClick"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
                                                              viewBox="0 0 18 18"><path
           d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/></svg></span>
       </div>`,

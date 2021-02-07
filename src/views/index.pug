@@ -21,6 +21,7 @@ html.refresher-popup
           p(:class="{active: tab == 1}" v-on:click="() => tab = 1") 고급
           p(:class="{active: tab == 2}" v-on:click="() => tab = 2") 차단
           p(:class="{active: tab == 3}" v-on:click="() => tab = 3") 모듈
+          p(:class="{active: tab == 4}" v-on:click="() => tab = 4") 단축키
       transition-group(name="refresher-slide-left" mode="in-out")
         div.tab.tab1(v-show="tab == 0" key="tab1")
           .info
@@ -66,7 +67,7 @@ html.refresher-popup
             h3 {{blockKeyNames[key]}} <span class="plus" v-on:click="() => addEmptyBlockedUser(key)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" width="18px" height="18px"><path d="M0 0h24v24H0z" fill="none"/><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span>
             .lists
               p(v-if="!blocks[key].length") 차단된 {{blockKeyNames[key]}} 없음
-              refresher-bubble(v-for="(blocked, i) in blocks[key]" :key="'block:' + i" :text="blocked.content" :regex="blocked.isRegex" :gallery="blocked.gallery" :extra="blocked.extra" :removable="true" :remove="() => removeBlockedUser(key, i)" :textclick="() => editBlockedUser(key, i)")
+              refresher-bubble(v-for="(blocked, i) in blocks[key]" :key="'block:' + i" :text="blocked.content" :regex="blocked.isRegex" :gallery="blocked.gallery" :extra="blocked.extra" :remove="() => removeBlockedUser(key, i)" :textclick="() => editBlockedUser(key, i)")
 
         div.tab.tab4(v-show="tab == 3" key="tab4")
           div.refresher-no-modules(v-if="!Object.keys(modules).length")
@@ -74,3 +75,11 @@ html.refresher-popup
             p 우선 디시 페이지를 열어주세요.
           div(v-else)
             refresher-module(v-for="(module, i) in modules" :key="module.name" :name="module.name" :desc="module.description" :enabled="module.enable" :author="module.author" :require="module.require")
+        div.tab.tab5(v-show="tab == 4" key="tab5")
+          .shortcut-lists
+            .refresher-shortcut(v-for="(shortcut, i) in shortcuts" v-if="shortcut.description.length")
+              p.description {{shortcut.description}}
+              .key
+                refresher-bubble(v-if="shortcut.shortcut.length" v-for="key in shortcut.shortcut.match(shortcutRegex)" :text="key")
+                refresher-bubble(v-else text="키 없음")
+          p 단축키는 <a v-on:click="openShortcutSettings">{{isFirefox ? 'about:addons > 톱니바퀴 > 확장 기능 단축키 관리' : '확장 프로그램 > 단축키'}}</a>에서 설정할 수 있습니다.

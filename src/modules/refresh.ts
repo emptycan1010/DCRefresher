@@ -1,11 +1,10 @@
 import { eventBus } from '../core/eventbus'
 import { filter } from '../core/filtering'
+import * as Toast from '../components/toast'
 
 const AVERAGE_COUNTS_SIZE = 7
 
-let lastAccess = 0
-
-export default {
+const MODULE: RefresherModule = {
   name: '글 목록 새로고침',
   description: '글 목록을 자동으로 새로고침합니다.',
   author: { name: 'Sochiru', url: '' },
@@ -26,7 +25,9 @@ export default {
     delay: 2500,
     refresh: 0,
     calledByPageTurn: false,
-    refreshRequest: ''
+    refreshRequest: '',
+    lastRefresh: 0,
+    load: (): void => {}
   },
   enable: true,
   default_enable: true,
@@ -75,6 +76,21 @@ export default {
       advanced: true
     }
   },
+  shortcuts: {
+    refreshLists (this: RefresherModule): void {
+      if (this.memory.lastRefresh + 500 > Date.now()) {
+        Toast.show(
+          `너무 자주 새로고칠 수 없습니다.`,
+          true,
+          1000
+        )
+
+        return
+      }
+
+      this.memory.load()
+    }
+  },
   func (
     http: RefresherHTTP,
     eventBus: RefresherEventBus,
@@ -105,8 +121,8 @@ export default {
 
     let originalLocation = location.href
 
-    const load = async (customURL?: string): Promise<boolean> => {
-      if (Date.now() - lastAccess < 500) {
+    this.memory.load = async (customURL?: string): Promise<boolean> => {
+      if (Date.now() < this.memory.lastRefresh + 500) {
         return false
       }
 
@@ -114,7 +130,7 @@ export default {
         return false
       }
 
-      lastAccess = Date.now()
+      this.memory.lastRefresh = Date.now()
 
       const isAdmin =
         document.querySelector('.useradmin_btnbox button') !== null
@@ -279,7 +295,7 @@ export default {
 
     const run = (skipLoad?: boolean) => {
       if (!skipLoad) {
-        load()
+        this.memory.load()
       }
 
       if (!this.status.autoRate) {
@@ -312,7 +328,7 @@ export default {
         clearTimeout(this.memory.refresh)
       }
 
-      load()
+      this.memory.load()
     })
 
     if (this.status.useBetterBrowse) {
@@ -342,7 +358,7 @@ export default {
             }
             this.memory.calledByPageTurn = true
 
-            await load(location.href)
+            await this.memory.load(location.href)
 
             const query = document.querySelector(
               isPageView ? '.view_bottom_btnbox' : '.page_head'
@@ -357,7 +373,7 @@ export default {
 
       window.addEventListener('popstate', () => {
         this.memory.calledByPageTurn = true
-        load()
+        this.memory.load()
       })
 
       this.memory.uuid2 = eventBus.on(
@@ -401,7 +417,7 @@ export default {
                 }
                 this.memory.calledByPageTurn = true
 
-                await load(location.href)
+                await this.memory.load(location.href)
 
                 const query = document.querySelector(
                   location.href.indexOf('/board/view') > -1
@@ -442,3 +458,5 @@ export default {
     }
   }
 }
+
+export default MODULE

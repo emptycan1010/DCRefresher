@@ -64,6 +64,11 @@ declare global {
     settings?: { [index: string]: RefresherSettings } | null
 
     /**
+     * 단축키가 입력되면 실행할 함수를 정의합니다.
+     */
+    shortcuts?: { [index: string]: () => void }
+
+    /**
      * 설정이 업데이트 됐을 시 호출할 함수를 정의합니다.
      */
     update?: { [index: string]: () => void } | null
