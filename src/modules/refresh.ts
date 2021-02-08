@@ -1,6 +1,7 @@
 import { eventBus } from '../core/eventbus'
 import { filter } from '../core/filtering'
 import * as Toast from '../components/toast'
+import { queryString } from '../utils/http'
 
 const AVERAGE_COUNTS_SIZE = 7
 
@@ -79,11 +80,7 @@ const MODULE: RefresherModule = {
   shortcuts: {
     refreshLists (this: RefresherModule): void {
       if (this.memory.lastRefresh + 500 > Date.now()) {
-        Toast.show(
-          `너무 자주 새로고칠 수 없습니다.`,
-          true,
-          1000
-        )
+        Toast.show(`너무 자주 새로고칠 수 없습니다.`, true, 1000)
 
         return
       }
@@ -285,6 +282,41 @@ const MODULE: RefresherModule = {
               }
             }
           }
+        }
+      }
+
+      // 검색일 경우 강조 표시 생성
+      if (queryString('s_keyword')) {
+        const keyword = (document.querySelector(
+          'input[name=s_keyword]'
+        ) as HTMLInputElement).value
+
+        if (keyword && keyword != '' && keyword != 'null') {
+          document.querySelectorAll('.gall_tit').forEach(element => {
+            const tmp_subject = (element.querySelector(
+              'a:first-child'
+            ) as HTMLAnchorElement).cloneNode(true) as HTMLElement
+
+            const iconImg = tmp_subject.querySelector('.icon_img')
+            iconImg?.parentElement?.removeChild(iconImg)
+
+            const tmp_subject_html = tmp_subject.innerHTML
+
+            if (tmp_subject_html.match(keyword)) {
+              let subject = tmp_subject_html.replace(
+                keyword,
+                '<span class="mark">' + keyword + '</span>'
+              )
+
+              subject = element
+                .querySelector('a:first-child')
+                ?.innerHTML.replace(tmp_subject_html, subject) as string
+
+              ;(element.querySelector(
+                'a:first-child'
+              ) as HTMLAnchorElement).innerHTML = subject
+            }
+          })
         }
       }
 
