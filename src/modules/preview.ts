@@ -8,7 +8,6 @@ import { ScrollDetection } from '../utils/scrollDetection'
 import { get_cookie, setCookieTmp } from '../utils/webStorage'
 import { submitComment } from '../utils/comment'
 import logger from '../utils/logger'
-import { sign } from 'crypto'
 
 class PostInfo implements PostInfo {
   id: string
@@ -1282,10 +1281,17 @@ export default {
     experimentalComment: {
       name: '댓글 기능 활성화',
       desc:
-        '!!!차단 가능성 있음!!! 실험 중인 댓글 기능을 활성화합니다. 현재 댓글 기능을 사용할 시 디시에서 일시로 차단당할 가능성이 있습니다.',
+        '!!!차단 가능성 있음!!! 실험 중인 댓글 기능을 활성화합니다. 차단 당할 가능성 100% 있으니 쓰지 말라고. 쓰다가 차단 당했다고 징징대지 마셈.',
       type: 'check',
       default: false,
       advanced: true
+    }
+  },
+  update: {
+    experimentalComment (value: boolean): void {
+      if (value) {
+        alert('댓글 쓰다 보면 100% 차단 당한다고 경고 했음. 징징대면 진짜;;')
+      }
     }
   },
   require: ['filter', 'eventBus', 'Frame', 'http', 'block'],
