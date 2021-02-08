@@ -110,8 +110,7 @@ const MODULE: RefresherModule = {
     },
     noRefreshOnSearch: {
       name: '검색 중 페이지 새로고침 안함',
-      desc:
-        '사이트 내부 검색 기능을 사용 중일시 새로고침을 사용하지 않습니다.',
+      desc: '사이트 내부 검색 기능을 사용 중일시 새로고침을 사용하지 않습니다.',
       type: 'check',
       default: true,
       advanced: false
@@ -200,6 +199,11 @@ const MODULE: RefresherModule = {
       }
 
       if (PAUSE_REFRESH) {
+        return false
+      }
+
+      // 유저 메뉴가 열렸을 때는 새로고침 하지 않음
+      if (document.getElementById('user_data_lyr')) {
         return false
       }
 
