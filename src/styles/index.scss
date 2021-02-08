@@ -694,6 +694,10 @@ tr .gall_writer {
   }
 }
 
+.cmt_info .gall_writer {
+  display: unset;
+}
+
 .refresher-frame.preview .refresher-preview-contents {
   embed {
     background-color: #333;
