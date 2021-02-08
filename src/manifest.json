@@ -60,6 +60,12 @@
         "default": "Alt+R"
       },
       "description": "글 목록 새로고침: 새로고침"
+    },
+    "refreshPause": {
+      "suggested_key": {
+        "default": "Alt+S"
+      },
+      "description": "글 목록 새로고침: 일시 비활성화"
     }
   },
   "applications": {

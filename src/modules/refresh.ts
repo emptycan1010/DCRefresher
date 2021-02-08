@@ -5,6 +5,45 @@ import { queryString } from '../utils/http'
 
 const AVERAGE_COUNTS_SIZE = 7
 
+let PAUSE_REFRESH = false
+
+const updateRefreshText = (button?: HTMLElement) => {
+  if (!button) {
+    button = document.querySelector(
+      '.page_head .gall_issuebox button[data-refresher="true"]'
+    ) as HTMLElement
+  }
+
+  if (button) {
+    const onOff = button.querySelector('span')
+    ;(onOff as HTMLSpanElement).innerHTML = PAUSE_REFRESH ? '꺼짐' : '켜짐'
+  }
+}
+
+const addRefreshText = (issueBox: HTMLElement) => {
+  const pageHead =
+    issueBox || document.querySelector('.page_head .gall_issuebox')
+
+  if (!pageHead?.querySelector('button[data-refresher="true"]')) {
+    const button = document.createElement('button')
+    button.setAttribute('type', 'button')
+    button.dataset.refresher = 'true'
+    button.innerHTML = `새로고침: `
+
+    const onOff = document.createElement('span')
+    onOff.innerHTML = '켜짐'
+    button.onclick = () => {
+      PAUSE_REFRESH = !PAUSE_REFRESH
+      updateRefreshText(button)
+    }
+    button.appendChild(onOff)
+
+    updateRefreshText(button)
+
+    pageHead?.appendChild(button)
+  }
+}
+
 const MODULE: RefresherModule = {
   name: '글 목록 새로고침',
   description: '글 목록을 자동으로 새로고침합니다.',
@@ -15,6 +54,7 @@ const MODULE: RefresherModule = {
     useBetterBrowse: undefined,
     fadeIn: undefined,
     autoRate: undefined,
+    noRefreshOnSearch: false,
     doNotColorVisited: false
   },
   memory: {
@@ -32,7 +72,7 @@ const MODULE: RefresherModule = {
   },
   enable: true,
   default_enable: true,
-  require: ['http', 'eventBus', 'block'],
+  require: ['http', 'eventBus', 'filter', 'block'],
   settings: {
     refreshRate: {
       name: '새로고침 주기',
@@ -68,6 +108,14 @@ const MODULE: RefresherModule = {
       default: true,
       advanced: false
     },
+    noRefreshOnSearch: {
+      name: '검색 중 페이지 새로고침 안함',
+      desc:
+        '사이트 내부 검색 기능을 사용 중일시 새로고침을 사용하지 않습니다.',
+      type: 'check',
+      default: true,
+      advanced: false
+    },
     doNotColorVisited: {
       name: '방문 링크 색상 지정 비활성화',
       desc:
@@ -86,11 +134,26 @@ const MODULE: RefresherModule = {
       }
 
       this.memory.load()
+    },
+
+    refreshPause (this: RefresherModule): void {
+      PAUSE_REFRESH = !PAUSE_REFRESH
+
+      Toast.show(
+        PAUSE_REFRESH
+          ? '이번 페이지에서는 새로고침을 사용하지 않습니다.'
+          : '이번 페이지에서 새로고침을 사용합니다.',
+        false,
+        1000
+      )
+
+      updateRefreshText()
     }
   },
   func (
     http: RefresherHTTP,
     eventBus: RefresherEventBus,
+    filter: RefresherFilter,
     block: RefresherBlock
   ): void {
     if (document && document.documentElement && this.status.doNotColorVisited) {
@@ -118,12 +181,25 @@ const MODULE: RefresherModule = {
 
     let originalLocation = location.href
 
+    if (this.status.noRefreshOnSearch && queryString('s_keyword')) {
+      PAUSE_REFRESH = true
+      updateRefreshText()
+    }
+
+    filter.add('.page_head .gall_issuebox', elem => {
+      addRefreshText(elem)
+    })
+
     this.memory.load = async (customURL?: string): Promise<boolean> => {
       if (Date.now() < this.memory.lastRefresh + 500) {
         return false
       }
 
       if (document.hidden) {
+        return false
+      }
+
+      if (PAUSE_REFRESH) {
         return false
       }
 
@@ -311,7 +387,6 @@ const MODULE: RefresherModule = {
               subject = element
                 .querySelector('a:first-child')
                 ?.innerHTML.replace(tmp_subject_html, subject) as string
-
               ;(element.querySelector(
                 'a:first-child'
               ) as HTMLAnchorElement).innerHTML = subject
