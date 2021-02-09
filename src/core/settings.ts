@@ -1,4 +1,4 @@
-import * as store from '../utils/store'
+import * as store from './store'
 import { eventBus } from './eventbus'
 import { browser } from 'webextension-polyfill-ts'
 

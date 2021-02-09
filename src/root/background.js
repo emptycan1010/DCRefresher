@@ -154,6 +154,17 @@ chrome.contextMenus.create({
   }
 })
 
+chrome.contextMenus.create({
+  title: '오른쪽 클릭한 유저 메모',
+  contexts: ['all'],
+  documentUrlPatterns: ['*://gall.dcinside.com/*'],
+  onclick: (info, tab) => {
+    chrome.tabs.sendMessage(tab.id, {
+      type: 'memoSelected'
+    })
+  }
+})
+
 chrome.commands.onCommand.addListener(command => {
   chrome.tabs.query({ currentWindow: true, active: true }, tabs => {
     chrome.tabs.sendMessage(tabs[0].id, {

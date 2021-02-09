@@ -1,4 +1,4 @@
-import * as store from '../utils/store'
+import * as store from './store'
 import { eventBus } from './eventbus'
 import log from '../utils/logger'
 import { browser } from 'webextension-polyfill-ts'
@@ -272,7 +272,11 @@ export const setStore = (
 }
 
 communicate.addHook('blockSelected', () => {
-  eventBus.emit('RefresherRequestBlock')
+  eventBus.emit('refresherRequestBlock')
+})
+
+communicate.addHook('memoSelected', () => {
+  eventBus.emit('refresherUpdateUserMemo')
 })
 
 communicate.addHook('updateBlocks', data => {

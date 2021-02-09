@@ -1,4 +1,4 @@
-import * as store from '../utils/store'
+import * as store from './store'
 import * as Toast from '../components/toast'
 
 setTimeout(async () => {

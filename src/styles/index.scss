@@ -19,6 +19,8 @@ $shadow-3dp: 0px 0px 16px rgba(0, 0, 0, 0.24);
 @import './animations.scss';
 @import './toast.scss';
 
+@import './memo.scss';
+
 // Frame core
 
 .refresher-frame-outer {
@@ -256,7 +258,7 @@ $shadow-3dp: 0px 0px 16px rgba(0, 0, 0, 0.24);
 
 // IP Module
 
-.fl .refresherIP {
+.fl .refresherUserData {
   margin-left: 3px;
 }
 
@@ -282,7 +284,7 @@ tr .gall_writer {
   margin-left: unset !important;
 }
 
-.gall_writer .refresherIP {
+.gall_writer .refresherUserData {
   display: contents;
 }
 

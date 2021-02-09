@@ -1,0 +1,19 @@
+.refresher-memo-frame {
+  position: absolute;
+  display: block;
+  min-width: 100px;
+  min-height: 100px;
+  width: 70%;
+  max-width: 700px;
+  background-color: #fff;
+  transform: translateY(10px);
+  box-shadow: $shadow-2dp;
+  border-radius: 13.3px;
+  padding: 3vh 2.5vw;
+  overflow: hidden;
+  pointer-events: all;
+
+  .title {
+    font-size: 20px;
+  }
+}

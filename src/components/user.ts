@@ -71,7 +71,7 @@ export default {
 
     contextMenu (): void {
       eventBus.emit(
-        'RefresherAddToBlock',
+        'refresherUserContextMenu',
         this.user.nick,
         this.user.id,
         this.user.ip

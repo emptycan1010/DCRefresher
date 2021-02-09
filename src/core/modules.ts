@@ -1,6 +1,6 @@
 import log from '../utils/logger'
 
-import * as store from '../utils/store'
+import * as store from './store'
 import { eventBus } from './eventbus'
 import { filter } from './filtering'
 import Frame from './frame'
@@ -12,6 +12,7 @@ import { browser } from 'webextension-polyfill-ts'
 
 import * as settings from './settings'
 import * as block from './block'
+import DeepProxy from '../utils/deepProxy'
 
 import * as communicate from './communicate'
 
@@ -40,7 +41,7 @@ const runModule = (mod: RefresherModule) => {
   }
 
   if (mod.func) {
-    mod.func(...plugins)
+    mod.func.bind(mod)(...plugins)
   }
 }
 
@@ -55,7 +56,7 @@ const revokeModule = (mod: RefresherModule) => {
       }
     }
 
-    mod.revoke(...plugins)
+    mod.revoke.bind(mod)(...plugins)
   }
 
   if (mod.memory) {
@@ -103,6 +104,27 @@ export const modules = {
 
         mod.status[key] = await settings.load(mod.name, key, mod.settings[key])
       }
+    }
+
+    if (mod.data) {
+      for (const key in mod.data) {
+        const originValue = mod.data[key]
+        mod.data[key] = (await store.module.get(mod.name)) || originValue
+      }
+
+      mod.data = (await store.module.get(mod.name)) || {}
+
+      const proxy = new DeepProxy(mod.data, {
+        set (target, path, value, receiver) {
+          store.module.setGlobal(mod.name, JSON.stringify(mod.data))
+        },
+
+        deleteProperty (target, path) {
+          store.module.setGlobal(mod.name, JSON.stringify(mod.data))
+        }
+      })
+
+      mod.data = proxy
     }
 
     module_store[mod.name] = mod

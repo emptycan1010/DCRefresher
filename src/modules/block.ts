@@ -78,7 +78,7 @@ export default {
     )
 
     this.memory.addBlock = eventBus.on(
-      'RefresherAddToBlock',
+      'refresherUserContextMenu',
       (nick: string, uid: string, ip: string) => {
         this.memory.selected = {
           nick,
@@ -89,7 +89,7 @@ export default {
       }
     )
 
-    this.memory.requestBlock = eventBus.on('RefresherRequestBlock', () => {
+    this.memory.requestBlock = eventBus.on('refresherRequestBlock', () => {
       if (Date.now() - this.memory.lastSelect > 10000) {
         return
       }
