@@ -142,7 +142,7 @@ const memoAsk = (
   })
   updateType()
 
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     frame
       .querySelector('.refresher-preview-button[data-update="true"]')
       ?.addEventListener('click', () => {
@@ -276,6 +276,10 @@ export default {
       if (!elem || elem.dataset.refresherMemo) return false
 
       let memo = null
+
+      if (!this.data.memos) {
+        this.data.memos = {}
+      }
 
       if (elem.dataset.uid) {
         memo = this.data.memos[`UID@${elem.dataset.uid}`]

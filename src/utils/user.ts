@@ -72,6 +72,10 @@ export class User {
       [index: string]: refresherMemo
     }
 
+    if (!memos || typeof memos !== 'object') {
+      return
+    }
+
     let memo: refresherMemo = {
       text: '',
       color: ''
