@@ -1,5 +1,4 @@
 import * as ip from './ip'
-import { eventBus } from '../core/eventbus'
 import { modules } from '../core/modules'
 
 const USERTYPE = {

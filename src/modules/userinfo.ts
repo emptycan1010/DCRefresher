@@ -142,7 +142,7 @@ const memoAsk = (
   })
   updateType()
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     frame
       .querySelector('.refresher-preview-button[data-update="true"]')
       ?.addEventListener('click', () => {

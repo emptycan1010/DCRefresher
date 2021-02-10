@@ -128,7 +128,7 @@ export default {
       }
     },
 
-    isAdmin () {
+    isAdmin (): boolean {
       return document.querySelector('.useradmin_btnbox button') !== null
     }
   },

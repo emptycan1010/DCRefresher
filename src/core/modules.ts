@@ -115,12 +115,16 @@ export const modules = {
       mod.data = (await store.module.get(mod.name)) || {}
 
       const proxy = new DeepProxy(mod.data, {
-        set (target, path, value, receiver) {
+        set (): boolean {
           store.module.setGlobal(mod.name, JSON.stringify(mod.data))
+
+          return true
         },
 
-        deleteProperty (target, path) {
+        deleteProperty (): boolean {
           store.module.setGlobal(mod.name, JSON.stringify(mod.data))
+
+          return true
         }
       })
 

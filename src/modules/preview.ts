@@ -486,7 +486,7 @@ const request = {
       .then(v => {
         return v
       })
-      .catch(e => {
+      .catch(() => {
         return false
       })
   },
@@ -528,7 +528,7 @@ const request = {
       .then(v => {
         return v
       })
-      .catch(e => {
+      .catch(() => {
         return false
       })
   }
