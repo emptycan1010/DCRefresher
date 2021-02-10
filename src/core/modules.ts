@@ -155,6 +155,18 @@ export const modules = {
         2
       )}ms.`
     )
+  },
+
+  getData (name: string, key?: string): unknown {
+    if (!module_store[name]) {
+      throw new Error('Given module is not exists.')
+    }
+
+    if (key) {
+      return module_store[name].data[key]
+    }
+
+    return module_store[name].data
   }
 }
 

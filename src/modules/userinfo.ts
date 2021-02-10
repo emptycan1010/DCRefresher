@@ -1,39 +1,176 @@
-const types: {[index: string]: string} = {
+const types: { [index: string]: string } = {
   UID: '유저 ID',
   NICK: '닉네임',
   IP: 'IP'
 }
-const memoAsk = (type: string, value: string) => {
+
+const memoAsk = (
+  selected: refresherUserTypes,
+  lists: { [index: string]: refresherMemo },
+  type: string,
+  value: string
+) => {
   const win = document.createElement('div')
-  win.className = 'refresher-frame-outer'
+  win.className = 'refresher-frame-outer center background'
+
+  let currentType = type
+  let currentValue = value
 
   const frame = document.createElement('div')
-  frame.className = 'refresher-memo-frame'
+  frame.className = 'refresher-frame refresher-memo-frame center'
   frame.innerHTML = `
-  <p>${types[type]} ${value} 메모</p>
-  <input id="refresher_memo" type="text"></input>
-  <br>
-  <input type="color" id="refresher_memo_color"></input>
-  <p>color select</p>
-  <button>ok</button>
+  <h3 class="head">메모 종류 선택 <span class="refresher-memo-type mute"></span></h3>
+  <div class="memo-row memo-user-type">
+    <div class="user-type nick" data-type="NICK">
+      <p>닉네임</p>
+    </div>
+    <div class="user-type uid" data-type="UID">
+      <p>아이디</p>
+    </div>
+    <div class="user-type ip" data-type="IP">
+      <p>IP</p>
+    </div>
+  </div>
+  <div class="memo-row">
+    <p>메모</p>
+    <div class="refresher-input-wrap focus">
+      <input id="refresher_memo" type="text"></input>
+    </div>
+  </div>
+  <div class="memo-row">
+    <p>색상</p>
+    <br>
+    <input type="color" id="refresher_memo_color"></input>
+  </div>
+  <div class="button-wrap">
+    <div class="refresher-preview-button primary" data-update="true"><p>추가</p></div>
+    <div class="refresher-preview-button sub" data-clear="true"><p>삭제</p></div>
+  </div>
   `
 
   win.appendChild(frame)
   document.body.appendChild(win)
 
+  const removeWindow = () => {
+    if (!win) {
+      return
+    }
+
+    win.classList.remove('fadeIn')
+    win.classList.add('fadeOut')
+
+    setTimeout(() => {
+      document.body.removeChild(win)
+    }, 300)
+  }
+
+  const removeWindowKey = (ev: KeyboardEvent) => {
+    if (win && ev.code === 'Escape') {
+      removeWindow()
+
+      window.removeEventListener('keydown', removeWindowKey)
+    }
+  }
+
+  win.addEventListener('click', ev => {
+    if (ev.target === win) {
+      removeWindow()
+    }
+  })
+
+  window.addEventListener('keydown', removeWindowKey)
+
   requestAnimationFrame(() => {
     win.classList.add('fadeIn')
   })
 
-  return new Promise((resolve, reject) => {
-    frame.querySelector('button')?.addEventListener('click', () => {
-      resolve({
-        text: frame.querySelector('#refresher_memo').value,
-        color: frame.querySelector('#refresher_memo_color').value
+  const memoElement = frame.querySelector('#refresher_memo') as HTMLInputElement
+  const colorElement = frame.querySelector(
+    '#refresher_memo_color'
+  ) as HTMLInputElement
+
+  const randomColor = () => {
+    colorElement.value = '#' + (((1 << 24) * Math.random()) | 0).toString(16)
+  }
+
+  const updateType = () => {
+    frame.querySelector(
+      '.refresher-memo-type'
+    )!.innerHTML = `${types[currentType]}: ${currentValue}`
+
+    memoElement.value = ''
+    colorElement.value = ''
+    randomColor()
+
+    const previousObject = lists[`${currentType}@${currentValue}`]
+    if (previousObject) {
+      memoElement.value = previousObject.text
+      colorElement.value = previousObject.color
+    }
+  }
+
+  frame.querySelectorAll('.user-type').forEach(userType => {
+    userType.classList.remove('active')
+
+    if ((userType as HTMLElement).dataset.type === currentType) {
+      userType.classList.add('active')
+    }
+
+    if (!selected[(userType as HTMLElement).dataset.type!.toLowerCase()]) {
+      userType.classList.add('disable')
+    }
+
+    userType.addEventListener('click', () => {
+      if (userType.classList.contains('disable')) {
+        return
+      }
+
+      frame.querySelectorAll('.user-type').forEach(ut => {
+        ut.classList.remove('active')
       })
 
-      document.body.removeChild(win)
+      userType.classList.add('active')
+
+      currentType = (userType as HTMLElement).dataset.type || 'NICK'
+      currentValue = selected[currentType.toLowerCase()]
+
+      updateType()
     })
+  })
+  updateType()
+
+  return new Promise((resolve, reject) => {
+    frame
+      .querySelector('.refresher-preview-button[data-update="true"]')
+      ?.addEventListener('click', () => {
+        if (memoElement.value.length > 160) {
+          alert('160자를 초과할 수 없습니다.')
+
+          return
+        }
+
+        removeWindow()
+
+        resolve({
+          text: memoElement.value,
+          color: colorElement.value,
+          type: currentType,
+          value: currentValue
+        })
+      })
+
+    frame
+      .querySelector('.refresher-preview-button[data-clear="true"]')
+      ?.addEventListener('click', () => {
+        removeWindow()
+
+        resolve({
+          text: '',
+          color: '',
+          type: currentType,
+          value: currentValue
+        })
+      })
   })
 }
 
@@ -154,8 +291,8 @@ export default {
       }
 
       const text = document.createElement('span')
-      text.className = 'ip refresherUserData'
-      text.innerHTML = `<span>(${memo.text})</span>`
+      text.className = 'ip refresherUserData refresherMemoData'
+      text.innerHTML = `<span>(${memo.text}) </span>`
       text.title = memo.text
 
       if (memo.color) {
@@ -233,15 +370,18 @@ export default {
         return
       }
 
-      if (!this.data.memos) {
-        this.data.memos = {}
-      }
-
-      console.log(this.data.memos)
-
-      memoAsk(type, value)
+      memoAsk(this.memory.selected, this.data.memos, type, value)
         .then(obj => {
-          this.data.memos[`${type}@${value}`] = obj
+          if (!obj.text) {
+            delete this.data.memos[`${obj.type}@${obj.value}`]
+
+            return
+          }
+
+          this.data.memos[`${obj.type}@${obj.value}`] = {
+            text: obj.text,
+            color: obj.color
+          }
         })
         .catch(e => {
           console.log(e)

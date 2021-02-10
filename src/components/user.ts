@@ -5,6 +5,7 @@ export default {
     <div class="refresher-user-content">
       <span class="refresher-user-icon" :data-icon="user.icon" :data-type="user.type"></span>
       <span class="refresher-user-nick">{{user.nick}}</span>
+      <span class="refresher-user-memo" v-if="user.memo" :style="{color: user.memo.color}">{{user.memo.text}}</span>
       <span class="refresher-user-info">{{userInfo}}</span>
     </div>
   </div>`,
@@ -39,7 +40,9 @@ export default {
     },
 
     userInfo (): string {
-      return this.user.id
+      let data = ''
+
+      data += this.user.id
         ? '(' + this.user.id + ')'
         : this.user.ip
           ? '(' +
@@ -52,6 +55,8 @@ export default {
             : '') +
           ')'
           : ''
+
+      return data
     }
   },
   methods: {

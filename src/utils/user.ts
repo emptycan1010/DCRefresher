@@ -1,4 +1,6 @@
 import * as ip from './ip'
+import { eventBus } from '../core/eventbus'
+import { modules } from '../core/modules'
 
 const USERTYPE = {
   UNFIXED: 0,
@@ -45,6 +47,7 @@ export class User {
   icon: string | null
   type: number
   __ip: string | null
+  memo: refresherMemo | null
 
   constructor (
     nick: string,
@@ -60,6 +63,34 @@ export class User {
     this.ip = ip
     this.icon = icon || ''
     this.type = getType(this.icon)
+    this.memo = null
+
+    this.getMemo()
+  }
+
+  getMemo (): void {
+    const memos = modules.getData('유저 정보', 'memos') as {
+      [index: string]: refresherMemo
+    }
+
+    let memo: refresherMemo = {
+      text: '',
+      color: ''
+    }
+
+    if (this.id) {
+      memo = memos[`UID@${this.id}`]
+    }
+
+    if ((!memo || !memo.text) && this.ip) {
+      memo = memos[`IP@${this.ip}`]
+    }
+
+    if (!memo || !memo.text) {
+      memo = memos[`NICK@${this.nick}`]
+    }
+
+    this.memo = memo
   }
 
   import (dom: HTMLElement | null): this {
@@ -83,6 +114,8 @@ export class User {
     this.ip = ip
     this.icon = icon
     this.type = getType(icon)
+
+    this.getMemo()
 
     return this
   }

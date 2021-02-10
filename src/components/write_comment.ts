@@ -18,7 +18,7 @@ export default {
       <input type="password" v-model="unsignedUserPW" v-on:change="(v) => validCheck('pw', v.target.value)" placeholder="비밀번호"></input>
     </div>
     <div class="refresher-comment-body">
-      <div class="input-wrap" :class="{focus: focused, disable: disabled}">
+      <div class="refresher-input-wrap" :class="{focus: focused, disable: disabled}">
         <input id="comment_main" placeholder="댓글 입력..." v-model="text" type="text" v-on:focus="focus" v-on:blur="blur"
                v-on:keydown="type" :disabled="disabled"/>
       </div>
@@ -34,7 +34,7 @@ export default {
       </div>
     </div>
   </div>`,
-  data (): {[index:string]: unknown} {
+  data (): { [index: string]: unknown } {
     return {
       focused: false,
       disabled: false,
