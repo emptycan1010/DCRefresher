@@ -1,3 +1,6 @@
+import * as color from '../utils/color'
+import * as Toast from '../components/toast'
+
 const types: { [index: string]: string } = {
   UID: '유저 ID',
   NICK: '닉네임',
@@ -90,7 +93,7 @@ const memoAsk = (
   ) as HTMLInputElement
 
   const randomColor = () => {
-    colorElement.value = '#' + (((1 << 24) * Math.random()) | 0).toString(16)
+    colorElement.value = color.random()
   }
 
   const updateType = () => {
@@ -348,7 +351,6 @@ export default {
         this.memory.lastSelect = Date.now()
       }
     )
-    console.log(this.data.memos)
 
     this.memory.requestBlock = eventBus.on('refresherUpdateUserMemo', () => {
       if (Date.now() - this.memory.lastSelect > 10000) {
@@ -373,6 +375,18 @@ export default {
       memoAsk(this.memory.selected, this.data.memos, type, value)
         .then(obj => {
           if (!obj.text) {
+            if (!this.data.memos[`${obj.type}@${obj.value}`]) {
+              Toast.show(
+                `해당하는 ${
+                  types[obj.type]
+                }을(를) 가진 사용자 메모가 없습니다.`,
+                true,
+                3000
+              )
+
+              return
+            }
+
             delete this.data.memos[`${obj.type}@${obj.value}`]
 
             return
@@ -382,6 +396,12 @@ export default {
             text: obj.text,
             color: obj.color
           }
+
+          Toast.show(
+            `${types[obj.type]} ${obj.value}에 메모를 추가했습니다.`,
+            false,
+            2000
+          )
         })
         .catch(e => {
           console.log(e)

@@ -33,7 +33,11 @@ export const parse = (str: string): number[] => {
 }
 
 // https://gist.github.com/mjackson/5311256
-export const RGBtoHSL = (r: number, g: number, b: number): [number, number, number] => {
+export const RGBtoHSL = (
+  r: number,
+  g: number,
+  b: number
+): [number, number, number] => {
   ;(r /= 255), (g /= 255), (b /= 255)
 
   const max = Math.max(r, g, b)
@@ -75,7 +79,11 @@ function hue2rgb (p: number, q: number, t: number) {
   return p
 }
 
-export const HSLtoRGB = (h: number, s: number, l: number): [number, number, number] => {
+export const HSLtoRGB = (
+  h: number,
+  s: number,
+  l: number
+): [number, number, number] => {
   let r, g, b
 
   if (s == 0) {
@@ -96,3 +104,6 @@ export const RGBtoHEX = (...args: number[]): string =>
   '#' + args.map(v => (~~v).toString(16)).join('')
 
 export const inverseColor = (c: number): number => 1 - c ** 2
+
+export const random = (): string =>
+  '#' + (((1 << 24) * Math.random()) | 0).toString(16)
