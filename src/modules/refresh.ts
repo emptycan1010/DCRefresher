@@ -193,7 +193,7 @@ const MODULE: RefresherModule = {
       customURL?: string,
       force?: boolean
     ): Promise<boolean> => {
-      if (Date.now() < this.memory.lastRefresh + 500) {
+      if (!force && Date.now() < this.memory.lastRefresh + 500) {
         return false
       }
 
