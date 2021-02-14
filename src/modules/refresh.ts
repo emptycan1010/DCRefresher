@@ -375,7 +375,7 @@ const MODULE: RefresherModule = {
         ) as HTMLInputElement).value
 
         if (keyword && keyword != '' && keyword != 'null') {
-          document.querySelectorAll('.gall_tit').forEach(element => {
+          document.querySelectorAll('.gall_list .gall_tit').forEach(element => {
             const tmp_subject = (element.querySelector(
               'a:first-child'
             ) as HTMLAnchorElement).cloneNode(true) as HTMLElement
