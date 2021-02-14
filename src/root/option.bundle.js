@@ -636,6 +636,10 @@ Vue.component('refresher-bubble', {
 })
 
 const createDCConSelector = () => {
+  alert("아직 디시콘 차단 기능을 사용할 수 없습니다.")
+
+  return
+
   chrome.windows.create(
     {
       url: 'views/dcconSelection.html',

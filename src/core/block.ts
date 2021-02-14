@@ -301,6 +301,4 @@ requestAnimationFrame(async () => {
   })
 
   store.set('refresher.blockQueue', [])
-
-  console.log(await store.all())
 })
