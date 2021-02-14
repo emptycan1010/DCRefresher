@@ -73,6 +73,10 @@ const checkValidMode = (mode: string) => {
 const removeExists = (type: string, content: string) => {
   const cache = BLOCK_CACHE[type]
 
+  if (!cache) {
+    return
+  }
+
   for (let i = 0; i < cache.length; i++) {
     if (cache[i].content === content) {
       BLOCK_CACHE[type].splice(i, 1)
@@ -281,4 +285,22 @@ communicate.addHook('memoSelected', () => {
 
 communicate.addHook('updateBlocks', data => {
   setStore(data.blocks, data.modes)
+})
+
+requestAnimationFrame(async () => {
+  store.get('refresher.blockQueue').then(value => {
+    if (!(value as string[]).length) {
+      return
+    }
+
+    for (let i = 0; i < (value as string[]).length; i++) {
+      const dccon = (value as string[])[i]
+
+      InternalAddToList('DCCON', dccon as string, false)
+    }
+  })
+
+  store.set('refresher.blockQueue', [])
+
+  console.log(await store.all())
 })

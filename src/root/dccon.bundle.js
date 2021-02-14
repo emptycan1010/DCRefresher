@@ -1,17 +1,23 @@
-function selectDCON (e) {
+async function selectDCON (e) {
   const str = window.chrome && window.chrome.storage
 
   if (!str) {
     throw new Error("This browser doesn't support storage API.")
   }
 
-  let obj = {}
-  obj['자짤 자동 추가.dccon'] = e.currentTarget.id
-  ;(str.sync || str.local).set(obj)
+  let targetId = e.currentTarget.id
 
-  chrome.tabs.query({ active: true, currentWindow: false }, function (tabs) {
-    chrome.tabs.reload(tabs[0].id)
-    window.close()
+  ;(str.sync || str.local).get('refresher.blockQueue', value => {
+    let obj = {}
+
+    obj['refresher.blockQueue'] = value['refresher.blockQueue'] || []
+    obj['refresher.blockQueue'].push(targetId)
+    ;(str.sync || str.local).set(obj)
+
+    chrome.tabs.query({ active: true, currentWindow: false }, function (tabs) {
+      chrome.tabs.reload(tabs[0].id)
+      window.close()
+    })
   })
 }
 
