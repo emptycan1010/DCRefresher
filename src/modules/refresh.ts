@@ -189,8 +189,11 @@ const MODULE: RefresherModule = {
       addRefreshText(elem)
     })
 
-    this.memory.load = async (customURL?: string): Promise<boolean> => {
-      if (Date.now() < this.memory.lastRefresh + 500) {
+    this.memory.load = async (
+      customURL?: string,
+      force?: boolean
+    ): Promise<boolean> => {
+      if (!force && Date.now() < this.memory.lastRefresh + 500) {
         return false
       }
 
@@ -198,7 +201,7 @@ const MODULE: RefresherModule = {
         return false
       }
 
-      if (PAUSE_REFRESH) {
+      if (PAUSE_REFRESH && !force) {
         return false
       }
 
@@ -372,7 +375,7 @@ const MODULE: RefresherModule = {
         ) as HTMLInputElement).value
 
         if (keyword && keyword != '' && keyword != 'null') {
-          document.querySelectorAll('.gall_tit').forEach(element => {
+          document.querySelectorAll('.gall_list .gall_tit').forEach(element => {
             const tmp_subject = (element.querySelector(
               'a:first-child'
             ) as HTMLAnchorElement).cloneNode(true) as HTMLElement
@@ -439,7 +442,7 @@ const MODULE: RefresherModule = {
         clearTimeout(this.memory.refresh)
       }
 
-      this.memory.load()
+      this.memory.load(null, true)
     })
 
     if (this.status.useBetterBrowse) {
@@ -469,7 +472,7 @@ const MODULE: RefresherModule = {
             }
             this.memory.calledByPageTurn = true
 
-            await this.memory.load(location.href)
+            await this.memory.load(location.href, true)
 
             const query = document.querySelector(
               isPageView ? '.view_bottom_btnbox' : '.page_head'
@@ -484,7 +487,7 @@ const MODULE: RefresherModule = {
 
       window.addEventListener('popstate', () => {
         this.memory.calledByPageTurn = true
-        this.memory.load()
+        this.memory.load(null, true)
       })
 
       this.memory.uuid2 = eventBus.on(
@@ -528,7 +531,7 @@ const MODULE: RefresherModule = {
                 }
                 this.memory.calledByPageTurn = true
 
-                await this.memory.load(location.href)
+                await this.memory.load(location.href, true)
 
                 const query = document.querySelector(
                   location.href.indexOf('/board/view') > -1

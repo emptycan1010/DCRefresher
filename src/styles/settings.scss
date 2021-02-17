@@ -664,9 +664,14 @@
   .text {
     width: fit-content;
     height: 14px;
+
+    &.image {
+      height: unset;
+    }
   }
 
   .remove {
+    margin: auto;
     margin-left: 5px;
     width: 20px;
     height: 20px;

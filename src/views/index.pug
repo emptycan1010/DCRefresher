@@ -67,7 +67,8 @@ html.refresher-popup
             h3 {{blockKeyNames[key]}} <span class="plus" v-on:click="() => addEmptyBlockedUser(key)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" width="18px" height="18px"><path d="M0 0h24v24H0z" fill="none"/><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span>
             .lists
               p(v-if="!blocks[key].length") 차단된 {{blockKeyNames[key]}} 없음
-              refresher-bubble(v-for="(blocked, i) in blocks[key]" :key="'block:' + i" :text="blocked.content" :regex="blocked.isRegex" :gallery="blocked.gallery" :extra="blocked.extra" :remove="() => removeBlockedUser(key, i)" :textclick="() => editBlockedUser(key, i)")
+              refresher-bubble(v-if="key !== 'DCCON'" v-for="(blocked, i) in blocks[key]" :key="'block:' + i" :text="blocked.content" :regex="blocked.isRegex" :gallery="blocked.gallery" :extra="blocked.extra" :remove="() => removeBlockedUser(key, i)" :textclick="() => editBlockedUser(key, i)")
+              refresher-bubble(v-else v-for="(blocked, i) in blocks[key]" :key="'block:' + i" :image="'https://dcimg5.dcinside.com/dccon.php?no='+blocked.content.split('||')[2]" :regex="blocked.isRegex" :gallery="blocked.gallery" :extra="blocked.extra" :remove="() => removeBlockedUser(key, i)" :textclick="() => editBlockedUser(key, i)")
 
         div.tab.tab4(v-show="tab == 3" key="tab4")
           div.refresher-no-modules(v-if="!Object.keys(modules).length")

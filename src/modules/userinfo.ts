@@ -378,6 +378,8 @@ export default {
 
       memoAsk(this.memory.selected, this.data.memos, type, value)
         .then(obj => {
+          eventBus.emit('refreshRequest')
+
           if (!obj.text) {
             if (!this.data.memos[`${obj.type}@${obj.value}`]) {
               Toast.show(
