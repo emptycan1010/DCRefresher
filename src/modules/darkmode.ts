@@ -1,6 +1,8 @@
 import * as Color from '../utils/color'
 import * as DOM from '../utils/dom'
 
+const DARK_MODE_COLOR = [41, 41, 41]
+
 const colorCorrection = (elem: HTMLElement) => {
   const fontAttr = elem.hasAttribute('color')
 
@@ -12,7 +14,7 @@ const colorCorrection = (elem: HTMLElement) => {
 
   const textColor = Color.parse(color)
 
-  const contrast = Color.contrast(textColor, [41, 41, 41])
+  const contrast = Color.contrast(textColor, DARK_MODE_COLOR)
 
   if (contrast < 3) {
     const trans = Color.RGBtoHSL(textColor[0], textColor[1], textColor[2])
@@ -41,8 +43,9 @@ const contentColorFix = (el: HTMLElement) => {
     if (
       !elem.style ||
       !(elem.style.color || elem.hasAttribute('color')) ||
-      elem.style.background ||
-      elem.style.backgroundColor
+      (elem.style.background && elem.style.background !== 'transparent') ||
+      (elem.style.backgroundColor &&
+        elem.style.backgroundColor !== 'transparent')
     )
       return
 
@@ -88,7 +91,8 @@ export default {
           return
 
         colorCorrection(elem)
-      }, {
+      },
+      {
         skipIfNotExists: true
       }
     )
