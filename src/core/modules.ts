@@ -210,20 +210,29 @@ communicate.addHook('executeShortcut', data => {
   })
 })
 
+// 설정 창에서 설정을 변경할 경우 실행되는 함수를 정의합니다.
 eventBus.on(
   'refresherUpdateSetting',
   (module: string, key: string, value: unknown) => {
-    if (module_store[module]) {
-      module_store[module].status[key] = value
+    const mod = module_store[module]
+
+    if (mod) {
+      if (!mod.status) {
+        mod.status = {}
+      }
+
+      mod.status[key] = value
     }
 
-    if (
-      module_store[module].update &&
-      typeof module_store[module].update[key] === 'function'
-    ) {
+    // 모듈이 활성화되지 않은 상태일 경우 모듈 로딩을 건너뜁니다.
+    if (!mod.enable) {
+      return
+    }
+
+    if (mod.update && typeof mod.update[key] === 'function') {
       const utils: unknown[] = []
 
-      const requires = module_store[module].require as string[]
+      const requires = mod.require as string[]
       if (requires) {
         for (let i = 0; i < requires.length; i++) {
           const name = requires[i]
@@ -234,10 +243,7 @@ eventBus.on(
         }
       }
 
-      module_store[module].update[key].bind(module_store[module])(
-        value,
-        ...utils
-      )
+      mod.update[key].bind(mod)(value, ...utils)
     }
   }
 )

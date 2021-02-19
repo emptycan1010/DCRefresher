@@ -46,7 +46,7 @@ declare global {
     /**
      * 모듈 데이터를 영속적으로 저장하고 싶을 때 사용하는 객체. 이 객체에 값을 저장하면 확장 프로그램이 로드될 때 마다 해당 값을 불러옵니다.
      */
-    data: {[index: string]: unknown}
+    data: { [index: string]: unknown }
 
     /**
      * 해당 모듈이 가질 메모리 값. 모듈에 일시적으로 데이터를 저장하고 싶을 때 사용됩니다.
@@ -76,7 +76,7 @@ declare global {
     /**
      * 설정이 업데이트 됐을 시 호출할 함수를 정의합니다.
      */
-    update?: { [index: string]: () => void } | null
+    update?: { [index: string]: (...args: any[]) => void } | null
 
     /**
      * 모듈에서 사용할 내장 유틸 목록.
