@@ -327,6 +327,10 @@ tr .gall_writer {
     right: 13px;
   }
 
+  .dc_logo {
+    display: none;
+  }
+
   .gall_exposure,
   .right_content,
   .minor_ranking_box,
@@ -337,7 +341,7 @@ tr .gall_writer {
   .list_array_option,
   .listwrap .visit_list,
   .listwrap .issuebox {
-    width: 100%;
+    width: 100% !important;
   }
 
   .listwrap .visit_history {
@@ -372,7 +376,7 @@ tr .gall_writer {
     display: flex;
   }
 
-  .width1160 .left_content {
+  .width1160 .wrap_inner {
     width: 95%;
     max-width: 1000px;
     margin-left: auto;
@@ -384,8 +388,70 @@ tr .gall_writer {
   }
 }
 
-.refresherHideGalleryView .issue_wrap .issuebox {
-  display: none;
+.refresherCompactView {
+  .width1160 .left_content {
+    width: unset !important;
+  }
+
+  .width1160 .wrap_inner {
+    width: 95%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cmt_txt_cont textarea {
+    @media screen and (min-width: 1220px) {
+      width: 956px;
+    }
+
+    @media screen and (min-width: 1145px) and (max-width: 1220px) {
+      width: 882px;
+    }
+
+    @media screen and (min-width: 1070px) and (max-width: 1145px) {
+      width: 808px;
+    }
+
+    @media screen and (min-width: 1015px) and (max-width: 1070px) {
+      width: 758px;
+    }
+
+    @media screen and (min-width: 960px) and (max-width: 1015px) {
+      width: 708px;
+    }
+
+    @media screen and (min-width: 850px) and (max-width: 960px) {
+      width: 608px;
+    }
+
+    @media screen and (min-width: 740px) and (max-width: 850px) {
+      width: 508px;
+    }
+
+    @media screen and (min-width: 630px) and (max-width: 740px) {
+      width: 400px;
+    }
+
+    @media screen and (min-width: 520px) and (max-width: 630px) {
+      width: 300px;
+    }
+
+    @media screen and (min-width: 410) and (max-width: 520px) {
+      width: 200px;
+    }
+
+    width: 100px;
+  }
+}
+
+.refresherHideGalleryView .issue_wrap {
+  padding-bottom: unset;
+
+  .issuebox .issue_contentbox,
+  .issuebox .visit_history {
+    display: none;
+  }
 }
 
 .refresherHideUselessView section.right_content article {

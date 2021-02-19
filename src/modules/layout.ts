@@ -7,9 +7,15 @@ const updateWindowSize = (
     active = Number(active)
   }
 
+  const isView = location.href.indexOf('board/view') > -1
+
   if (forceActive || active >= width) {
     if (document.documentElement.className.indexOf('refresherCompact') === -1) {
       document.documentElement.classList.add('refresherCompact')
+
+      if (isView) {
+        document.documentElement.classList.add('refresherCompactView')
+      }
     }
   } else {
     if (document.documentElement.className.indexOf('refresherCompact') > -1) {
@@ -22,7 +28,7 @@ export default {
   name: '레이아웃 수정',
   description: '디시 레이아웃을 변경할 수 있도록 도와줍니다.',
   author: { name: 'Sochiru', url: '' },
-  url: /board\/lists/g,
+  url: /(board\/lists|board\/view)/g,
   status: {
     activePixel: 900,
     forceCompact: false,
