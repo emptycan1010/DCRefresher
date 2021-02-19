@@ -224,7 +224,7 @@ eventBus.on(
       mod.status[key] = value
     }
 
-    // 모듈이 활성화되지 않은 상태일 경우 모듈 로딩을 건너뜁니다.
+    // 모듈이 활성화되지 않은 상태일 경우 모듈 설정 업데이트 함수 호출을 건너뜁니다.
     if (!mod.enable) {
       return
     }
