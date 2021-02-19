@@ -36,7 +36,8 @@ export default {
     hideUselessView: false,
     pushToRight: false,
     removeNotice: false,
-    removeDCNotice: false
+    removeDCNotice: false,
+    useCompactModeOnView: true
   },
   memory: {
     uuid: null,
@@ -62,6 +63,13 @@ export default {
       type: 'check',
       default: false,
       advanced: false
+    },
+
+    useCompactModeOnView: {
+      name: '컴팩트 모드 강제 사용',
+      desc: '게시글 보기에서도 컴팩트 모드를 사용하도록 설정합니다.',
+      type: 'check',
+      default: true
     },
 
     hideGalleryView: {
@@ -202,6 +210,13 @@ export default {
     }
   },
   func (filter: RefresherFilter): void {
+    if (
+      location.href.indexOf('board/view') > -1 &&
+      !this.status.useCompactModeOnView
+    ) {
+      return
+    }
+
     this.memory.resize = () =>
       updateWindowSize(
         this.status.forceCompact,
