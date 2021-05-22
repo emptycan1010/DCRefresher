@@ -30,12 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
           {
             text: 'GitHub',
             url: 'https://github.com/So-chiru/DCRefresher'
-          },
-          {
-            text: '리뷰 남기기',
-            url: /Chrome/.test(navigator.userAgent)
-              ? 'https://chrome.google.com/webstore/detail/dc-refresher/gpipaoeekcphlmilndfdbfdgijjjiklh'
-              : 'https://addons.mozilla.org/en-US/firefox/addon/dc-refresher/'
           }
         ]
       }
@@ -249,15 +243,7 @@ Vue.component('refresher-module', {
       <div class="left">
         <p class="title">{{ name }}</p>
         <p class="desc">{{ desc }}</p>
-        <p class="mute">개발자 :
-            <span v-if="typeof author === 'object'"
-                :class="{link: author.url}"
-                v-on:click="() => openLink(author && author.url)">
-              {{ author.name }}
-            </span>
-            <span v-else>
-              {{ author || '알 수 없음' }}
-            </span>, 요구 유틸 : {{ require.join(', ') || '없음' }}</p>
+        <p class="mute">요구 유틸 : {{ require.join(', ') || '없음' }}</p>
       </div>
       <div class="right">
         <refresher-checkbox :checked="enabled" :change="update"></refresher-checkbox>

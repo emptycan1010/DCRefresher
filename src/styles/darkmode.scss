@@ -187,6 +187,7 @@ $dark-red: #e21919;
   .integrate_schwrap .fix_element,
   .pop_wrap.type4,
   .visit_history,
+  .newvisit_history,
   .minor_wrap.gallmain .visit_history,
   .hot_gall_box,
   .hotcate_list .top_cate_wrap .cate_box,
@@ -346,7 +347,10 @@ $dark-red: #e21919;
     filter: invert(0.8);
   }
 
-  .my_minor_list .mng {
+  .my_minor_list .mng,
+  .newvisit_history .tit,
+  .bnt_newvisit_more,
+  .under_catelist.newvisit_layer .list_alldel {
     color: $dark-dc-color;
   }
 
@@ -407,6 +411,7 @@ $dark-red: #e21919;
   }
 
   .minor_wrap.gallmain .visit_list li a,
+  .newvisit_list li a,
   .under_catelist .under_listbox li a {
     color: $dark-text-color;
   }
@@ -534,6 +539,7 @@ $dark-red: #e21919;
   .hot_gall_box,
   .dccon_storage_table td,
   .dccon_storage_table th,
+  .newvisit_history::before,
   .hotcate_list .cate_wrap {
     border: 1px solid $dark-tint2;
   }
@@ -803,6 +809,7 @@ $dark-red: #e21919;
   .miniwrap .bottom_array .select_area .inner,
   .user_info_input.id input,
   .cmt_write_box .user_info_input.id > label,
+  .newvisit_history,
   .btn_user_control,
   .btn_white {
     background-color: $dark-tint-light;
@@ -840,6 +847,7 @@ $dark-red: #e21919;
 
   .content_box,
   .visit_history,
+  .newvisit_history,
   .array_tab button,
   .content_box .img_box,
   .content_box .secimg_box .img_box,
@@ -859,8 +867,9 @@ $dark-red: #e21919;
   .cate_tit,
   .bottom_array .option_box,
   .miniwrap .bottom_array .option_box,
+  .wk_content .tit > span,
+  .wk_box,
   .block_tab button:first-child.on,
-  button,
   .minor_tip_txt.bg,
   .output_array .option_box,
   .box_bottom,
