@@ -473,6 +473,10 @@ tr .gall_writer {
   .listwrap .visit_history {
     width: 1134px;
   }
+
+  .list_wrap.width1160 .newvisit_history {
+    width: unset;
+  }
 }
 
 // Comment Dory Block Module
