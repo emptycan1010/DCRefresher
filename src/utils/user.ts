@@ -16,16 +16,19 @@ const getType = (icon: string) => {
 
   if (
     icon.indexOf('/fix_nik.gif') > -1 ||
-    icon.indexOf('/dc20th_wgallcon4.') > -1
+    icon.indexOf('/dc20th_wgallcon4.') > -1 ||
+    icon.indexOf('gonick_') > -1
   ) {
     return USERTYPE.FIXED
   } else if (
     icon.indexOf('/nik.gif') > -1 ||
-    icon.indexOf('/dc20th_wgallcon.') > -1
+    icon.indexOf('/dc20th_wgallcon.') > -1 ||
+    icon.indexOf('/nogonick_') > -1
   ) {
     return USERTYPE.HALFFIXED
   } else if (
     icon.indexOf('sub_manager') > -1 ||
+    icon.indexOf('submanager') > -1 ||
     icon.indexOf('/dc20th_wgallcon3.') > -1
   ) {
     return USERTYPE.SUBMANAGER
@@ -45,7 +48,7 @@ export class User {
   ip_data: string
   icon: string | null
   type: number
-  __ip: string | null
+  private __ip: string | null
   memo: refresherMemo | null
 
   constructor (
