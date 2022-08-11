@@ -1,6 +1,6 @@
 {
   "name": "dcrefresher",
-  "version": "2.5.5",
+  "version": "2.5.6",
   "description": "DC 페이지를 자동으로 고치고, 미리 보기를 생성합니다.",
   "devDependencies": {
     "@babel/core": "^7.15.0",
@@ -61,5 +61,6 @@
     "lint": "eslint -c .eslintrc.json './src/**/*.ts' --cache",
     "lint-fix": "eslint --fix -c .eslintrc.json './src/**/*.ts' --cache",
     "test": "mocha"
-  }
+  },
+  "packageManager": "yarn@3.2.2"
 }
