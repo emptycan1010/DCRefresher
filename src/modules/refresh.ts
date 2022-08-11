@@ -205,8 +205,11 @@ const MODULE: RefresherModule = {
         return false
       }
 
+
+      const userDataLyr = document.getElementById('user_data_lyr')
+
       // 유저 메뉴가 열렸을 때는 새로고침 하지 않음
-      if (document.getElementById('user_data_lyr')) {
+      if (userDataLyr && userDataLyr.style.display !== 'none') {
         return false
       }
 
